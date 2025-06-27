@@ -6,7 +6,7 @@
 [English README](../README.md)
 
 ## 快速开始
-本项目提供了两种工具：
+本项目提供了两种工具 (**两种方式冲突无法同时使用**)：
 1. mitmproxy addon 脚本，可在 mitmproxy 运行时通过参数添加
 2. （仅支持 mitmweb）Tampermonkey 脚本
 

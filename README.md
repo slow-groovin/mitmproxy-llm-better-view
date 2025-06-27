@@ -6,7 +6,7 @@
 [中文文档](./docs/README_CN.md)
 
 ## Quick Start
-This project provides two tools:
+This project provides two tools (**The two are conflicting**):
 1. mitmproxy addon scripts, which can be added when executing mitmproxy/mitmweb
 2. (mitmweb only) Tampermonkey script
 
