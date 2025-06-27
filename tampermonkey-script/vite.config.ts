@@ -8,7 +8,7 @@ export default defineConfig({
       entry: "src/index.ts",
       userscript: {
         name: 'mitmproxy-llm-better-view',
-        // namespace: "npm/vite-plugin-monkey",
+        namespace: "npm/vite-plugin-monkey",
         match: [
           "http://localhost:8081/*",
           "http://127.0.0.1:8081/*"

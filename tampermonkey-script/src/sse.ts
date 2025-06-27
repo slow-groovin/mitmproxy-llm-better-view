@@ -105,7 +105,6 @@ function aggregateChoices(events: OpenAISSEEvent[]): AggregatedChoice[] {
   }>()
 
   for (const event of events) {
-    console.log(event?.choices?.[0]?.delta)
     if (!event.choices) continue
     for (const choice of event.choices) {
       const index = choice.index

@@ -9,7 +9,10 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "lit-html": "^3.3.0",
+    "lit": "^3.3.0",
     "typescript": "^5.7.2",
+    "marked": "^15.0.12",
     "vite": "^6.0.5",
     "vite-plugin-monkey": "^5.0.3"
   }

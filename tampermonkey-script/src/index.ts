@@ -1,221 +1,306 @@
-import { unsafeWindow } from '$';
-import { OpenAISSEEvent, processSSEEvents } from './sse';
-import { openai_req_template, openai_res_template, openai_res_sse_template } from './templates';
+import { GM_addElement, unsafeWindow } from '$';
+import { render } from 'lit-html';
+import { processSSEEvents } from './sse';
+import { openai_req_template, } from './templates/openai-req';
+import { openai_res_template } from './templates/openai-res';
+import { openai_res_sse_template } from './templates/openai-res-sse';
+import { CallAction, Flow } from './types';
+import { LRUCache, omit } from './utils';
+
+/**
+
+ */
+
+// LRU cache for Flow data to improve performance
+const flowKV = new LRUCache<string, Flow>(1024);
+// Save the original fetch method for later use
 const originalFetch = unsafeWindow.fetch;
-let iframeElement: HTMLElement
-listenFetch()
-
+// Global iframe element reference
+let iframeElement: HTMLIFrameElement
 
 /**
- * 当点击某个Flow以及Respnse/Request标签时, mitmweb会发送一个后台api请求获取flow的内容,
- * 拦截这个请求, 对大模型请求中的请求body/响应body渲染对应的页面
+ * Listen for URL changes and automatically render OpenAI request/response content
+ * Entry point for mitmproxy-llm-better-view script.
+ * Listens for URL changes in the mitmproxy web interface and renders custom visualizations
+ * for OpenAI request/response flows.
  */
-async function listenFetch() {
-    unsafeWindow.fetch = async (...args) => {
-        const [input, init] = args
-        const response = await originalFetch(...args);
-        const url = input.toString();
-        const isFlowContent = url.includes('content/Auto.json') || input.toString().includes('content/auto.json')
-
-        //only handle content/auto.json mitmproxy request
-        if (!isFlowContent) {
-            return response
-        }
-
-
-        const cloneResp = response.clone()
-
-        if (url.includes("/request/content/")) {
-            handleFlowRequest(cloneResp, args)
-        } else if (url.includes("/response/content/")) {
-            handleFlowResponse(cloneResp, args)
-        }
-        clearIFrameElement()
-
-        return response;
-    };
-}
+listenUrlChange(async ({ uuid, action }) => {
+  const flow = await getFlow(uuid)
+  if (!flow) {
+    return
+  }
+  if (isOpenaiFlow(flow)) {
+    if (action === 'request') {
+      await renderOpenaiRequest(uuid)
+    } else if (action === 'response') {
+      await renderOpenaiResponse(uuid)
+    }
+  }
+})
 
 /**
- * 渲染大模型请求Flow中的Request Body
+ * Render OpenAI request body content
+ * @param uuid Unique identifier for the Flow
  */
-async function handleFlowRequest(resp: Response, rawRequest: Parameters<typeof fetch>) {
-    const json = await resp.json()
-    if (!json.text) {
-        console.warn("response has no text field.")
-    }
-    let parsedObj: any
-    try {
-        parsedObj = JSON.parse(json.text)
-    } catch (e: any) {
-        if (e instanceof SyntaxError) {
-            console.debug("try fetch full line of this flow", rawRequest[0])
-            const newJson = await reFetchFullLineOfFlow(rawRequest)
-            parsedObj = JSON.parse(newJson.text)
-        } else {
-            console.error('error when parsing `text` in response json', e.name)
-            return
-        }
-    }
+async function renderOpenaiRequest(uuid: string) {
+  const json = await getFlowData(`http://${window.location.host}/flows/${uuid}/request/content/Auto.json`)
+  if (!json.text) {
+    console.warn("response has no text field.")
+  }
+  let parsedObj: any
+  try {
+    parsedObj = JSON.parse(json.text)
+  } catch (e: any) {
+    console.error(e);
+  }
 
-    if (!isLLMRequest(parsedObj)) {
-        return
-    }
+  if (!isLLMRequest(parsedObj)) {
+    return
+  }
 
-    const html = await generateHtmlForOpenaiRequestBody(parsedObj)
-    createIFrameElement(html)
+  const html = await generateHtmlForOpenaiRequestBody(parsedObj)
+  createIFrameElement(html)
 }
 
 /**
- * 渲染大模型请求Flow中的 Response Body
- * 分别处理 完整JSON响应 和 SSE响应
+ * Render OpenAI response body content (supports both JSON and SSE formats)
+ * @param uuid Unique identifier for the Flow
  */
-async function handleFlowResponse(resp: Response, rawRequest: Parameters<typeof fetch>) {
-    // 读取 response 内容
-    let json = await await reFetchFullLineOfFlow(rawRequest);
-    let html = ''
-    if (json.view_name === "JSON") {
-        const parsedObj = JSON.parse(json.text);
-        // 判断是否为 LLM 响应
-        if (!parsedObj || !parsedObj['model'] || !parsedObj['choices']) {
-            return;
-        }
-        html = await generateHtmlForOpenaiResponseBody(parsedObj);
-    } else {
-        html = await generateHtmlForOpenaiSSE(json.text);
+async function renderOpenaiResponse(uuid: string) {
+  // Read response content
+  let json = await await getFlowData(`http://${window.location.host}/flows/${uuid}/response/content/Auto.json`);
+  let html = ''
+  if (json.view_name === "JSON") {
+    const parsedObj = JSON.parse(json.text);
+    // Check if it is an LLM response
+    if (!isLLMResponse(parsedObj)) {
+      return;
     }
+    html = await generateHtmlForOpenaiResponseBody(parsedObj);
+  } else {
+    html = await generateHtmlForOpenaiSSE(json.text);
+  }
 
-    createIFrameElement(html);
+  createIFrameElement(html);
 }
 
 /**
- * 生成 OpenAI JSON 响应的 HTML
- */
-async function generateHtmlForOpenaiResponseBody(body: any): Promise<string> {
-    // 读取HTML模板
-    let template = openai_res_template;
-
-    // 直接用结构化 JSON 字符串替换
-    const bodyStr = JSON.stringify(body, null, 2);
-    const html = template.replace('OPENAI_RESPONSE_BODY_PLACEHOLDER', bodyStr);
-
-    return html;
-}
-
-async function generateHtmlForOpenaiSSE(sseText: string): Promise<string> {
-    // 解析 events
-    const events: any[] = [];
-    console.log('sseText', sseText)
-    sseText.split('\n').forEach(line => {
-        line = line.trim();
-        if (line.startsWith('data: ')) {
-            const dataContent = line.slice(6);
-            if (dataContent === '[DONE]') return;
-            try {
-                events.push(JSON.parse(dataContent));
-            } catch { }
-        }
-    });
-    const input = processSSEEvents(events)
-    console.log('input', input)
-    const html = openai_res_sse_template(input);
-
-    return html;
-}
-
-async function reFetchFullLineOfFlow(rawRequest: Parameters<typeof fetch>) {
-    const [input, init] = rawRequest
-    const newInput = input.toString().replace(/\?lines=\d+/, "")
-    const newResp = await originalFetch(newInput, init)
-    const newJson = await newResp.json()
-    return newJson
-}
-
-
-
-
-function isLLMRequest(parsedObj: any): boolean {
-    return (!!parsedObj) && (!!parsedObj['messages']) && (!!parsedObj['model'])
-
-}
-/**
- * 
- * @param body openai api request 中的 body
- * @returns 一个可嵌入页面的HTML字符串，展示body内容
+ * Generate HTML string for OpenAI request body
+ * @param body The body of the OpenAI API request
+ * @returns An embeddable HTML string displaying the body content
  */
 async function generateHtmlForOpenaiRequestBody(body: any): Promise<string> {
-    // 读取HTML模板
-    let template = openai_req_template;
-
-    // 将body转换为字符串并替换占位符
-    const bodyStr = JSON.stringify(body, null, 2);
-
-    const html = template.replace('OPENAI_REQUEST_BODY_PLACEHOLDER', bodyStr);
-
-    return html;
+  // Call the lit-html template function to generate content
+  const templateResult = openai_req_template(body);
+  // Create a temporary div to render the lit-html template
+  const tempDiv = document.createElement('div');
+  render(templateResult, tempDiv);
+  const html = tempDiv.innerHTML;
+  return html;
 }
 
+/**
+ * Generate HTML string for OpenAI JSON response
+ * @param body OpenAI API response JSON
+ */
+async function generateHtmlForOpenaiResponseBody(body: any) {
+  const templateResult = openai_res_template(body);
+  // Create a temporary div to render the lit-html template
+  const tempDiv = document.createElement('div');
+  render(templateResult, tempDiv);
+  const html = tempDiv.innerHTML;
+  return html;
+}
 
+/**
+ * Generate HTML string for OpenAI SSE response
+ * @param sseText SSE text content
+ */
+async function generateHtmlForOpenaiSSE(sseText: string): Promise<string> {
+  // Parse events
+  const events: any[] = [];
+  sseText.split('\n').forEach(line => {
+    line = line.trim();
+    if (line.startsWith('data: ')) {
+      const dataContent = line.slice(6);
+      if (dataContent === '[DONE]') return;
+      try {
+        events.push(JSON.parse(dataContent));
+      } catch { }
+    }
+  });
+  const input = processSSEEvents(events)
+  const templateResult = openai_res_sse_template(input);
+  const tempDiv = document.createElement('div');
+  render(templateResult, tempDiv);
+  const html = tempDiv.innerHTML;
+  return html;
+}
+
+/**
+ * Fetch Flow data from the specified URL
+ * @param dataUrl The URL to request
+ */
+async function getFlowData(dataUrl: string) {
+  const newResp = await originalFetch(new Request(dataUrl))
+  const newJson = await newResp.json()
+  return newJson
+}
+
+/**
+ * Extract Flow info (uuid and action) from the URL
+ * @param url The current page URL
+ */
+function extractFlowInfo(url: string): CallAction | null {
+  const regex = /#\/flows\/([0-9a-fA-F\-]{36})\/(request|response)/;
+  const match = url.match(regex);
+
+  if (match) {
+    const [, uuid, action] = match;
+    return { uuid, action: action as 'request' | 'response' };
+  }
+  return null;
+}
+
+/**
+ * Listen for page URL changes and invoke the hook
+ * @param hook Callback when the URL changes
+ */
+async function listenUrlChange(hook?: (flow: CallAction) => void) {
+  // Record the current URL
+  let currentUrl = location.href;
+
+  // General function: triggered when the URL changes
+  function onUrlChange() {
+    if (location.href !== currentUrl) {
+      const flow = extractFlowInfo(location.href)
+      if (flow) {
+        hook?.(flow)
+      }
+      currentUrl = location.href;
+      // Place your logic here
+    }
+  }
+  // Hijack pushState and replaceState
+  const originalPushState = history.pushState;
+  history.pushState = function (...args) {
+    originalPushState.apply(this, args);
+    onUrlChange();
+  };
+
+  const originalReplaceState = history.replaceState;
+  history.replaceState = function (...args) {
+    originalReplaceState.apply(this, args);
+    onUrlChange();
+  };
+
+  // Listen for popstate event (browser forward/back)
+  window.addEventListener('popstate', onUrlChange);
+}
+
+/**
+ * Determine if a Flow is an OpenAI chat/completions request
+ * @param flow Flow object
+ */
+function isOpenaiFlow(flow: Flow): boolean {
+  return flow.request.path.endsWith('chat/completions')
+
+}
+/**
+ * Get Flow data from LRU cache or API
+ * @param uuid Unique identifier for the Flow
+ */
+async function getFlow(uuid: string): Promise<Flow | null> {
+  const cacheKey = `mitmproxy-flow-${uuid}`;
+  let cachedFlow = flowKV.get(cacheKey);
+  if (cachedFlow) {
+    return cachedFlow;
+  }
+
+  // If not in cache, fetch from API
+  const response = await originalFetch(`http://${location.host}/flows`);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch flow with uuid ${uuid}`);
+  }
+  const flowArray: Flow[] = await response.json();
+  let targetFlow: Flow | null = null
+  for (const flow of flowArray) {
+    if (isOpenaiFlow(flow)) {
+      flowKV.put(flow.id, omit<any, string>(flow, ['client_conn', 'server_conn']) as Flow)
+    }
+    if (flow.id === uuid) {
+      targetFlow = flow
+    }
+  }
+  if (targetFlow) {
+
+    flowKV.put(cacheKey, targetFlow); // Cache the result
+  }
+  return targetFlow;
+
+}
+
+/**
+ * Check if the object is an LLM request body
+ * @param parsedObj Request body object
+ */
+function isLLMRequest(parsedObj: any): boolean {
+  return (!!parsedObj) && (!!parsedObj['messages']) && (!!parsedObj['model'])
+}
+
+/**
+ * Check if the object is an LLM response body
+ * @param parsedObj Response body object
+ */
+function isLLMResponse(parsedObj: any): boolean {
+  return (!!parsedObj) && (!!parsedObj['choices']) && (!!parsedObj['model'])
+}
+
+/**
+ * Create and insert an iframe element to display the rendered result
+ * @param html The HTML string to embed
+ */
 async function createIFrameElement(html: string) {
-    // 获取容器元素
-    const container = document.querySelector('.contentview')
-    if (!container) {
-        console.warn("no `.contentView` element found")
-        return
+  // Get the container element
+  let container = document.getElementById('mitmproxy-llm-better-view-container') as HTMLElement | null;
+  if (!container) {
+    const contentview = document.querySelector('.contentview');
+    if (!contentview) {
+      console.warn("no `.contentview` element found");
+      return;
     }
 
-    const secondChild = container.childNodes[1]
+    const secondChild = contentview.childNodes[1];
+    container = document.createElement('details');
+    container.toggleAttribute('open')
+    container.id = 'mitmproxy-llm-better-view-container';
+    contentview.insertBefore(container, secondChild);
+  }
+  container.innerHTML = '' // clear
 
-    // 创建 Blob 对象，指定 MIME 类型为 text/html
-    const blob = new Blob([html], { type: 'text/html' });
+  // Create temporary iframe
+  iframeElement = GM_addElement(container, 'iframe', {
+    scrolling: 'no',
+    frameborder: '0',
+    style: 'width: 100%; height: 100%; border: none; overflow: hidden; display: block; background: transparent;',
+    csp: "default-src 'unsafe-eval'  'unsafe-inline' ",
+    srcdoc: html,
 
-    // 生成临时的 URL
-    const blobUrl = URL.createObjectURL(blob);
+    // src: blobUrl
+  }) as HTMLIFrameElement
+  // Listen for iframe load event to adjust height
+  iframeElement.onload = function () {
+    try {
+      const iframeDocument = iframeElement.contentDocument || iframeElement.contentWindow?.document;
+      const height = iframeDocument?.documentElement.scrollHeight;
 
-    // 获取 iframe 元素
-    const iframe = document.createElement('iframe');
-    iframe.style.width = '100%'
-    // 设置样式，让它像内置元素一样
-    iframe.style.border = 'none';
-    iframe.style.overflow = 'hidden';
-    iframe.style.width = '100%';
+      iframeElement.style.height = height + 'px';
 
-    iframe.style.display = 'block';
-    iframe.style.background = 'transparent';
+    } catch (e) {
+      console.warn(e);
+    }
+  };
+  container.appendChild(iframeElement)
 
-    // 监听iframe加载完成事件，调整高度
-    iframe.onload = function () {
-        try {
-            const iframeDocument = iframe.contentDocument || iframe.contentWindow?.document;
-            const height = iframeDocument?.documentElement.scrollHeight;
-            iframe.style.height = height + 'px';
-        } catch (e) {
-            console.warn(e);
-        }
-        // 添加全局点击事件到 iframe 内部
-        iframe.contentWindow?.document.addEventListener('click', (e) => {
-            setTimeout(() => {
-                try {
-                    const iframeDocument = iframe.contentDocument || iframe.contentWindow?.document;
-                    const height = iframeDocument?.documentElement.offsetHeight;
-                    iframe.style.height = height + 'px';
-                } catch (e) {
-                    console.warn(e);
-                }
-            }, 500)
-        });
-    };
-
-    // 如果你想禁止滚动条，也可以尝试设置属性（兼容旧浏览器）
-    iframe.setAttribute('scrolling', 'no');
-    iframe.setAttribute('frameborder', '0');
-    iframe.src = blobUrl;
-    container.insertBefore(iframe, secondChild)
-
-    iframeElement = iframe
 }
-
-async function clearIFrameElement() {
-    iframeElement?.remove()
-}
-
