@@ -1,11 +1,18 @@
 // ==UserScript==
-// @name       mitmproxy-llm-better-view
-// @namespace  npm/vite-plugin-monkey
-// @version    0.0.1
-// @match      http://localhost:8081/*
-// @match      http://127.0.0.1:8081/*
-// @grant      GM_addElement
-// @grant      unsafeWindow
+// @name               mitmproxy-llm-better-view
+// @name:zh-CN         mitmproxy 大模型请求内容预览
+// @namespace          npm/vite-plugin-monkey
+// @version            0.0.5
+// @description        Better view request body and response body of LLM API (openai completion) in mitmweb
+// @description:zh-CN  在 mitmweb 中查看大模型请求中的信息
+// @icon               https://s3.api2o.com/mitm-better-view.svg
+// @homepage           https://github.com/slow-groovin/mitmproxy-llm-better-view
+// @downloadURL        https://raw.githubusercontent.com/slow-groovin/mitmproxy-llm-better-view/refs/heads/main/tampermonkey-script/dist/mtimweb-llm-better-view.js
+// @updateURL          https://raw.githubusercontent.com/slow-groovin/mitmproxy-llm-better-view/refs/heads/main/tampermonkey-script/dist/mtimweb-llm-better-view.js
+// @include            http://localhost:8081/*
+// @include            http://127.0.0.1:8081/*
+// @grant              GM_addElement
+// @grant              unsafeWindow
 // ==/UserScript==
 
 (function () {
@@ -34,7 +41,7 @@
     for (let i3 = 0; i3 < s2; i3++) {
       const s3 = t2[i3];
       let a2, u2, d2 = -1, y2 = 0;
-      for (; y2 < s3.length && (c2.lastIndex = y2, u2 = c2.exec(s3), null !== u2);) y2 = c2.lastIndex, c2 === f ? "!--" === u2[1] ? c2 = v : void 0 !== u2[1] ? c2 = _ : void 0 !== u2[2] ? ($.test(u2[2]) && (r2 = RegExp("</" + u2[2], "g")), c2 = m) : void 0 !== u2[3] && (c2 = m) : c2 === m ? ">" === u2[0] ? (c2 = r2 ?? f, d2 = -1) : void 0 === u2[1] ? d2 = -2 : (d2 = c2.lastIndex - u2[2].length, a2 = u2[1], c2 = void 0 === u2[3] ? m : '"' === u2[3] ? g : p) : c2 === g || c2 === p ? c2 = m : c2 === v || c2 === _ ? c2 = f : (c2 = m, r2 = void 0);
+      for (; y2 < s3.length && (c2.lastIndex = y2, u2 = c2.exec(s3), null !== u2); ) y2 = c2.lastIndex, c2 === f ? "!--" === u2[1] ? c2 = v : void 0 !== u2[1] ? c2 = _ : void 0 !== u2[2] ? ($.test(u2[2]) && (r2 = RegExp("</" + u2[2], "g")), c2 = m) : void 0 !== u2[3] && (c2 = m) : c2 === m ? ">" === u2[0] ? (c2 = r2 ?? f, d2 = -1) : void 0 === u2[1] ? d2 = -2 : (d2 = c2.lastIndex - u2[2].length, a2 = u2[1], c2 = void 0 === u2[3] ? m : '"' === u2[3] ? g : p) : c2 === g || c2 === p ? c2 = m : c2 === v || c2 === _ ? c2 = f : (c2 = m, r2 = void 0);
       const x2 = c2 === m && t2[i3 + 1].startsWith("/>") ? " " : "";
       l2 += c2 === f ? s3 + n : d2 >= 0 ? (o2.push(a2), s3.slice(0, d2) + e$2 + s3.slice(d2) + h + x2) : s3 + h + (-2 === d2 ? i3 : x2);
     }
@@ -50,7 +57,7 @@
         const t3 = this.el.content.firstChild;
         t3.replaceWith(...t3.childNodes);
       }
-      for (; null !== (r2 = C.nextNode()) && d2.length < u2;) {
+      for (; null !== (r2 = C.nextNode()) && d2.length < u2; ) {
         if (1 === r2.nodeType) {
           if (r2.hasAttributes()) for (const t3 of r2.getAttributeNames()) if (t3.endsWith(e$2)) {
             const i2 = v2[a2++], s3 = r2.getAttribute(t3).split(h), e2 = /([.?@])?(.*)/.exec(i2);
@@ -67,7 +74,7 @@
         } else if (8 === r2.nodeType) if (r2.data === o$1) d2.push({ type: 2, index: c2 });
         else {
           let t3 = -1;
-          for (; -1 !== (t3 = r2.data.indexOf(h, t3 + 1));) d2.push({ type: 7, index: c2 }), t3 += h.length - 1;
+          for (; -1 !== (t3 = r2.data.indexOf(h, t3 + 1)); ) d2.push({ type: 7, index: c2 }), t3 += h.length - 1;
         }
         c2++;
       }
@@ -98,7 +105,7 @@
       const { el: { content: i2 }, parts: s2 } = this._$AD, e2 = ((t2 == null ? void 0 : t2.creationScope) ?? r).importNode(i2, true);
       C.currentNode = e2;
       let h2 = C.nextNode(), o2 = 0, n2 = 0, l2 = s2[0];
-      for (; void 0 !== l2;) {
+      for (; void 0 !== l2; ) {
         if (o2 === l2.index) {
           let i3;
           2 === l2.type ? i3 = new R(h2, h2.nextSibling, this, t2) : 1 === l2.type ? i3 = new l2.ctor(h2, l2.name, l2.strings, this, t2) : 6 === l2.type && (i3 = new z(h2, this, t2)), this._$AV.push(i3), l2 = s2[++n2];
@@ -165,7 +172,7 @@
     }
     _$AR(t2 = this._$AA.nextSibling, i2) {
       var _a2;
-      for ((_a2 = this._$AP) == null ? void 0 : _a2.call(this, false, true, i2); t2 && t2 !== this._$AB;) {
+      for ((_a2 = this._$AP) == null ? void 0 : _a2.call(this, false, true, i2); t2 && t2 !== this._$AB; ) {
         const i3 = t2.nextSibling;
         t2.remove(), t2 = i3;
       }
@@ -2979,7 +2986,7 @@ ${text}</tr>
             if ("renderer" in ext) {
               const prevRenderer = extensions.renderers[ext.name];
               if (prevRenderer) {
-                extensions.renderers[ext.name] = function (...args2) {
+                extensions.renderers[ext.name] = function(...args2) {
                   let ret = ext.renderer.apply(this, args2);
                   if (ret === false) {
                     ret = prevRenderer.apply(this, args2);
@@ -3103,7 +3110,7 @@ ${text}</tr>
         if (pack.walkTokens) {
           const walkTokens2 = this.defaults.walkTokens;
           const packWalktokens = pack.walkTokens;
-          opts.walkTokens = function (token) {
+          opts.walkTokens = function(token) {
             let values = [];
             values.push(packWalktokens.call(this, token));
             if (walkTokens2) {
@@ -3192,7 +3199,7 @@ ${text}</tr>
   function marked(src, opt) {
     return markedInstance.parse(src, opt);
   }
-  marked.options = marked.setOptions = function (options2) {
+  marked.options = marked.setOptions = function(options2) {
     markedInstance.setOptions(options2);
     marked.defaults = markedInstance.defaults;
     changeDefaults(marked.defaults);
@@ -3200,13 +3207,13 @@ ${text}</tr>
   };
   marked.getDefaults = _getDefaults;
   marked.defaults = _defaults;
-  marked.use = function (...args) {
+  marked.use = function(...args) {
     markedInstance.use(...args);
     marked.defaults = markedInstance.defaults;
     changeDefaults(marked.defaults);
     return marked;
   };
-  marked.walkTokens = function (tokens, callback) {
+  marked.walkTokens = function(tokens, callback) {
     return markedInstance.walkTokens(tokens, callback);
   };
   marked.parseInline = markedInstance.parseInline;
@@ -3314,7 +3321,7 @@ ${text}</tr>
           ` : ""}
           ${obj.n ? x`
             <div class="info-item">
-              <div class="info-label">生成数量</div>
+              <div class="info-label">n</div>
               <div class="info-value">${obj.n}</div>
             </div>
           ` : ""}
@@ -3331,7 +3338,7 @@ ${text}</tr>
         </summary>
         <div class="section-content">
           ${!((_b = obj.messages) == null ? void 0 : _b.length) ? x`
-            <div class="empty-state">暂无消息</div>
+            <div class="empty-state">no messages</div>
           ` : x`
             ${obj.messages.map((message, index) => x`
               <details open class="message-item">
@@ -3365,8 +3372,8 @@ ${text}</tr>
           </summary>
           <div class="section-content">
             ${obj.tools.map((tool, index) => {
-      var _a3, _b2;
-      return x`
+    var _a3, _b2;
+    return x`
               <details open class="tool-item">
                 <summary class="tool-header">
                   <div style="display: flex; align-items: center; gap: 8px">
@@ -3380,11 +3387,11 @@ ${text}</tr>
                       ${tool.function.description ? x`<div class="tool-description prose">${renderMarkdown(tool.function.description)}</div>` : ""}
                       ${((_b2 = tool.function.parameters) == null ? void 0 : _b2.properties) ? x`
                           <div class="tool-parameters">
-                            <div class="tool-parameters-title">参数:</div>
+                            <div class="tool-parameters-title">parameters:</div>
                             ${Object.entries(tool.function.parameters.properties).map(([name, param]) => {
-        const required = tool.function.parameters.required || [];
-        const isRequired = required.includes(name);
-        return x`
+      const required = tool.function.parameters.required || [];
+      const isRequired = required.includes(name);
+      return x`
                                 <div class="parameter-item">
                                   <div>
                                     <span class="parameter-name">${name}</span>
@@ -3394,14 +3401,14 @@ ${text}</tr>
                                   ${param.description ? x`<div class="parameter-description">${param.description}</div>` : ""}
                                 </div>
                               `;
-      })}
+    })}
                           </div>
                         ` : ""}
                     `}
                 </div>
               </details>
             `;
-    })}
+  })}
           </div>
         </details>
       ` : ""}
@@ -3516,8 +3523,8 @@ ${text}</tr>
             <div class="empty-state">No choices available</div>
           ` : x`
             ${obj.choices.map((choice, index) => {
-      var _a3, _b2, _c2;
-      return x`
+    var _a3, _b2, _c2;
+    return x`
               <details open class="choice-item">
                 <summary class="choice-header">
                   <div style="display: flex; align-items: center; gap: 8px">
@@ -3557,8 +3564,8 @@ ${text}</tr>
                     <div class="tool-calls-container">
                       <h4 style="margin-bottom: 8px; font-size: 0.9rem; color: #1e293b;">Tool Calls:</h4>
                       ${choice.message.tool_calls.map((toolCall, toolIndex) => {
-        var _a4, _b3;
-        return x`
+      var _a4, _b3;
+      return x`
                         <details open class="tool-call-item">
                           <summary class="tool-call-header">
                             <div>
@@ -3569,15 +3576,15 @@ ${text}</tr>
                           <div class="tool-call-content">
                             <div class="json-content">
                               ${JSON.stringify(
-          ((_b3 = toolCall.function) == null ? void 0 : _b3.arguments) ? JSON.parse(toolCall.function.arguments) : {},
-          null,
-          2
-        )}
+        ((_b3 = toolCall.function) == null ? void 0 : _b3.arguments) ? JSON.parse(toolCall.function.arguments) : {},
+        null,
+        2
+      )}
                             </div>
                           </div>
                         </details>
                       `;
-      })}
+    })}
                     </div>
                   ` : ""}
 
@@ -3591,7 +3598,7 @@ ${text}</tr>
                 </div>
               </details>
             `;
-    })}
+  })}
           `}
         </div>
       </details>
@@ -3704,9 +3711,9 @@ ${text}</tr>
               <div class="empty-state">No choices available</div>
             ` : x`
               ${events.choices.map(
-      (choice, index) => {
-        var _a3;
-        return x`
+    (choice, index) => {
+      var _a3;
+      return x`
                 <details open class="choice-item">
                   <summary class="choice-header">
                     <div class="choice-meta-item">
@@ -3731,9 +3738,9 @@ ${text}</tr>
                     ${((_a3 = choice.tool_calls) == null ? void 0 : _a3.length) ? x`
                       <div class="tool-calls-container">
                         ${choice.tool_calls.map(
-          (toolCall, toolIndex) => {
-            var _a4;
-            return x`
+        (toolCall, toolIndex) => {
+          var _a4;
+          return x`
                           <div open class="tool-call-item">
                             <div>
                               <div class="tool-call-name">${((_a4 = toolCall.function) == null ? void 0 : _a4.name) || "Unknown Function"}</div>
@@ -3741,28 +3748,28 @@ ${text}</tr>
                             </div>
                             <div class="tool-call-content">
                               <div class="json-content">${(() => {
-                var _a5;
-                if (!((_a5 = toolCall.function) == null ? void 0 : _a5.arguments)) return "{}";
-                try {
-                  console.log(toolCall);
-                  const parsed = JSON.parse(toolCall.function.arguments);
-                  return JSON.stringify(parsed, null, 2);
-                } catch {
-                  return toolCall.function.arguments;
-                }
-              })()}</div>
+            var _a5;
+            if (!((_a5 = toolCall.function) == null ? void 0 : _a5.arguments)) return "{}";
+            try {
+              console.log(toolCall);
+              const parsed = JSON.parse(toolCall.function.arguments);
+              return JSON.stringify(parsed, null, 2);
+            } catch {
+              return toolCall.function.arguments;
+            }
+          })()}</div>
                             </div>
             </div>
                         `;
-          }
-        )}
+        }
+      )}
                       </div>
                     ` : ""}
                   </div>
                 </details>
               `;
-      }
-    )}
+    }
+  )}
             `}
           </div>
         </details>
@@ -3779,7 +3786,7 @@ ${text}</tr>
             <div class="section-content">
               <div class="events-timeline">
                 ${events.events.map(
-      (event, index) => x`
+    (event, index) => x`
                   <details open class="event-item">
                     <summary class="event-header">
                       <div class="event-meta">
@@ -3799,7 +3806,7 @@ ${text}</tr>
                     </div>
                   </details>
                 `
-    )}
+  )}
               </div>
             </div>
           </details>
@@ -3974,12 +3981,12 @@ ${text}</tr>
       }
     }
     const originalPushState = history.pushState;
-    history.pushState = function (...args) {
+    history.pushState = function(...args) {
       originalPushState.apply(this, args);
       onUrlChange();
     };
     const originalReplaceState = history.replaceState;
-    history.replaceState = function (...args) {
+    history.replaceState = function(...args) {
       originalReplaceState.apply(this, args);
       onUrlChange();
     };
@@ -4042,7 +4049,7 @@ ${text}</tr>
       srcdoc: html2
       // src: blobUrl
     });
-    iframeElement.onload = function () {
+    iframeElement.onload = function() {
       var _a2;
       try {
         const iframeDocument = iframeElement.contentDocument || ((_a2 = iframeElement.contentWindow) == null ? void 0 : _a2.document);
