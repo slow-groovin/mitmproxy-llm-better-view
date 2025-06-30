@@ -8,17 +8,13 @@ export const css = html`<style>
       }
 
       body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          sans-serif;
-        color: #000000;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        padding: 2px;
         line-height: 1.5;
         font-size: 14px;
       }
 
       .container {
-        padding: 12px;
-        border: 1px solid gray;
-        border-radius: 8px;
       }
 
       .header {
@@ -618,7 +614,7 @@ export const css = html`<style>
       }
 
       .tool-call-content {
-        padding: 12px;
+        padding: 2px;
       }
 
       .events-timeline {
@@ -674,47 +670,6 @@ export const css = html`<style>
         padding: 12px;
       }
 
-      @media (max-width: 768px) {
-        body {
-          padding: 10px;
-        }
-
-        .container {
-          border-radius: 8px;
-        }
-
-        .header {
-          padding: 16px;
-        }
-
-        .header h1 {
-          font-size: 1.5rem;
-        }
-
-        .event-badge {
-          position: static;
-          margin-bottom: 12px;
-          display: inline-block;
-        }
-
-        .section-content {
-          padding: 16px;
-        }
-
-        .usage-grid {
-          grid-template-columns: 1fr;
-        }
-
-        .choice-meta {
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 4px;
-        }
-
-        .event-meta {
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 4px;
-        }
+      
     }
     </style>`

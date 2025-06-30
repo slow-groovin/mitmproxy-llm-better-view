@@ -24,6 +24,18 @@ export function renderToolMessage(content: string) {
   return html`<div  style="white-space: pre; font-family: monospace;">${content}</div>`
 }
 
+export function renderToolChoiceArgument(_arguments: string) {
+  try {
+    const toolObj = JSON.parse(_arguments)
+    return html`<div class="json-content"><pre>${JSON.stringify(toolObj, null, 2)}</pre></div>`
+
+  } catch (e) {
+
+  }
+
+  return html`<div  style="white-space: pre; font-family: monospace;">${_arguments}</div>`
+}
+
 export const joinedWithHr = (sections: HTMLTemplateResult[]) => sections.flatMap((section, index, arr) =>
   index < arr.length - 1
     ? [section, html`<hr />`]  // 每段后面加 <hr>

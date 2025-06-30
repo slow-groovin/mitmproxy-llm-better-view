@@ -1,4 +1,4 @@
-import { GM_addElement, unsafeWindow } from '$';
+import { GM_addElement, unsafeWindow, GM_addStyle } from '$';
 import { render } from 'lit-html';
 import { processSSEEvents } from './sse';
 import { openai_req_template, } from './templates/openai-req';
@@ -6,7 +6,7 @@ import { openai_res_template } from './templates/openai-res';
 import { openai_res_sse_template } from './templates/openai-res-sse';
 import { CallAction, Flow } from './types';
 import { LRUCache, omit } from './utils';
-
+import style from './style.css'
 /**
 
  */
@@ -17,7 +17,28 @@ const flowKV = new LRUCache<string, Flow>(1024);
 const originalFetch = unsafeWindow.fetch;
 // Global iframe element reference
 let iframeElement: HTMLIFrameElement
+let mutationObservers: { [key: string]: MutationObserver } = {};
 
+
+GM_addStyle(`
+details.llm-better-view {
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+.llm-better-view summary {
+  font-weight: bold;
+  padding: 0.5em;
+  display: list-item;
+}
+
+details[open].llm-better-view summary {
+  border-bottom: 1px solid #aaa;
+  margin-bottom: 0.5em;
+}
+
+  `)
 /**
  * Listen for URL changes and automatically render OpenAI request/response content
  * Entry point for mitmproxy-llm-better-view script.
@@ -273,32 +294,69 @@ async function createIFrameElement(html: string) {
 
     const secondChild = contentview.childNodes[1];
     container = document.createElement('details');
-    container.toggleAttribute('open')
+    container.toggleAttribute('open');
     container.id = 'mitmproxy-llm-better-view-container';
+    container.classList = 'llm-better-view'
     contentview.insertBefore(container, secondChild);
   }
-  container.innerHTML = '' // clear
+
+  // Ensure the details element has a summary element
+  let summaryElement = Array.from(container.children).find(
+    el => el.tagName.toLowerCase() === 'summary'
+  ) as HTMLElement | undefined;
+  if (!summaryElement) {
+    summaryElement = document.createElement('summary');
+    summaryElement.textContent = 'LLM Better View'; // You might want to customize this text
+    container.prepend(summaryElement); // Add it as the first child
+  }
+
+
+
+  // Define the function to resize the iframe content
+  const resizeIframeContent = () => {
+    try {
+      const iframeDocument = iframeElement.contentDocument || iframeElement.contentWindow?.document;
+      const height = iframeDocument?.documentElement.offsetHeight;
+      // console.log("resizing iframe content", iframeDocument?.documentElement.clientHeight, iframeDocument?.documentElement.offsetHeight, iframeDocument?.documentElement.scrollHeight);
+      iframeElement.style.height = height + 'px';
+
+    } catch (e) {
+      console.warn(e);
+    }
+  };
+
+
+  // Disconnect any existing observer and clear existing iframe if any
+  // Disconnect all existing MutationObservers and clear them
+  for (const observerId in mutationObservers) {
+    mutationObservers[observerId].disconnect();
+    delete mutationObservers[observerId];
+  }
+  // Remove existing iframe if present
+  if (iframeElement && container.contains(iframeElement)) {
+    container.removeChild(iframeElement);
+  }
 
   // Create temporary iframe
   iframeElement = GM_addElement(container, 'iframe', {
     scrolling: 'no',
     frameborder: '0',
-    style: 'width: 100%; height: 100%; border: none; overflow: hidden; display: block; background: transparent;',
+    style: 'width: 100%; height: 100%; border: none; overflow: hidden; display: block; background: transparent; ',
     csp: "default-src 'unsafe-eval'  'unsafe-inline' ",
     srcdoc: html,
 
     // src: blobUrl
   }) as HTMLIFrameElement
   // Listen for iframe load event to adjust height
-  iframeElement.onload = function () {
-    try {
-      const iframeDocument = iframeElement.contentDocument || iframeElement.contentWindow?.document;
-      const height = iframeDocument?.documentElement.scrollHeight;
-
-      iframeElement.style.height = height + 'px';
-
-    } catch (e) {
-      console.warn(e);
+  iframeElement.onload = () => {
+    resizeIframeContent();
+    const iframeDocument = iframeElement.contentDocument || iframeElement.contentWindow?.document;
+    if (iframeDocument) {
+      const observer = new MutationObserver(resizeIframeContent);
+      observer.observe(iframeDocument.body, { childList: true, subtree: true, attributes: true });
+      const observerId = `${Date.now()}`;
+      iframeElement.dataset.mutationObserverId = observerId;
+      mutationObservers[observerId] = observer;
     }
   };
   container.appendChild(iframeElement)

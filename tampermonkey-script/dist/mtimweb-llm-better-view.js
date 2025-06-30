@@ -2,7 +2,7 @@
 // @name               mitmproxy-llm-better-view
 // @name:zh-CN         mitmproxy 大模型请求内容预览
 // @namespace          npm/vite-plugin-monkey
-// @version            0.0.5
+// @version            0.0.6
 // @description        Better view request body and response body of LLM API (openai completion) in mitmweb
 // @description:zh-CN  在 mitmweb 中查看大模型请求中的信息
 // @icon               https://s3.api2o.com/mitm-better-view.svg
@@ -12,6 +12,7 @@
 // @include            http://localhost:8081/*
 // @include            http://127.0.0.1:8081/*
 // @grant              GM_addElement
+// @grant              GM_addStyle
 // @grant              unsafeWindow
 // ==/UserScript==
 
@@ -23,6 +24,7 @@
   var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
   var _a;
   var _GM_addElement = /* @__PURE__ */ (() => typeof GM_addElement != "undefined" ? GM_addElement : void 0)();
+  var _GM_addStyle = /* @__PURE__ */ (() => typeof GM_addStyle != "undefined" ? GM_addStyle : void 0)();
   var _unsafeWindow = /* @__PURE__ */ (() => typeof unsafeWindow != "undefined" ? unsafeWindow : void 0)();
   /**
    * @license
@@ -339,17 +341,13 @@
       }
 
       body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          sans-serif;
-        color: #000000;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        padding: 2px;
         line-height: 1.5;
         font-size: 14px;
       }
 
       .container {
-        padding: 12px;
-        border: 1px solid gray;
-        border-radius: 8px;
       }
 
       .header {
@@ -949,7 +947,7 @@
       }
 
       .tool-call-content {
-        padding: 12px;
+        padding: 2px;
       }
 
       .events-timeline {
@@ -1005,48 +1003,7 @@
         padding: 12px;
       }
 
-      @media (max-width: 768px) {
-        body {
-          padding: 10px;
-        }
-
-        .container {
-          border-radius: 8px;
-        }
-
-        .header {
-          padding: 16px;
-        }
-
-        .header h1 {
-          font-size: 1.5rem;
-        }
-
-        .event-badge {
-          position: static;
-          margin-bottom: 12px;
-          display: inline-block;
-        }
-
-        .section-content {
-          padding: 16px;
-        }
-
-        .usage-grid {
-          grid-template-columns: 1fr;
-        }
-
-        .choice-meta {
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 4px;
-        }
-
-        .event-meta {
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 4px;
-        }
+      
     }
     </style>`;
   /**
@@ -3250,13 +3207,150 @@ ${text}</tr>
     }
     return x`<div  style="white-space: pre; font-family: monospace;">${content}</div>`;
   }
+  function renderToolChoiceArgument(_arguments) {
+    try {
+      const toolObj = JSON.parse(_arguments);
+      return x`<div class="json-content"><pre>${JSON.stringify(toolObj, null, 2)}</pre></div>`;
+    } catch (e2) {
+    }
+    return x`<div  style="white-space: pre; font-family: monospace;">${_arguments}</div>`;
+  }
   const joinedWithHr = (sections) => sections.flatMap(
     (section, index, arr) => index < arr.length - 1 ? [section, x`<hr />`] : [section]
     // 最后一段后面不加
   );
-  const openai_req_template = (obj) => {
-    var _a2, _b, _c;
-    return x`<!DOCTYPE html>
+  const renderInfoItem$2 = (label, value) => {
+    if (value === void 0) return "";
+    return x`
+    <div class="info-item">
+      <div class="info-label">${label}</div>
+      <div class="info-value">${typeof value === "boolean" ? value ? "true" : "false" : value}</div>
+    </div>
+  `;
+  };
+  const renderMessageContent$1 = (message) => {
+    if (message.role === "tool") {
+      return x`<div class="prose">${renderToolMessage(message.content)}</div>`;
+    } else if (typeof message.content === "string") {
+      return x`<div class="prose">${renderMarkdown(message.content)}</div>`;
+    } else {
+      return x`<div class="json-content">${JSON.stringify(message.content, null, 2)}</div>`;
+    }
+  };
+  const renderMessage = (message, index) => {
+    const roleClass = `role-${message.role}`;
+    return x`
+    <details open class="message-item">
+      <summary class="message-header">
+        <div style="display: flex; align-items: center; gap: 8px">
+          <span class="role-badge ${roleClass}">${message.role}</span>
+          <span style="font-size: 0.8rem">Message ${index + 1}</span>
+        </div>
+      </summary>
+      <div class="message-content">
+        ${renderMessageContent$1(message)}
+      </div>
+    </details>
+  `;
+  };
+  const renderParameterItem = (name, param, required = []) => {
+    const isRequired = required.includes(name);
+    return x`
+    <div class="parameter-item">
+      <div>
+        <span class="parameter-name">${name}</span>
+        ${param.type ? x`<span class="parameter-type">${param.type}</span>` : ""}
+        ${isRequired ? x`<span class="parameter-required">required</span>` : ""}
+      </div>
+      ${param.description ? x`<div class="parameter-description">${param.description}</div>` : ""}
+    </div>
+  `;
+  };
+  const renderToolContent = (tool, index) => {
+    var _a2;
+    if (!tool.function) {
+      return x`<div class="json-content">${JSON.stringify(tool, null, 2)}</div>`;
+    }
+    return x`
+    ${tool.function.description ? x`<div class="tool-description prose">${renderMarkdown(tool.function.description)}</div>` : ""}
+    ${((_a2 = tool.function.parameters) == null ? void 0 : _a2.properties) ? x`
+        <div class="tool-parameters">
+          <div class="tool-parameters-title">parameters:</div>
+          ${Object.entries(tool.function.parameters.properties).map(
+    ([name, param]) => renderParameterItem(name, param, tool.function.parameters.required || [])
+  )}
+        </div>
+      ` : ""}
+  `;
+  };
+  const renderTool = (tool, index) => {
+    var _a2;
+    return x`
+    <details open class="tool-item">
+      <summary class="tool-header">
+        <div style="display: flex; align-items: center; gap: 8px">
+          <span class="tool-name-badge">
+            ${((_a2 = tool.function) == null ? void 0 : _a2.name) || `Tool ${index + 1}`}
+          </span>
+        </div>
+      </summary>
+      <div class="tool-content">
+        ${renderToolContent(tool)}
+      </div>
+    </details>
+  `;
+  };
+  const renderBasicInfo$2 = (obj) => {
+    return x`
+    <details open class="section">
+      <summary class="section-header">
+        <span class="section-title">Basic Info</span>
+      </summary>
+      <div class="section-content">
+        ${renderInfoItem$2("model", obj.model)}
+        ${renderInfoItem$2("Temperature", obj.temperature)}
+        ${renderInfoItem$2("Max Tokens", obj.max_tokens)}
+        ${renderInfoItem$2("Top P", obj.top_p)}
+        ${renderInfoItem$2("Frequency Penalty", obj.frequency_penalty)}
+        ${renderInfoItem$2("Presence Penalty", obj.presence_penalty)}
+        ${renderInfoItem$2("Stream", obj.stream)}
+        ${renderInfoItem$2("n", obj.n)}
+      </div>
+    </details>
+  `;
+  };
+  const renderMessages = (messages = []) => {
+    return x`
+    <details open class="section">
+      <summary class="section-header">
+        <span class="section-title">
+          Messages
+          ${messages.length ? x`<span>(${messages.length})</span>` : ""}
+        </span>
+      </summary>
+      <div class="section-content">
+        ${!messages.length ? x`<div class="empty-state">no messages</div>` : x`${messages.map((message, index) => renderMessage(message, index))}`}
+      </div>
+    </details>
+  `;
+  };
+  const renderTools = (tools = []) => {
+    if (tools.length === 0) return "";
+    return x`
+    <details open class="section">
+      <summary class="section-header">
+        <span class="section-title">
+          Tools
+          <span>(${tools.length})</span>
+        </span>
+      </summary>
+      <div class="section-content">
+        ${tools.map((tool, index) => renderTool(tool, index))}
+      </div>
+    </details>
+  `;
+  };
+  const openai_req_template = (obj) => x`<!DOCTYPE html>
 <html lang="en-US">
   <head>
     <meta charset="UTF-8" />
@@ -3271,156 +3365,174 @@ ${text}</tr>
         <p></p>
       </div>
 
-      <!-- Basic Info区域 -->
-      <details open class="section">
-        <summary class="section-header">
-          <span class="section-title">Basic Info</span>
-        </summary>
-        <div class="section-content">
-          ${obj.model ? x`
-            <div class="info-item">
-              <div class="info-label">model</div>
-              <div class="info-value">${obj.model}</div>
-            </div>
-          ` : ""}
-          ${obj.temperature !== void 0 ? x`
-            <div class="info-item">
-              <div class="info-label">Temperature</div>
-              <div class="info-value">${obj.temperature}</div>
-            </div>
-          ` : ""}
-          ${obj.max_tokens ? x`
-            <div class="info-item">
-              <div class="info-label">Max Tokens</div>
-              <div class="info-value">${obj.max_tokens}</div>
-            </div>
-          ` : ""}
-          ${obj.top_p !== void 0 ? x`
-            <div class="info-item">
-              <div class="info-label">Top P</div>
-              <div class="info-value">${obj.top_p}</div>
-            </div>
-          ` : ""}
-          ${obj.frequency_penalty !== void 0 ? x`
-            <div class="info-item">
-              <div class="info-label">Frequency Penalty</div>
-              <div class="info-value">${obj.frequency_penalty}</div>
-            </div>
-          ` : ""}
-          ${obj.presence_penalty !== void 0 ? x`
-            <div class="info-item">
-              <div class="info-label">Presence Penalty</div>
-              <div class="info-value">${obj.presence_penalty}</div>
-            </div>
-          ` : ""}
-          ${obj.stream !== void 0 ? x`
-            <div class="info-item">
-              <div class="info-label">Stream</div>
-              <div class="info-value">${obj.stream ? "true" : "false"}</div>
-            </div>
-          ` : ""}
-          ${obj.n ? x`
-            <div class="info-item">
-              <div class="info-label">n</div>
-              <div class="info-value">${obj.n}</div>
-            </div>
-          ` : ""}
-        </div>
-      </details>
-
-      <!-- Messages区域 -->
-      <details open class="section">
-        <summary class="section-header">
-          <span class="section-title">
-            Messages
-            ${((_a2 = obj.messages) == null ? void 0 : _a2.length) ? x`<span>(${obj.messages.length})</span>` : ""}
-          </span>
-        </summary>
-        <div class="section-content">
-          ${!((_b = obj.messages) == null ? void 0 : _b.length) ? x`
-            <div class="empty-state">no messages</div>
-          ` : x`
-            ${obj.messages.map((message, index) => x`
-              <details open class="message-item">
-                <summary class="message-header">
-                  <div style="display: flex; align-items: center; gap: 8px">
-                    <span
-                      class="role-badge ${message.role === "user" ? "role-user" : message.role === "assistant" ? "role-assistant" : message.role === "system" ? "role-system" : message.role === "tool" ? "role-tool" : ""}"
-                    >
-                      ${message.role}
-                    </span>
-                    <span style="font-size: 0.8rem">Message ${index + 1}</span>
-                  </div>
-                </summary>
-                <div class="message-content">
-                  ${message.role === "tool" ? x`<div class="prose">${renderToolMessage(message.content)}</div>` : typeof message.content === "string" ? x`<div class="prose">${renderMarkdown(message.content)}</div>` : x`<div class="json-content">${JSON.stringify(message.content, null, 2)}</div>`}
-                </div>
-              </details>
-            `)}
-          `}
-        </div>
-      </details>
-
-      <!-- Tools区域 -->
-      ${((_c = obj.tools) == null ? void 0 : _c.length) > 0 ? x`
-        <details open class="section">
-          <summary class="section-header">
-            <span class="section-title">
-              Tools
-              <span>(${obj.tools.length})</span>
-            </span>
-          </summary>
-          <div class="section-content">
-            ${obj.tools.map((tool, index) => {
-    var _a3, _b2;
+      ${renderBasicInfo$2(obj)}
+      ${renderMessages(obj.messages)}
+      ${renderTools(obj.tools)}
+    </div>
+  </body>
+</html>`;
+  const renderInfoItem$1 = (label, value) => {
+    if (value === void 0) return "";
     return x`
-              <details open class="tool-item">
-                <summary class="tool-header">
-                  <div style="display: flex; align-items: center; gap: 8px">
-                    <span class="tool-name-badge">
-                      ${((_a3 = tool.function) == null ? void 0 : _a3.name) || `Tool ${index + 1}`}
-                    </span>
-                  </div>
-                </summary>
-                <div class="tool-content">
-                  ${!tool.function ? x`<div class="json-content">${JSON.stringify(tool, null, 2)}</div>` : x`
-                      ${tool.function.description ? x`<div class="tool-description prose">${renderMarkdown(tool.function.description)}</div>` : ""}
-                      ${((_b2 = tool.function.parameters) == null ? void 0 : _b2.properties) ? x`
-                          <div class="tool-parameters">
-                            <div class="tool-parameters-title">parameters:</div>
-                            ${Object.entries(tool.function.parameters.properties).map(([name, param]) => {
-      const required = tool.function.parameters.required || [];
-      const isRequired = required.includes(name);
-      return x`
-                                <div class="parameter-item">
-                                  <div>
-                                    <span class="parameter-name">${name}</span>
-                                    ${param.type ? x`<span class="parameter-type">${param.type}</span>` : ""}
-                                    ${isRequired ? x`<span class="parameter-required">required</span>` : ""}
-                                  </div>
-                                  ${param.description ? x`<div class="parameter-description">${param.description}</div>` : ""}
-                                </div>
-                              `;
-    })}
-                          </div>
-                        ` : ""}
-                    `}
-                </div>
-              </details>
-            `;
-  })}
-          </div>
-        </details>
+    <div class="info-item">
+      <div class="info-label">${label}</div>
+      <div class="info-value">${typeof value === "boolean" ? value ? "true" : "false" : value}</div>
+    </div>
+  `;
+  };
+  const renderUsageItem$1 = (label, value) => {
+    if (value === void 0) return "";
+    return x`
+    <div class="usage-item">
+      <div class="usage-label">${label}</div>
+      <div class="usage-value">${value}</div>
+    </div>
+  `;
+  };
+  const renderBasicInfo$1 = (obj) => {
+    const createdDate = obj.created ? new Date(obj.created * 1e3).toLocaleString("en-US") : void 0;
+    return x`
+    <details open class="section">
+      <summary class="section-header">
+        <span class="section-title">Basic Info</span>
+      </summary>
+      <div class="section-content">
+        ${renderInfoItem$1("Response ID", obj.id)}
+        ${renderInfoItem$1("Object Type", obj.object)}
+        ${renderInfoItem$1("Created", createdDate)}
+        ${renderInfoItem$1("Model", obj.model)}
+        ${renderInfoItem$1("System Fingerprint", obj.system_fingerprint)}
+      </div>
+    </details>
+  `;
+  };
+  const renderTokenUsage$1 = (usage) => {
+    var _a2;
+    if (!usage) return "";
+    return x`
+    <details open class="section">
+      <summary class="section-header">
+        <span class="section-title">Token Usage</span>
+      </summary>
+      <div class="section-content">
+        <div class="usage-grid">
+          ${renderUsageItem$1("Prompt Tokens", usage.prompt_tokens)}
+          ${renderUsageItem$1("Completion Tokens", usage.completion_tokens)}
+          ${renderUsageItem$1("Total Tokens", usage.total_tokens)}
+          ${renderUsageItem$1("Cached Tokens", (_a2 = usage.prompt_tokens_details) == null ? void 0 : _a2.cached_tokens)}
+        </div>
+      </div>
+    </details>
+  `;
+  };
+  const renderToolCall$1 = (toolCall, index) => {
+    var _a2, _b;
+    const parsedArguments = ((_a2 = toolCall.function) == null ? void 0 : _a2.arguments) ? JSON.parse(toolCall.function.arguments) : {};
+    return x`
+    <details open class="tool-call-item">
+      <summary class="tool-call-header">
+        <div>
+          <div class="tool-call-name">${((_b = toolCall.function) == null ? void 0 : _b.name) || "Unknown Function"}</div>
+          <div class="tool-call-id">ID: ${toolCall.id || "N/A"}</div>
+        </div>
+      </summary>
+      <div class="tool-call-content">
+        ${renderToolChoiceArgument(parsedArguments)}
+      </div>
+    </details>
+  `;
+  };
+  const renderToolCalls = (toolCalls) => {
+    if (!(toolCalls == null ? void 0 : toolCalls.length)) return "";
+    return x`
+    <div class="tool-calls-container">
+      <h4 style="margin-bottom: 8px; font-size: 0.9rem; color: #1e293b;">Tool Calls:</h4>
+      ${toolCalls.map((toolCall, index) => renderToolCall$1(toolCall))}
+    </div>
+  `;
+  };
+  const renderLogProbs = (logprobs) => {
+    if (!logprobs) return "";
+    return x`
+    <div style="margin-top: 12px;">
+      <h4 style="margin-bottom: 8px; font-size: 0.9rem; color: #1e293b;">Log Probabilities:</h4>
+      <div class="json-content">${JSON.stringify(logprobs, null, 2)}</div>
+    </div>
+  `;
+  };
+  const renderChoiceMeta = (choice) => {
+    return x`
+    <div class="choice-meta">
+      ${choice.index !== void 0 ? x`
+        <div class="choice-meta-item">
+          <span>Index:</span>
+          <span>${choice.index}</span>
+        </div>
+      ` : ""}
+      ${choice.logprobs ? x`
+        <div class="choice-meta-item">
+          <span>Log Probs:</span>
+          <span>Available</span>
+        </div>
       ` : ""}
     </div>
-
-  </body>
-</html>
-`;
+  `;
   };
-  const openai_res_template = (obj) => {
-    var _a2, _b, _c;
-    return x`<!DOCTYPE html>
+  const renderMessageContent = (content) => {
+    if (!content) return "";
+    return x`
+    <div class="prose">
+      ${typeof content === "string" ? renderMarkdown(content) : x`<div class="json-content">${JSON.stringify(content, null, 2)}</div>`}
+    </div>
+  `;
+  };
+  const getFinishReasonClass$1 = (finishReason) => {
+    const classMap = {
+      "stop": "finish-stop",
+      "length": "finish-length",
+      "tool_calls": "finish-tool-calls",
+      "content_filter": "finish-content-filter"
+    };
+    return classMap[finishReason] || "";
+  };
+  const renderChoice$1 = (choice, index) => {
+    var _a2, _b;
+    const finishReasonClass = getFinishReasonClass$1(choice.finish_reason);
+    return x`
+    <details open class="choice-item">
+      <summary class="choice-header">
+        <div style="display: flex; align-items: center; gap: 8px">
+          <span class="choice-badge">Choice ${index + 1}</span>
+          <span class="finish-reason-badge ${finishReasonClass}">
+            ${choice.finish_reason || "unknown"}
+          </span>
+        </div>
+      </summary>
+      <div class="choice-content">
+        ${renderChoiceMeta(choice)}
+        ${renderMessageContent((_a2 = choice.message) == null ? void 0 : _a2.content)}
+        ${renderToolCalls((_b = choice.message) == null ? void 0 : _b.tool_calls)}
+        ${renderLogProbs(choice.logprobs)}
+      </div>
+    </details>
+  `;
+  };
+  const renderChoices$1 = (choices = []) => {
+    return x`
+    <details open class="section">
+      <summary class="section-header">
+        <span class="section-title">
+          Choices
+          ${choices.length ? x`<span>(${choices.length})</span>` : ""}
+        </span>
+      </summary>
+      <div class="section-content">
+        ${!choices.length ? x`<div class="empty-state">No choices available</div>` : x`${choices.map((choice, index) => renderChoice$1(choice, index))}`}
+      </div>
+    </details>
+  `;
+  };
+  const openai_res_template = (obj) => x`<!DOCTYPE html>
 <html lang="en-US">
   <head>
     <meta charset="UTF-8" />
@@ -3434,182 +3546,181 @@ ${text}</tr>
         <h1>OpenAI API Response</h1>
       </div>
 
-      <!-- Basic Info Section -->
-      <details open class="section">
-        <summary class="section-header">
-          <span class="section-title">Basic Info</span>
-        </summary>
-        <div class="section-content">
-          ${obj.id ? x`
-            <div class="info-item">
-              <div class="info-label">Response ID</div>
-              <div class="info-value">${obj.id}</div>
-            </div>
-          ` : ""}
-          ${obj.object ? x`
-            <div class="info-item">
-              <div class="info-label">Object Type</div>
-              <div class="info-value">${obj.object}</div>
-            </div>
-          ` : ""}
-          ${obj.created ? x`
-            <div class="info-item">
-              <div class="info-label">Created</div>
-              <div class="info-value">${new Date(obj.created * 1e3).toLocaleString("en-US")}</div>
-            </div>
-          ` : ""}
-          ${obj.model ? x`
-            <div class="info-item">
-              <div class="info-label">Model</div>
-              <div class="info-value">${obj.model}</div>
-            </div>
-          ` : ""}
-          ${obj.system_fingerprint ? x`
-            <div class="info-item">
-              <div class="info-label">System Fingerprint</div>
-              <div class="info-value">${obj.system_fingerprint}</div>
-            </div>
-          ` : ""}
-        </div>
-      </details>
-
-      <!-- Token Usage Section -->
-      ${obj.usage ? x`
-        <details open class="section">
-          <summary class="section-header">
-            <span class="section-title">Token Usage</span>
-          </summary>
-          <div class="section-content">
-            <div class="usage-grid">
-              ${obj.usage.prompt_tokens ? x`
-                <div class="usage-item">
-                  <div class="usage-label">Prompt Tokens</div>
-                  <div class="usage-value">${obj.usage.prompt_tokens}</div>
-                </div>
-              ` : ""}
-              ${obj.usage.completion_tokens ? x`
-                <div class="usage-item">
-                  <div class="usage-label">Completion Tokens</div>
-                  <div class="usage-value">${obj.usage.completion_tokens}</div>
-                </div>
-              ` : ""}
-              ${obj.usage.total_tokens ? x`
-                <div class="usage-item">
-                  <div class="usage-label">Total Tokens</div>
-                  <div class="usage-value">${obj.usage.total_tokens}</div>
-                </div>
-              ` : ""}
-              ${((_a2 = obj.usage.prompt_tokens_details) == null ? void 0 : _a2.cached_tokens) ? x`
-                <div class="usage-item">
-                  <div class="usage-label">Cached Tokens</div>
-                  <div class="usage-value">${obj.usage.prompt_tokens_details.cached_tokens}</div>
-                </div>
-              ` : ""}
-            </div>
-          </div>
-        </details>
-      ` : ""}
-
-      <!-- Choices Section -->
-      <details open class="section">
-        <summary class="section-header">
-          <span class="section-title">
-            Choices
-            ${((_b = obj.choices) == null ? void 0 : _b.length) ? x`<span>(${obj.choices.length})</span>` : ""}
-          </span>
-        </summary>
-        <div class="section-content">
-          ${!((_c = obj.choices) == null ? void 0 : _c.length) ? x`
-            <div class="empty-state">No choices available</div>
-          ` : x`
-            ${obj.choices.map((choice, index) => {
-    var _a3, _b2, _c2;
-    return x`
-              <details open class="choice-item">
-                <summary class="choice-header">
-                  <div style="display: flex; align-items: center; gap: 8px">
-                    <span class="choice-badge">Choice ${index + 1}</span>
-                    <span
-                      class="finish-reason-badge ${choice.finish_reason === "stop" ? "finish-stop" : choice.finish_reason === "length" ? "finish-length" : choice.finish_reason === "tool_calls" ? "finish-tool-calls" : choice.finish_reason === "content_filter" ? "finish-content-filter" : ""}"
-                    >
-                      ${choice.finish_reason || "unknown"}
-                    </span>
-                  </div>
-                </summary>
-                <div class="choice-content">
-                  <div class="choice-meta">
-                    ${choice.index !== void 0 ? x`
-                      <div class="choice-meta-item">
-                        <span>Index:</span>
-                        <span>${choice.index}</span>
-                      </div>
-                    ` : ""}
-                    ${choice.logprobs ? x`
-                      <div class="choice-meta-item">
-                        <span>Log Probs:</span>
-                        <span>Available</span>
-                      </div>
-                    ` : ""}
-                  </div>
-                  
-                  <!-- Message Content -->
-                  ${((_a3 = choice.message) == null ? void 0 : _a3.content) ? x`
-                    <div class="prose">
-                      ${typeof choice.message.content === "string" ? renderMarkdown(choice.message.content) : x`<div class="json-content">${JSON.stringify(choice.message.content, null, 2)}</div>`}
-                    </div>
-                  ` : ""}
-                  
-                  <!-- Tool Calls -->
-                  ${((_c2 = (_b2 = choice.message) == null ? void 0 : _b2.tool_calls) == null ? void 0 : _c2.length) ? x`
-                    <div class="tool-calls-container">
-                      <h4 style="margin-bottom: 8px; font-size: 0.9rem; color: #1e293b;">Tool Calls:</h4>
-                      ${choice.message.tool_calls.map((toolCall, toolIndex) => {
-      var _a4, _b3;
-      return x`
-                        <details open class="tool-call-item">
-                          <summary class="tool-call-header">
-                            <div>
-                              <div class="tool-call-name">${((_a4 = toolCall.function) == null ? void 0 : _a4.name) || "Unknown Function"}</div>
-                              <div class="tool-call-id">ID: ${toolCall.id || "N/A"}</div>
-                            </div>
-                          </summary>
-                          <div class="tool-call-content">
-                            <div class="json-content">
-                              ${JSON.stringify(
-        ((_b3 = toolCall.function) == null ? void 0 : _b3.arguments) ? JSON.parse(toolCall.function.arguments) : {},
-        null,
-        2
-      )}
-                            </div>
-                          </div>
-                        </details>
-                      `;
-    })}
-                    </div>
-                  ` : ""}
-
-                  <!-- Log Probs (if available) -->
-                  ${choice.logprobs ? x`
-                    <div style="margin-top: 12px;">
-                      <h4 style="margin-bottom: 8px; font-size: 0.9rem; color: #1e293b;">Log Probabilities:</h4>
-                      <div class="json-content">${JSON.stringify(choice.logprobs, null, 2)}</div>
-                    </div>
-                  ` : ""}
-                </div>
-              </details>
-            `;
-  })}
-          `}
-        </div>
-      </details>
+      ${renderBasicInfo$1(obj)}
+      ${renderTokenUsage$1(obj.usage)}
+      ${renderChoices$1(obj.choices)}
     </div>
   </body>
-</html>
+</html>`;
+  const formatTimestamp = (timestamp) => {
+    return new Date(timestamp * 1e3).toLocaleString("en-US");
+  };
+  const formatJSON = (data) => {
+    if (typeof data === "string") return data;
+    try {
+      return JSON.stringify(data, null, 2);
+    } catch {
+      return String(data);
+    }
+  };
+  const getFinishReasonClass = (reason) => {
+    const classMap = {
+      stop: "finish-stop",
+      length: "finish-length",
+      tool_calls: "finish-tool-calls",
+      content_filter: "finish-content-filter"
+    };
+    return classMap[reason] || "";
+  };
+  const renderInfoItem = (label, value, formatter) => {
+    if (!value) return "";
+    const displayValue = formatter ? formatter(value) : value;
+    return x`
+    <div class="info-item">
+      <div class="info-label">${label}</div>
+      <div class="info-value">${displayValue}</div>
+    </div>
+  `;
+  };
+  const renderUsageItem = (label, value) => {
+    if (!value) return "";
+    return x`
+    <div class="usage-item">
+      <div class="usage-label">${label}</div>
+      <div class="usage-value">${value}</div>
+    </div>
+  `;
+  };
+  const renderBasicInfo = (events) => x`
+  <details open class="section">
+    <summary class="section-header">
+      <div class="section-title">Basic Info</div>
+    </summary>
+    <div class="section-content">
+      ${renderInfoItem("Model", events.model)}
+      ${renderInfoItem("Created", events.created, formatTimestamp)}
+      ${renderInfoItem("System Fingerprint", events.system_fingerprint)}
+      ${renderInfoItem("Events Count", events.eventCount || 0)}
+    </div>
+  </details>
+`;
+  const renderTokenUsage = (usage) => {
+    var _a2;
+    if (!usage) return "";
+    return x`
+    <details open class="section">
+      <summary class="section-header">
+        <div class="section-title">Token Usage</div>
+      </summary>
+      <div class="section-content">
+        <div class="usage-grid">
+          ${renderUsageItem("Prompt Tokens", usage.prompt_tokens)}
+          ${renderUsageItem("Completion Tokens", usage.completion_tokens)}
+          ${renderUsageItem("Total Tokens", usage.total_tokens)}
+          ${renderUsageItem("Cached Tokens", (_a2 = usage.prompt_tokens_details) == null ? void 0 : _a2.cached_tokens)}
+        </div>
+      </div>
+    </details>
+  `;
+  };
+  const renderToolCall = (toolCall, index) => {
+    var _a2, _b;
+    return x`
+  <div class="tool-call-item">
+    <div>
+      <div class="tool-call-name">${((_a2 = toolCall.function) == null ? void 0 : _a2.name) || "Unknown Function"}</div>
+      <div class="tool-call-id">ID: ${toolCall.id || "N/A"}</div>
+    </div>
+    <div class="tool-call-content">
+    ${renderToolChoiceArgument(((_b = toolCall.function) == null ? void 0 : _b.arguments) || "{}")}
+    </div>
+  </div>
 `;
   };
-  const openai_res_sse_template = (events) => {
-    var _a2, _b, _c, _d;
-    return x`<!DOCTYPE html>
+  const renderChoiceContent = (choice) => {
+    var _a2;
+    const contentHtml = choice.content ? x`
+    <div class="content-section">
+      <h4>Content:</h4>
+      <div class="prose">
+        ${typeof choice.content === "string" ? renderMarkdown(choice.content) : x`<div class="json-content">${formatJSON(choice.content)}</div>`}
+      </div>
+    </div>
+  ` : "";
+    const toolCallsHtml = ((_a2 = choice.tool_calls) == null ? void 0 : _a2.length) ? x`
+    <div class="tool-calls-container">
+      ${choice.tool_calls.map((toolCall, index) => renderToolCall(toolCall))}
+    </div>
+  ` : "";
+    return x`${contentHtml}${toolCallsHtml}`;
+  };
+  const renderChoice = (choice, index) => x`
+  <details open class="choice-item">
+    <summary class="choice-header">
+      <div class="choice-meta-item">
+        <span class="choice-badge">Choice ${index + 1}</span>
+        <span class="finish-reason-badge ${getFinishReasonClass(choice.finish_reason)}">
+          ${choice.finish_reason || "unknown"}
+        </span>
+      </div>
+    </summary>
+    <div class="choice-content">
+      ${renderChoiceContent(choice)}
+    </div>
+  </details>
+`;
+  const renderChoices = (choices) => x`
+  <details open class="section">
+    <summary class="section-header">
+      <div class="section-title">
+        Choices
+        ${(choices == null ? void 0 : choices.length) ? x`<span>(${choices.length})</span>` : ""}
+      </div>
+    </summary>
+    <div class="section-content">
+      ${!(choices == null ? void 0 : choices.length) ? x`<div class="empty-state">No choices available</div>` : choices.map((choice, index) => renderChoice(choice, index))}
+    </div>
+  </details>
+`;
+  const renderEvent = (event, index) => x`
+  <details open class="event-item">
+    <summary class="event-header">
+      <div class="event-meta">
+        <span class="event-badge">Event ${index + 1}</span>
+        <span class="event-type-badge">${event.event || "data"}</span>
+        ${event.timestamp ? x`
+          <span class="event-timestamp">
+            ${new Date(event.timestamp).toLocaleTimeString("en-US")}
+          </span>
+        ` : ""}
+      </div>
+    </summary>
+    <div class="event-content">
+      ${event.data ? x`
+        <div class="json-content">${formatJSON(event.data)}</div>
+      ` : ""}
+    </div>
+  </details>
+`;
+  const renderEventsTimeline = (events) => {
+    if (!(events == null ? void 0 : events.length)) return "";
+    return x`
+    <details open class="section">
+      <summary class="section-header">
+        <div class="section-title">
+          Events Timeline
+          <span>(${events.length})</span>
+        </div>
+      </summary>
+      <div class="section-content">
+        <div class="events-timeline">
+          ${events.map((event, index) => renderEvent(event, index))}
+        </div>
+      </div>
+    </details>
+  `;
+  };
+  const openai_res_sse_template = (events) => x`<!DOCTYPE html>
 <html lang="en-US">
   <head>
     <meta charset="UTF-8" />
@@ -3625,198 +3736,15 @@ ${text}</tr>
         <p>Server-Sent Events Response Visualization</p>
       </div>
       <div class="content">
-        <!-- Basic Info Section -->
-        <details open class="section">
-          <summary class="section-header">
-            <div class="section-title">
-              Basic Info
-            </div>
-          </summary>
-          <div class="section-content">
-            ${events.model ? x`
-              <div class="info-item">
-                <div class="info-label">Model</div>
-                <div class="info-value">${events.model}</div>
-              </div>
-            ` : ""}
-            ${events.created ? x`
-              <div class="info-item">
-                <div class="info-label">Created</div>
-                <div class="info-value">${new Date(events.created * 1e3).toLocaleString("en-US")}</div>
-              </div>
-            ` : ""}
-            ${events.system_fingerprint ? x`
-              <div class="info-item">
-                <div class="info-label">System Fingerprint</div>
-                <div class="info-value">${events.system_fingerprint}</div>
-              </div>
-            ` : ""}
-            <div class="info-item">
-              <div class="info-label">Events Count</div>
-              <div class="info-value">${events.eventCount || 0}</div>
-            </div>
-          </div>
-        </details>
-
-        <!-- Token Usage Section -->
-        ${events.usage ? x`
-          <details open class="section">
-            <summary class="section-header">
-              <div class="section-title">
-    
-                Token Usage
-              </div>
-            </summary>
-            <div class="section-content">
-              <div class="usage-grid">
-                ${events.usage.prompt_tokens ? x`
-                  <div class="usage-item">
-                    <div class="usage-label">Prompt Tokens</div>
-                    <div class="usage-value">${events.usage.prompt_tokens}</div>
-                  </div>
-                ` : ""}
-                ${events.usage.completion_tokens ? x`
-                  <div class="usage-item">
-                    <div class="usage-label">Completion Tokens</div>
-                    <div class="usage-value">${events.usage.completion_tokens}</div>
-                  </div>
-                ` : ""}
-                ${events.usage.total_tokens ? x`
-                  <div class="usage-item">
-                    <div class="usage-label">Total Tokens</div>
-                    <div class="usage-value">${events.usage.total_tokens}</div>
-                  </div>
-                ` : ""}
-                ${((_a2 = events.usage.prompt_tokens_details) == null ? void 0 : _a2.cached_tokens) ? x`
-                  <div class="usage-item">
-                    <div class="usage-label">Cached Tokens</div>
-                    <div class="usage-value">${events.usage.prompt_tokens_details.cached_tokens}</div>
-                  </div>
-                ` : ""}
-              </div>
-            </div>
-          </details>
-        ` : ""}
-
-        <!-- Choices Section -->
-        <details open class="section">
-          <summary class="section-header">
-            <div class="section-title">
-              Choices
-              ${((_b = events.choices) == null ? void 0 : _b.length) ? x`<span>(${events.choices.length})</span>` : ""}
-            </div>
-          </summary>
-          <div class="section-content">
-            ${!((_c = events.choices) == null ? void 0 : _c.length) ? x`
-              <div class="empty-state">No choices available</div>
-            ` : x`
-              ${events.choices.map(
-    (choice, index) => {
-      var _a3;
-      return x`
-                <details open class="choice-item">
-                  <summary class="choice-header">
-                    <div class="choice-meta-item">
-                      <span class="choice-badge">Choice ${index + 1}</span>
-                      <span class="finish-reason-badge ${choice.finish_reason === "stop" ? "finish-stop" : choice.finish_reason === "length" ? "finish-length" : choice.finish_reason === "tool_calls" ? "finish-tool-calls" : choice.finish_reason === "content_filter" ? "finish-content-filter" : ""}">
-                        ${choice.finish_reason || "unknown"}
-                      </span>
-                    </div>
-                  </summary>
-                  <div class="choice-content">
-                    <!-- Message Content -->
-                    ${choice.content ? x`
-                      <div class="content-section">
-                        <h4>Content:</h4>
-                        <div class="prose">
-                          ${typeof choice.content === "string" ? renderMarkdown(choice.content) : x`<div class="json-content">${JSON.stringify(choice.content, null, 2)}</div>`}
-                        </div>
-                      </div>
-                    ` : ""}
-                    
-                    <!-- Tool Calls -->
-                    ${((_a3 = choice.tool_calls) == null ? void 0 : _a3.length) ? x`
-                      <div class="tool-calls-container">
-                        ${choice.tool_calls.map(
-        (toolCall, toolIndex) => {
-          var _a4;
-          return x`
-                          <div open class="tool-call-item">
-                            <div>
-                              <div class="tool-call-name">${((_a4 = toolCall.function) == null ? void 0 : _a4.name) || "Unknown Function"}</div>
-                              <div class="tool-call-id">ID: ${toolCall.id || "N/A"}</div>
-                            </div>
-                            <div class="tool-call-content">
-                              <div class="json-content">${(() => {
-            var _a5;
-            if (!((_a5 = toolCall.function) == null ? void 0 : _a5.arguments)) return "{}";
-            try {
-              console.log(toolCall);
-              const parsed = JSON.parse(toolCall.function.arguments);
-              return JSON.stringify(parsed, null, 2);
-            } catch {
-              return toolCall.function.arguments;
-            }
-          })()}</div>
-                            </div>
-            </div>
-                        `;
-        }
-      )}
-                      </div>
-                    ` : ""}
-                  </div>
-                </details>
-              `;
-    }
-  )}
-            `}
-          </div>
-        </details>
-
-        <!-- Events Timeline Section -->
-        ${((_d = events.events) == null ? void 0 : _d.length) ? x`
-          <details open class="section">
-            <summary class="section-header">
-              <div class="section-title">
-                Events Timeline
-                <span>(${events.events.length})</span>
-              </div>
-            </summary>
-            <div class="section-content">
-              <div class="events-timeline">
-                ${events.events.map(
-    (event, index) => x`
-                  <details open class="event-item">
-                    <summary class="event-header">
-                      <div class="event-meta">
-                        <span class="event-badge">Event ${index + 1}</span>
-                        <span class="event-type-badge">${event.event || "data"}</span>
-                        ${event.timestamp ? x`
-                          <span class="event-timestamp">${new Date(event.timestamp).toLocaleTimeString("en-US")}</span>
-                        ` : ""}
-                      </div>
-                    </summary>
-                    <div class="event-content">
-                      ${event.data ? x`
-                        <div class="json-content">
-                          ${typeof event.data === "string" ? event.data : JSON.stringify(event.data, null, 2)}
-                        </div>
-                      ` : ""}
-                    </div>
-                  </details>
-                `
-  )}
-              </div>
-            </div>
-          </details>
-        ` : ""}
+        ${renderBasicInfo(events)}
+        ${renderTokenUsage(events.usage)}
+        ${renderChoices(events.choices)}
+        ${renderEventsTimeline(events.events)}
       </div>
     </div>
   </body>
 </html>
 `;
-  };
   class LRUCache {
     constructor(capacity) {
       __publicField(this, "capacity");
@@ -3877,6 +3805,26 @@ ${text}</tr>
   const flowKV = new LRUCache(1024);
   const originalFetch = _unsafeWindow.fetch;
   let iframeElement;
+  let mutationObservers = {};
+  _GM_addStyle(`
+details.llm-better-view {
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+.llm-better-view summary {
+  font-weight: bold;
+  padding: 0.5em;
+  display: list-item;
+}
+
+details[open].llm-better-view summary {
+  border-bottom: 1px solid #aaa;
+  margin-bottom: 0.5em;
+}
+
+  `);
   listenUrlChange(async ({ uuid, action }) => {
     const flow = await getFlow(uuid);
     if (!flow) {
@@ -4038,25 +3986,52 @@ ${text}</tr>
       container = document.createElement("details");
       container.toggleAttribute("open");
       container.id = "mitmproxy-llm-better-view-container";
+      container.classList = "llm-better-view";
       contentview.insertBefore(container, secondChild);
     }
-    container.innerHTML = "";
+    let summaryElement = Array.from(container.children).find(
+      (el) => el.tagName.toLowerCase() === "summary"
+    );
+    if (!summaryElement) {
+      summaryElement = document.createElement("summary");
+      summaryElement.textContent = "LLM Better View";
+      container.prepend(summaryElement);
+    }
+    const resizeIframeContent = () => {
+      var _a2;
+      try {
+        const iframeDocument = iframeElement.contentDocument || ((_a2 = iframeElement.contentWindow) == null ? void 0 : _a2.document);
+        const height = iframeDocument == null ? void 0 : iframeDocument.documentElement.offsetHeight;
+        iframeElement.style.height = height + "px";
+      } catch (e2) {
+        console.warn(e2);
+      }
+    };
+    for (const observerId in mutationObservers) {
+      mutationObservers[observerId].disconnect();
+      delete mutationObservers[observerId];
+    }
+    if (iframeElement && container.contains(iframeElement)) {
+      container.removeChild(iframeElement);
+    }
     iframeElement = _GM_addElement(container, "iframe", {
       scrolling: "no",
       frameborder: "0",
-      style: "width: 100%; height: 100%; border: none; overflow: hidden; display: block; background: transparent;",
+      style: "width: 100%; height: 100%; border: none; overflow: hidden; display: block; background: transparent; ",
       csp: "default-src 'unsafe-eval'  'unsafe-inline' ",
       srcdoc: html2
       // src: blobUrl
     });
-    iframeElement.onload = function() {
+    iframeElement.onload = () => {
       var _a2;
-      try {
-        const iframeDocument = iframeElement.contentDocument || ((_a2 = iframeElement.contentWindow) == null ? void 0 : _a2.document);
-        const height = iframeDocument == null ? void 0 : iframeDocument.documentElement.scrollHeight;
-        iframeElement.style.height = height + "px";
-      } catch (e2) {
-        console.warn(e2);
+      resizeIframeContent();
+      const iframeDocument = iframeElement.contentDocument || ((_a2 = iframeElement.contentWindow) == null ? void 0 : _a2.document);
+      if (iframeDocument) {
+        const observer = new MutationObserver(resizeIframeContent);
+        observer.observe(iframeDocument.body, { childList: true, subtree: true, attributes: true });
+        const observerId = `${Date.now()}`;
+        iframeElement.dataset.mutationObserverId = observerId;
+        mutationObservers[observerId] = observer;
       }
     };
     container.appendChild(iframeElement);
