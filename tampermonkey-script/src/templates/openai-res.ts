@@ -1,6 +1,6 @@
 import { html } from 'lit-html'
 import { css } from './css'
-import { renderMarkdown, renderToolChoiceArgument } from './utils';
+import { renderChoiceTextContent, renderToolChoiceArgument } from './utils';
 
 // 渲染基本信息项目
 const renderInfoItem = (label: string, value: any) => {
@@ -136,7 +136,7 @@ const renderMessageContent = (content: any) => {
   return html`
     <div class="prose">
       ${typeof content === "string" ?
-      renderMarkdown(content) :
+      renderChoiceTextContent(content) :
       html`<div class="json-content">${JSON.stringify(content, null, 2)}</div>`
     }
     </div>

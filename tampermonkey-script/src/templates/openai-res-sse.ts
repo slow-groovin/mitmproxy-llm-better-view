@@ -1,6 +1,6 @@
 import { html } from "lit-html"
 import { css } from "./css"
-import { renderMarkdown, renderToolChoiceArgument } from "./utils"
+import { renderChoiceTextContent, renderToolChoiceArgument } from "./utils"
 
 // 辅助函数
 const formatTimestamp = (timestamp: number): string => {
@@ -99,7 +99,7 @@ const renderChoiceContent = (choice: any) => {
       <h4>Content:</h4>
       <div class="prose">
         ${typeof choice.content === "string"
-      ? renderMarkdown(choice.content)
+      ? renderChoiceTextContent(choice.content)
       : html`<div class="json-content">${formatJSON(choice.content)}</div>`
     }
       </div>

@@ -3191,7 +3191,15 @@ ${text}</tr>
   _Parser.parse;
   _Lexer.lex;
   function renderMarkdown(content) {
-    return content ? o(marked.parse(content.trim())) : "";
+    if (!content) {
+      return "";
+    }
+    content = content.trim();
+    let isMarkdown = content.startsWith("#") || content.startsWith("```") || content.startsWith("---");
+    if (!isMarkdown) {
+      return x`<div style="white-space: pre; font-family: monospace; overflow-x: auto;">${content}</div>`;
+    }
+    return o(marked.parse(content));
   }
   function renderToolMessage(content) {
     try {

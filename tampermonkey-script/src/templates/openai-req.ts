@@ -1,6 +1,6 @@
 import { html } from 'lit-html'
 import { css } from './css'
-import { renderMarkdown, renderToolMessage } from './utils';
+import { renderChoiceTextContent, renderToolMessage } from './utils';
 
 // 渲染基本信息项目
 const renderInfoItem = (label: string, value: any) => {
@@ -18,7 +18,7 @@ const renderMessageContent = (message: any) => {
   if (message.role === "tool") {
     return html`<div class="prose">${renderToolMessage(message.content)}</div>`;
   } else if (typeof message.content === "string") {
-    return html`<div class="prose">${renderMarkdown(message.content)}</div>`;
+    return html`<div class="prose">${renderChoiceTextContent(message.content)}</div>`;
   } else {
     return html`<div class="json-content">${JSON.stringify(message.content, null, 2)}</div>`;
   }
@@ -65,7 +65,7 @@ const renderToolContent = (tool: any, index: number) => {
 
   return html`
     ${tool.function.description ?
-      html`<div class="tool-description prose">${renderMarkdown(tool.function.description)}</div>` :
+      html`<div class="tool-description prose">${renderChoiceTextContent(tool.function.description)}</div>` :
       ''}
     ${tool.function.parameters?.properties ?
       html`

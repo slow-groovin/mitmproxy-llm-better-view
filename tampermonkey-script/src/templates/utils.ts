@@ -2,15 +2,24 @@ import { html, HTMLTemplateResult } from "lit-html";
 import { unsafeHTML } from "lit-html/directives/unsafe-html.js";
 import { marked } from "marked";
 
-export function renderMarkdown(content?: string) {
-  return content ? unsafeHTML(marked.parse(content.trim()) as string) : ''
+export function renderChoiceTextContent(content?: string) {
+  if (!content) {
+    return ''
+  }
+  content = content.trim();
+  let isMarkdown = content.startsWith('#') || content.startsWith('```') || content.startsWith('---');
+  if (!isMarkdown) {
+    return html`<div style="white-space: pre; font-family: monospace; overflow-x: auto;">${content}</div>`;
+  }
+
+  return unsafeHTML(marked.parse(content) as string)
 }
 export function renderToolMessage(content: string) {
   try {
     const toolArr = JSON.parse(content)
     const htmls = toolArr.map((toolObj: any) => {
       if (toolObj.type === 'text') {
-        return renderMarkdown(toolObj.text)
+        return renderChoiceTextContent(toolObj.text)
       }
       return html`<div  style="white-space: pre; font-family: monospace;">${content}</div>`
     })
