@@ -2,7 +2,7 @@
 // @name               mitmproxy-llm-better-view
 // @name:zh-CN         mitmproxy 大模型请求内容预览
 // @namespace          npm/vite-plugin-monkey
-// @version            0.0.6
+// @version            0.0.7
 // @description        Better view request body and response body of LLM API (openai completion) in mitmweb
 // @description:zh-CN  在 mitmweb 中查看大模型请求中的信息
 // @icon               https://s3.api2o.com/mitm-better-view.svg
@@ -3190,23 +3190,31 @@ ${text}</tr>
   marked.parseInline;
   _Parser.parse;
   _Lexer.lex;
-  function renderMarkdown(content) {
+  function renderChoiceTextContent(content) {
     if (!content) {
       return "";
     }
     content = content.trim();
-    let isMarkdown = content.startsWith("#") || content.startsWith("```") || content.startsWith("---");
-    if (!isMarkdown) {
+    let isXml = isXmlFragment(content);
+    let isMarkdown = content.startsWith("#") || content.includes("\n```") || content.includes("\n## ") || content.includes("\n# ") || content.includes("\n### ");
+    if (isXml && !isMarkdown) {
       return x`<div style="white-space: pre; font-family: monospace; overflow-x: auto;">${content}</div>`;
     }
-    return o(marked.parse(content));
+    const parsedHtml = marked.use({
+      renderer: {
+        html({ text }) {
+          return `<div style="white-space: pre; font-family: monospace; overflow-x: auto;">${text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>`;
+        }
+      }
+    }).parse(content);
+    return o(parsedHtml);
   }
   function renderToolMessage(content) {
     try {
       const toolArr = JSON.parse(content);
       const htmls = toolArr.map((toolObj) => {
         if (toolObj.type === "text") {
-          return renderMarkdown(toolObj.text);
+          return renderChoiceTextContent(toolObj.text);
         }
         return x`<div  style="white-space: pre; font-family: monospace;">${content}</div>`;
       });
@@ -3227,6 +3235,55 @@ ${text}</tr>
     (section, index, arr) => index < arr.length - 1 ? [section, x`<hr />`] : [section]
     // 最后一段后面不加
   );
+  function isXmlFragment(content) {
+    if (!content || typeof content !== "string") {
+      return false;
+    }
+    const trimmedContent = content.trim();
+    if (trimmedContent.length === 0) {
+      return false;
+    }
+    if (!trimmedContent.includes("<") || !trimmedContent.includes(">")) {
+      return false;
+    }
+    const startsWithXmlPattern = /^\s*(<\?xml|<[a-zA-Z][a-zA-Z0-9:_.-]*[\s/>])/i;
+    const hasBalancedTags = (str) => {
+      const tagPattern = /<\/?([a-zA-Z][a-zA-Z0-9:_.-]*)[^>]*>/g;
+      const matches = [...str.matchAll(tagPattern)];
+      if (matches.length === 0) {
+        return false;
+      }
+      const openTags = [];
+      for (const match of matches) {
+        const fullTag = match[0];
+        const tagName = match[1];
+        if (fullTag.endsWith("/>")) {
+          continue;
+        }
+        if (fullTag.startsWith("</")) {
+          if (openTags.length === 0 || openTags.pop() !== tagName) {
+            return false;
+          }
+        } else {
+          openTags.push(tagName);
+        }
+      }
+      return true;
+    };
+    const hasXmlFeatures = (str) => {
+      const hasAttributes = /\s+[a-zA-Z][a-zA-Z0-9:_.-]*\s*=\s*(['"]).*?\1/.test(str);
+      const hasSelfClosingTags = /<[^>]+\/\s*>/.test(str);
+      const hasCData = /<!\[CDATA\[.*?\]\]>/.test(str);
+      const hasComments = /<!--.*?-->/.test(str);
+      const hasEntityRef = /&[a-zA-Z0-9#]+;/.test(str);
+      return hasAttributes || hasSelfClosingTags || hasCData || hasComments || hasEntityRef;
+    };
+    const hasNestedStructure = /<[^>]*>[^<>]*<[^>]*>/.test(trimmedContent);
+    const isStartingWithXml = startsWithXmlPattern.test(trimmedContent);
+    const hasBalanced = hasBalancedTags(trimmedContent);
+    const hasFeatures = hasXmlFeatures(trimmedContent);
+    return isStartingWithXml || hasBalanced && (hasFeatures || hasNestedStructure);
+  }
   const renderInfoItem$2 = (label, value) => {
     if (value === void 0) return "";
     return x`
@@ -3240,7 +3297,7 @@ ${text}</tr>
     if (message.role === "tool") {
       return x`<div class="prose">${renderToolMessage(message.content)}</div>`;
     } else if (typeof message.content === "string") {
-      return x`<div class="prose">${renderMarkdown(message.content)}</div>`;
+      return x`<div class="prose">${renderChoiceTextContent(message.content)}</div>`;
     } else {
       return x`<div class="json-content">${JSON.stringify(message.content, null, 2)}</div>`;
     }
@@ -3280,7 +3337,7 @@ ${text}</tr>
       return x`<div class="json-content">${JSON.stringify(tool, null, 2)}</div>`;
     }
     return x`
-    ${tool.function.description ? x`<div class="tool-description prose">${renderMarkdown(tool.function.description)}</div>` : ""}
+    ${tool.function.description ? x`<div class="tool-description prose">${renderChoiceTextContent(tool.function.description)}</div>` : ""}
     ${((_a2 = tool.function.parameters) == null ? void 0 : _a2.properties) ? x`
         <div class="tool-parameters">
           <div class="tool-parameters-title">parameters:</div>
@@ -3490,7 +3547,7 @@ ${text}</tr>
     if (!content) return "";
     return x`
     <div class="prose">
-      ${typeof content === "string" ? renderMarkdown(content) : x`<div class="json-content">${JSON.stringify(content, null, 2)}</div>`}
+      ${typeof content === "string" ? renderChoiceTextContent(content) : x`<div class="json-content">${JSON.stringify(content, null, 2)}</div>`}
     </div>
   `;
   };
@@ -3651,7 +3708,7 @@ ${text}</tr>
     <div class="content-section">
       <h4>Content:</h4>
       <div class="prose">
-        ${typeof choice.content === "string" ? renderMarkdown(choice.content) : x`<div class="json-content">${formatJSON(choice.content)}</div>`}
+        ${typeof choice.content === "string" ? renderChoiceTextContent(choice.content) : x`<div class="json-content">${formatJSON(choice.content)}</div>`}
       </div>
     </div>
   ` : "";
