@@ -3399,6 +3399,19 @@ ${text}</tr>
     </details>
   `;
   };
+  const renderPrompt = (prompt) => {
+    if (!prompt) return "";
+    return x`
+    <details open class="section">
+      <summary class="section-header">
+        <span class="section-title">Prompt</span>
+      </summary>
+      <div class="section-content">
+        <div class="message-content">${renderChoiceTextContent(prompt)}</div>
+      </div>
+    </details>
+  `;
+  };
   const renderTools = (tools = []) => {
     if (tools.length === 0) return "";
     return x`
@@ -3431,7 +3444,8 @@ ${text}</tr>
       </div>
 
       ${renderBasicInfo$2(obj)}
-      ${renderMessages(obj.messages)}
+      ${obj.messages ? renderMessages(obj.messages) : ""}
+      ${obj.prompt ? renderPrompt(obj.prompt) : ""}
       ${renderTools(obj.tools)}
     </div>
   </body>
@@ -4006,7 +4020,7 @@ details[open].llm-better-view summary {
     window.addEventListener("popstate", onUrlChange);
   }
   function isOpenaiFlow(flow) {
-    return flow.request.path.endsWith("chat/completions");
+    return flow.request.path.endsWith("/completions");
   }
   async function getFlow(uuid) {
     const cacheKey = `mitmproxy-flow-${uuid}`;
@@ -4034,7 +4048,7 @@ details[open].llm-better-view summary {
     return targetFlow;
   }
   function isLLMRequest(parsedObj) {
-    return !!parsedObj && !!parsedObj["messages"] && !!parsedObj["model"];
+    return !!parsedObj && (!!parsedObj["messages"] || !!parsedObj["prompt"]) && !!parsedObj["model"];
   }
   function isLLMResponse(parsedObj) {
     return !!parsedObj && !!parsedObj["choices"] && !!parsedObj["model"];

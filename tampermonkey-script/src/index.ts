@@ -224,7 +224,7 @@ async function listenUrlChange(hook?: (flow: CallAction) => void) {
  * @param flow Flow object
  */
 function isOpenaiFlow(flow: Flow): boolean {
-  return flow.request.path.endsWith('chat/completions')
+  return flow.request.path.endsWith('/completions')
 
 }
 /**
@@ -267,7 +267,7 @@ async function getFlow(uuid: string): Promise<Flow | null> {
  * @param parsedObj Request body object
  */
 function isLLMRequest(parsedObj: any): boolean {
-  return (!!parsedObj) && (!!parsedObj['messages']) && (!!parsedObj['model'])
+  return (!!parsedObj) && (!!parsedObj['messages'] || !!parsedObj['prompt']) && (!!parsedObj['model'])
 }
 
 /**

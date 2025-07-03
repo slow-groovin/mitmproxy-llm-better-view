@@ -139,6 +139,22 @@ const renderMessages = (messages = []) => {
   `;
 };
 
+// 渲染prompt字符串
+const renderPrompt = (prompt: string) => {
+  if (!prompt) return '';
+
+  return html`
+    <details open class="section">
+      <summary class="section-header">
+        <span class="section-title">Prompt</span>
+      </summary>
+      <div class="section-content">
+        <div class="message-content">${renderChoiceTextContent(prompt)}</div>
+      </div>
+    </details>
+  `;
+};
+
 // 渲染工具区域
 const renderTools = (tools = []) => {
   if (tools.length === 0) return '';
@@ -174,7 +190,8 @@ export const openai_req_template = (obj: any) => html`<!DOCTYPE html>
       </div>
 
       ${renderBasicInfo(obj)}
-      ${renderMessages(obj.messages)}
+      ${obj.messages ? renderMessages(obj.messages) : ''}
+      ${obj.prompt ? renderPrompt(obj.prompt) : ''}
       ${renderTools(obj.tools)}
     </div>
   </body>
