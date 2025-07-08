@@ -44,6 +44,16 @@ export function renderToolMessage(content: string) {
 }
 
 export function renderToolChoiceArgument(_arguments: string) {
+  /*
+   * 如果已经是object, 直接返回
+   */
+  if (typeof _arguments === 'object') {
+    return html`<div class="json-content"><pre>${JSON.stringify(_arguments, null, 2)}</pre></div>`
+
+  }
+  /*
+   * 尝试解析为object
+   */
   try {
     const toolObj = JSON.parse(_arguments)
     return html`<div class="json-content"><pre>${JSON.stringify(toolObj, null, 2)}</pre></div>`

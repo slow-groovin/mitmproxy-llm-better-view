@@ -3224,6 +3224,9 @@ ${text}</tr>
     return x`<div  style="white-space: pre; font-family: monospace;">${content}</div>`;
   }
   function renderToolChoiceArgument(_arguments) {
+    if (typeof _arguments === "object") {
+      return x`<div class="json-content"><pre>${JSON.stringify(_arguments, null, 2)}</pre></div>`;
+    }
     try {
       const toolObj = JSON.parse(_arguments);
       return x`<div class="json-content"><pre>${JSON.stringify(toolObj, null, 2)}</pre></div>`;
