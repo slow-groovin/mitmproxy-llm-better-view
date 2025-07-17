@@ -2,7 +2,7 @@
 // @name               mitmproxy-llm-better-view
 // @name:zh-CN         mitmproxy 大模型请求内容预览
 // @namespace          npm/vite-plugin-monkey
-// @version            0.0.8
+// @version            0.0.9
 // @description        Better view request body and response body of LLM API (openai completion) in mitmweb
 // @description:zh-CN  在 mitmweb 中查看大模型请求中的信息
 // @icon               https://s3.api2o.com/mitm-better-view.svg
@@ -43,7 +43,7 @@
     for (let i3 = 0; i3 < s2; i3++) {
       const s3 = t2[i3];
       let a2, u2, d2 = -1, y2 = 0;
-      for (; y2 < s3.length && (c2.lastIndex = y2, u2 = c2.exec(s3), null !== u2); ) y2 = c2.lastIndex, c2 === f ? "!--" === u2[1] ? c2 = v : void 0 !== u2[1] ? c2 = _ : void 0 !== u2[2] ? ($.test(u2[2]) && (r2 = RegExp("</" + u2[2], "g")), c2 = m) : void 0 !== u2[3] && (c2 = m) : c2 === m ? ">" === u2[0] ? (c2 = r2 ?? f, d2 = -1) : void 0 === u2[1] ? d2 = -2 : (d2 = c2.lastIndex - u2[2].length, a2 = u2[1], c2 = void 0 === u2[3] ? m : '"' === u2[3] ? g : p) : c2 === g || c2 === p ? c2 = m : c2 === v || c2 === _ ? c2 = f : (c2 = m, r2 = void 0);
+      for (; y2 < s3.length && (c2.lastIndex = y2, u2 = c2.exec(s3), null !== u2);) y2 = c2.lastIndex, c2 === f ? "!--" === u2[1] ? c2 = v : void 0 !== u2[1] ? c2 = _ : void 0 !== u2[2] ? ($.test(u2[2]) && (r2 = RegExp("</" + u2[2], "g")), c2 = m) : void 0 !== u2[3] && (c2 = m) : c2 === m ? ">" === u2[0] ? (c2 = r2 ?? f, d2 = -1) : void 0 === u2[1] ? d2 = -2 : (d2 = c2.lastIndex - u2[2].length, a2 = u2[1], c2 = void 0 === u2[3] ? m : '"' === u2[3] ? g : p) : c2 === g || c2 === p ? c2 = m : c2 === v || c2 === _ ? c2 = f : (c2 = m, r2 = void 0);
       const x2 = c2 === m && t2[i3 + 1].startsWith("/>") ? " " : "";
       l2 += c2 === f ? s3 + n : d2 >= 0 ? (o2.push(a2), s3.slice(0, d2) + e$2 + s3.slice(d2) + h + x2) : s3 + h + (-2 === d2 ? i3 : x2);
     }
@@ -59,7 +59,7 @@
         const t3 = this.el.content.firstChild;
         t3.replaceWith(...t3.childNodes);
       }
-      for (; null !== (r2 = C.nextNode()) && d2.length < u2; ) {
+      for (; null !== (r2 = C.nextNode()) && d2.length < u2;) {
         if (1 === r2.nodeType) {
           if (r2.hasAttributes()) for (const t3 of r2.getAttributeNames()) if (t3.endsWith(e$2)) {
             const i2 = v2[a2++], s3 = r2.getAttribute(t3).split(h), e2 = /([.?@])?(.*)/.exec(i2);
@@ -76,7 +76,7 @@
         } else if (8 === r2.nodeType) if (r2.data === o$1) d2.push({ type: 2, index: c2 });
         else {
           let t3 = -1;
-          for (; -1 !== (t3 = r2.data.indexOf(h, t3 + 1)); ) d2.push({ type: 7, index: c2 }), t3 += h.length - 1;
+          for (; -1 !== (t3 = r2.data.indexOf(h, t3 + 1));) d2.push({ type: 7, index: c2 }), t3 += h.length - 1;
         }
         c2++;
       }
@@ -107,7 +107,7 @@
       const { el: { content: i2 }, parts: s2 } = this._$AD, e2 = ((t2 == null ? void 0 : t2.creationScope) ?? r).importNode(i2, true);
       C.currentNode = e2;
       let h2 = C.nextNode(), o2 = 0, n2 = 0, l2 = s2[0];
-      for (; void 0 !== l2; ) {
+      for (; void 0 !== l2;) {
         if (o2 === l2.index) {
           let i3;
           2 === l2.type ? i3 = new R(h2, h2.nextSibling, this, t2) : 1 === l2.type ? i3 = new l2.ctor(h2, l2.name, l2.strings, this, t2) : 6 === l2.type && (i3 = new z(h2, this, t2)), this._$AV.push(i3), l2 = s2[++n2];
@@ -174,7 +174,7 @@
     }
     _$AR(t2 = this._$AA.nextSibling, i2) {
       var _a2;
-      for ((_a2 = this._$AP) == null ? void 0 : _a2.call(this, false, true, i2); t2 && t2 !== this._$AB; ) {
+      for ((_a2 = this._$AP) == null ? void 0 : _a2.call(this, false, true, i2); t2 && t2 !== this._$AB;) {
         const i3 = t2.nextSibling;
         t2.remove(), t2 = i3;
       }
@@ -2950,7 +2950,7 @@ ${text}</tr>
             if ("renderer" in ext) {
               const prevRenderer = extensions.renderers[ext.name];
               if (prevRenderer) {
-                extensions.renderers[ext.name] = function(...args2) {
+                extensions.renderers[ext.name] = function (...args2) {
                   let ret = ext.renderer.apply(this, args2);
                   if (ret === false) {
                     ret = prevRenderer.apply(this, args2);
@@ -3074,7 +3074,7 @@ ${text}</tr>
         if (pack.walkTokens) {
           const walkTokens2 = this.defaults.walkTokens;
           const packWalktokens = pack.walkTokens;
-          opts.walkTokens = function(token) {
+          opts.walkTokens = function (token) {
             let values = [];
             values.push(packWalktokens.call(this, token));
             if (walkTokens2) {
@@ -3163,7 +3163,7 @@ ${text}</tr>
   function marked(src, opt) {
     return markedInstance.parse(src, opt);
   }
-  marked.options = marked.setOptions = function(options2) {
+  marked.options = marked.setOptions = function (options2) {
     markedInstance.setOptions(options2);
     marked.defaults = markedInstance.defaults;
     changeDefaults(marked.defaults);
@@ -3171,13 +3171,13 @@ ${text}</tr>
   };
   marked.getDefaults = _getDefaults;
   marked.defaults = _defaults;
-  marked.use = function(...args) {
+  marked.use = function (...args) {
     markedInstance.use(...args);
     marked.defaults = markedInstance.defaults;
     changeDefaults(marked.defaults);
     return marked;
   };
-  marked.walkTokens = function(tokens, callback) {
+  marked.walkTokens = function (tokens, callback) {
     return markedInstance.walkTokens(tokens, callback);
   };
   marked.parseInline = markedInstance.parseInline;
@@ -3368,8 +3368,8 @@ ${text}</tr>
         <div class="tool-parameters">
           <div class="tool-parameters-title">parameters:</div>
           ${Object.entries(tool.function.parameters.properties).map(
-    ([name, param]) => renderParameterItem(name, param, tool.function.parameters.required || [])
-  )}
+      ([name, param]) => renderParameterItem(name, param, tool.function.parameters.required || [])
+    )}
         </div>
       ` : ""}
   `;
@@ -4034,12 +4034,12 @@ details[open].llm-better-view summary {
       }
     }
     const originalPushState = history.pushState;
-    history.pushState = function(...args) {
+    history.pushState = function (...args) {
       originalPushState.apply(this, args);
       onUrlChange();
     };
     const originalReplaceState = history.replaceState;
-    history.replaceState = function(...args) {
+    history.replaceState = function (...args) {
       originalReplaceState.apply(this, args);
       onUrlChange();
     };
