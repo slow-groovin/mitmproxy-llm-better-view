@@ -670,6 +670,13 @@ export const css = html`<style>
         padding: 12px;
       }
 
+      [data-content-type="anthropic"]{
+        margin-bottom: 12px;
+        padding: 2px;
+        border-radius: 8px;
+        border: #d1701452 solid 1px;
+      }
+
       
     }
     </style>`

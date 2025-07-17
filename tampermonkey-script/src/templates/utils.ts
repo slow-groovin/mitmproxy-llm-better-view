@@ -9,15 +9,15 @@ export function renderChoiceTextContent(content?: string) {
   content = content.trim();
 
   let isXml = isXmlFragment(content);
-  let isMarkdown = content.startsWith('#') || content.includes('\n```') || content.includes('\n## ') || content.includes('\n# ') || content.includes('\n### ');
+  let isMarkdown = content.startsWith('#') || content.includes('\n```') || content.includes('\n# ') || content.includes('\n## ') || content.includes('\n# ') || content.includes('\n### ') || content.includes('\n1. ') || content.includes('\n- ');
   if (isXml && !isMarkdown) {
-    return html`<div style="white-space: pre; font-family: monospace; overflow-x: auto;">${content}</div>`;
+    return html`<div data-format='xml' style="white-space: pre; font-family: monospace; overflow-x: auto;">${content}</div>`;
   }
 
   const parsedHtml = marked.use({
     renderer: {
       html({ text }) {
-        return `<div style="white-space: pre; font-family: monospace; overflow-x: auto;">${text.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
+        return `<div data-format='markdown-html' style="white-space: pre; font-family: monospace; overflow-x: auto;">${text.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
       }
     }
   }).parse(content) as string

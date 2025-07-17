@@ -2,7 +2,7 @@
 // @name               mitmproxy-llm-better-view
 // @name:zh-CN         mitmproxy 大模型请求内容预览
 // @namespace          npm/vite-plugin-monkey
-// @version            0.0.7
+// @version            0.0.8
 // @description        Better view request body and response body of LLM API (openai completion) in mitmweb
 // @description:zh-CN  在 mitmweb 中查看大模型请求中的信息
 // @icon               https://s3.api2o.com/mitm-better-view.svg
@@ -1001,6 +1001,13 @@
 
       .event-content {
         padding: 12px;
+      }
+
+      [data-content-type="anthropic"]{
+        margin-bottom: 12px;
+        padding: 2px;
+        border-radius: 8px;
+        border: #d1701452 solid 1px;
       }
 
       
@@ -3196,14 +3203,14 @@ ${text}</tr>
     }
     content = content.trim();
     let isXml = isXmlFragment(content);
-    let isMarkdown = content.startsWith("#") || content.includes("\n```") || content.includes("\n## ") || content.includes("\n# ") || content.includes("\n### ");
+    let isMarkdown = content.startsWith("#") || content.includes("\n```") || content.includes("\n# ") || content.includes("\n## ") || content.includes("\n# ") || content.includes("\n### ") || content.includes("\n1. ") || content.includes("\n- ");
     if (isXml && !isMarkdown) {
-      return x`<div style="white-space: pre; font-family: monospace; overflow-x: auto;">${content}</div>`;
+      return x`<div data-format='xml' style="white-space: pre; font-family: monospace; overflow-x: auto;">${content}</div>`;
     }
     const parsedHtml = marked.use({
       renderer: {
         html({ text }) {
-          return `<div style="white-space: pre; font-family: monospace; overflow-x: auto;">${text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>`;
+          return `<div data-format='markdown-html' style="white-space: pre; font-family: monospace; overflow-x: auto;">${text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>`;
         }
       }
     }).parse(content);
@@ -3298,13 +3305,29 @@ ${text}</tr>
   };
   const renderMessageContent$1 = (message) => {
     if (message.role === "tool") {
-      return x`<div class="prose">${renderToolMessage(message.content)}</div>`;
+      return x`<div class="prose" data-type="tool">${renderToolMessage(message.content)}</div>`;
     } else if (typeof message.content === "string") {
-      return x`<div class="prose">${renderChoiceTextContent(message.content)}</div>`;
+      return x`<div class="prose" data-format="string">${renderChoiceTextContent(message.content)}</div>`;
+    } else if (Array.isArray(message.content)) {
+      return x`<div data-format="array">${message.content.map((item) => renderMessageContent$1(item))}</div> `;
+    } else if (isAnthropicContent(message)) {
+      return renderAnthropicContent(message);
     } else {
-      return x`<div class="json-content">${JSON.stringify(message.content, null, 2)}</div>`;
+      return x`<div class="json-content" data-format="object">${JSON.stringify(message.content, null, 2)}</div>`;
     }
   };
+  function isAnthropicContent(content) {
+    if (content.type && typeof content.type === "string") {
+      return true;
+    }
+  }
+  function renderAnthropicContent(content) {
+    if (content.type === "text") {
+      return x`<div class="prose" data-format="string" data-content-type="anthropic">${renderChoiceTextContent(content.text)}</div>`;
+    } else {
+      return x`<div class="json-content" data-format="object" data-content-type="anthropic">${JSON.stringify(content, null, 2)}</div>`;
+    }
+  }
   const renderMessage = (message, index) => {
     const roleClass = `role-${message.role}`;
     return x`

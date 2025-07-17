@@ -16,13 +16,33 @@ const renderInfoItem = (label: string, value: any) => {
 // 渲染消息内容
 const renderMessageContent = (message: any) => {
   if (message.role === "tool") {
-    return html`<div class="prose">${renderToolMessage(message.content)}</div>`;
+    return html`<div class="prose" data-type="tool">${renderToolMessage(message.content)}</div>`;
   } else if (typeof message.content === "string") {
-    return html`<div class="prose">${renderChoiceTextContent(message.content)}</div>`;
-  } else {
-    return html`<div class="json-content">${JSON.stringify(message.content, null, 2)}</div>`;
+    return html`<div class="prose" data-format="string">${renderChoiceTextContent(message.content)}</div>`;
+  } else if (Array.isArray(message.content)) {
+    return html`<div data-format="array">${message.content.map((item: any) => renderMessageContent(item))}</div> `
+  } else if (isAnthropicContent(message)) {
+    return renderAnthropicContent(message)
+  }
+  else {
+    return html`<div class="json-content" data-format="object">${JSON.stringify(message.content, null, 2)}</div>`;
   }
 };
+
+
+function isAnthropicContent(content: any) {
+  if (content.type && typeof content.type === 'string') {
+    return true
+  }
+}
+function renderAnthropicContent(content: any) {
+  if (content.type === 'text') {
+    return html`<div class="prose" data-format="string" data-content-type="anthropic">${renderChoiceTextContent(content.text)}</div>`;
+  } else {
+    return html`<div class="json-content" data-format="object" data-content-type="anthropic">${JSON.stringify(content, null, 2)}</div>`;
+  }
+}
+
 
 // 渲染单个消息
 const renderMessage = (message: any, index: number) => {
