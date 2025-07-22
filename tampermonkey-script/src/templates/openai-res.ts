@@ -130,7 +130,7 @@ const renderChoiceMeta = (choice: any) => {
 };
 
 // 渲染消息内容
-const renderMessageContent = (content: any) => {
+const renderChoiceMessageContent = (content: any) => {
   if (!content) return '';
 
   return html`
@@ -170,7 +170,7 @@ const renderChoice = (choice: any, index: number) => {
       </summary>
       <div class="choice-content">
         ${renderChoiceMeta(choice)}
-        ${renderMessageContent(choice.message?.content)}
+        ${renderChoiceMessageContent(choice.message?.content)}
         ${renderToolCalls(choice.message?.tool_calls)}
         ${renderLogProbs(choice.logprobs)}
       </div>

@@ -3,12 +3,18 @@ import { unsafeHTML } from "lit-html/directives/unsafe-html.js";
 import { marked } from "marked";
 
 export function renderChoiceTextContent(content?: string) {
+  console.log('content', content)
   if (!content) {
     return ''
   }
   content = content.trim();
+  let _isJSON = isJSON(content);
+  if (_isJSON) {
+    return html`<div data-format='text-as-json' style="white-space: pre; font-family: monospace; overflow-x: auto;"><pre>${JSON.stringify(JSON.parse(content), null, 2)}</pre></div>`;
+  }
 
   let isXml = isXmlFragment(content);
+
   let isMarkdown = content.startsWith('#') || content.includes('\n```') || content.includes('\n# ') || content.includes('\n## ') || content.includes('\n# ') || content.includes('\n### ') || content.includes('\n1. ') || content.includes('\n- ');
   if (isXml && !isMarkdown) {
     return html`<div data-format='xml' style="white-space: pre; font-family: monospace; overflow-x: auto;">${content}</div>`;
@@ -172,4 +178,13 @@ function isXmlFragment(content: string): boolean {
   const hasFeatures = hasXmlFeatures(trimmedContent);
 
   return isStartingWithXml || (hasBalanced && (hasFeatures || hasNestedStructure));
+}
+
+function isJSON(content: string): boolean {
+  try {
+    JSON.parse(content);
+    return true;
+  } catch (e) {
+    return false;
+  }
 }
