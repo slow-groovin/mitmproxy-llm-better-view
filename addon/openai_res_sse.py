@@ -112,6 +112,7 @@ def handle_sse_choices(events: List[Dict[str, Any]]) -> str:
     # {
     #   choice_index: {
     #     "content": "...",
+    #     "reasoning": "...",
     #     "tool_calls": { tool_call_index: { ... } },
     #     "finish_reason": "...",
     #     "role": "..."
@@ -128,6 +129,7 @@ def handle_sse_choices(events: List[Dict[str, Any]]) -> str:
             if choice_index not in aggregated_choices:
                 aggregated_choices[choice_index] = {
                     "content": "",
+                    "reasoning": "",
                     "tool_calls": {},
                     "finish_reason": "N/A",
                     "role": "N/A",
@@ -142,6 +144,11 @@ def handle_sse_choices(events: List[Dict[str, Any]]) -> str:
             # 聚合内容 (stop)
             if delta.get("content"):
                 current_choice["content"] += delta.get("content")
+
+            # 聚合推理内容 (reasoning or reasoning_content)
+            reasoning = delta.get("reasoning") or delta.get("reasoning_content")
+            if reasoning:
+                current_choice["reasoning"] += reasoning
 
             # 聚合工具调用 (tool_calls)
             if delta.get("tool_calls"):
@@ -189,9 +196,17 @@ def handle_sse_choices(events: List[Dict[str, Any]]) -> str:
 
         choices_result += f"### 📋Choice {index}   [finish_reason: `{finish_reason}`, role:`{role}`]\n"
 
+        # 显示聚合的推理内容
+        reasoning = choice_data.get("reasoning", "").strip()
+        if reasoning:
+            choices_result += f"#### 🧠 Reasoning\n"
+            choices_result += f"{split_line}{indent_text(reasoning, 4)}{split_line}"
+
         # 显示聚合的文本内容
+        
         content = choice_data.get("content", "").strip()
         if content:
+            choices_result += f"#### ✏️ Content\n"
             choices_result += f"{split_line}{indent_text(content, 4)}{split_line}"
 
         # 显示聚合的工具调用

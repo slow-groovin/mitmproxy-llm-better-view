@@ -71,7 +71,16 @@ def handle_response_choices(choices: List[Any]) -> str:
         content = message.get("content", "N/A")
 
         choices_result += f"### 📋Choice {index}   [finish_reason: `{finish_reason}`, role:`{role}`]\n"
-        choices_result += f"{split_line}{content}{split_line}"
+        
+        # 处理推理内容（reasoning content）
+        reasoning = message.get("reasoning") or message.get("reasoning_content")
+        if reasoning:
+            choices_result += f"#### 🧠 Reasoning\n"
+            choices_result += f"{split_line}{indent_text(reasoning, 4)}{split_line}"
+        
+        choices_result += f"#### ✏️ Content\n"
+        # 处理常规内容
+        choices_result += f"{split_line}{indent_text(content, 4)}{split_line}"
 
         # 处理工具调用，如果有的话
         tool_calls = message.get("tool_calls", [])
