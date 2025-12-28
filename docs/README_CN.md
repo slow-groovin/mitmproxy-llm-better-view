@@ -20,60 +20,21 @@ git clone https://github.com/slow-groovin/mitmproxy-llm-better-view.git
 
 在 `~/.mitmproxy/config.yaml` 中添加持久化配置：
 
-#### 对于 OpenAI Chat Completions API：
 ```yaml
 # ... 你的其他配置
 scripts:
-  - <目录路径>/addon/openai_req.py
-  - <目录路径>/addon/openai_res.py
-  - <目录路径>/addon/openai_res_sse.py
-```
-
-#### 对于 Anthropic Messages API：
-```yaml
-# ... 你的其他配置
-scripts:
-  - <目录路径>/addon/anthropic_req.py
-  - <目录路径>/addon/anthropic_res.py
-  - <目录路径>/addon/anthropic_res_sse.py
-```
-
-#### 对于 OpenAI Responses API：
-```yaml
-# ... 你的其他配置
-scripts:
-  - <目录路径>/addon/openai_responses_req.py
-  - <目录路径>/addon/openai_responses_res.py
-```
-
-#### 同时加载所有 API：
-```yaml
-# ... 你的其他配置
-scripts:
-  # OpenAI Chat Completions
-  - <目录路径>/addon/openai_req.py
-  - <目录路径>/addon/openai_res.py
-  - <目录路径>/addon/openai_res_sse.py
-  # Anthropic Messages
-  - <目录路径>/addon/anthropic_req.py
-  - <目录路径>/addon/anthropic_res.py
-  - <目录路径>/addon/anthropic_res_sse.py
-  # OpenAI Responses
-  - <目录路径>/addon/openai_responses_req.py
-  - <目录路径>/addon/openai_responses_res.py
+  - <目录路径>/addon/llm_views.py
 ```
 
 > 你也可以在启动时通过 `-s` 参数指定脚本：
 > ```bash
-> # OpenAI Chat Completions
-> mitmweb -s ./addon/openai_req.py -s ./addon/openai_res.py -s ./addon/openai_res_sse.py
-> 
-> # Anthropic Messages
-> mitmweb -s ./addon/anthropic_req.py -s ./addon/anthropic_res.py -s ./addon/anthropic_res_sse.py
-> 
-> # OpenAI Responses
-> mitmweb -s ./addon/openai_responses_req.py -s ./addon/openai_responses_res.py
+> mitmweb -s ./addon/llm_views.py
 > ```
+
+**注意：** 单个 `llm_views.py` 文件自动处理所有支持的 LLM API：
+- OpenAI Chat Completions（流式和非流式）
+- OpenAI Responses API（流式和非流式）
+- Anthropic Messages API（流式和非流式）
 
 ### 方式2：Tampermonkey 脚本
 
@@ -89,7 +50,7 @@ https://greasyfork.org/scripts/540917-mitmproxy-llm-better-view
 #### 支持的 API：
 - **OpenAI Chat Completions API** (`/v1/chat/completions`)：完全支持流式和非流式请求
 - **Anthropic Messages API** (`/v1/messages`)：完全支持流式和非流式请求，包括工具使用
-- **OpenAI Responses API** (`/v1/responses`)：支持带有 JSON schema 的结构化输出
+- **OpenAI Responses API** (`/v1/responses`)：支持带有 JSON schema 的结构化输出，**包括流式（SSE）支持**
 
 ### 方式2：Tampermonkey 脚本
 
@@ -112,6 +73,7 @@ https://greasyfork.org/scripts/540917-mitmproxy-llm-better-view
 
 ### OpenAI Responses API 支持
 - 请求体解析，包括结构化输入和响应格式 schema
-- 结构化输出的响应解析
+- 结构化输出的响应解析（流式和非流式）
 - JSON schema 验证支持
 - Token 使用情况跟踪
+- **完整的 SSE 流式支持**，实现实时结构化输出传输

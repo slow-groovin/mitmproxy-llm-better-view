@@ -200,47 +200,38 @@ The OpenAI Responses API is designed for structured outputs with strict JSON sch
 
 ## Configuration
 
-To use these addons with mitmproxy, add them to your config:
+To use this addon with mitmproxy, add it to your config:
 
 ```yaml
 # ~/.mitmproxy/config.yaml
 scripts:
-  # OpenAI Chat Completions (existing)
-  - /path/to/addon/openai_req.py
-  - /path/to/addon/openai_res.py
-  - /path/to/addon/openai_res_sse.py
-  
-  # Anthropic Messages (new)
-  - /path/to/addon/anthropic_req.py
-  - /path/to/addon/anthropic_res.py
-  - /path/to/addon/anthropic_res_sse.py
-  
-  # OpenAI Responses (new)
-  - /path/to/addon/openai_responses_req.py
-  - /path/to/addon/openai_responses_res.py
+  - /path/to/addon/llm_views.py
 ```
 
-Or launch mitmweb with specific addons:
+Or launch mitmweb with the addon:
 
 ```bash
-# For Anthropic only
-mitmweb -s ./addon/anthropic_req.py -s ./addon/anthropic_res.py -s ./addon/anthropic_res_sse.py
-
-# For OpenAI Responses only
-mitmweb -s ./addon/openai_responses_req.py -s ./addon/openai_responses_res.py
-
-# For all APIs
-mitmweb -s ./addon/openai_req.py -s ./addon/openai_res.py -s ./addon/openai_res_sse.py \
-        -s ./addon/anthropic_req.py -s ./addon/anthropic_res.py -s ./addon/anthropic_res_sse.py \
-        -s ./addon/openai_responses_req.py -s ./addon/openai_responses_res.py
+mitmweb -s ./addon/llm_views.py
 ```
+
+**Note:** The single `llm_views.py` file automatically handles all supported LLM APIs - no need to load multiple files!
 
 ## API Detection
 
-The addons automatically detect which API is being used based on:
+The addon automatically detects which API is being used based on:
 
 - **Anthropic Messages API**: URL path contains `/messages` and host contains `anthropic`
 - **OpenAI Responses API**: URL path contains `/responses` or `/v1/responses`
 - **OpenAI Chat Completions API**: URL path ends with `/completions`
 
-This means you can load all addons at once, and they will only activate for their respective APIs.
+The addon intelligently routes requests and responses to the appropriate handler based on these patterns.
+
+## Streaming Support
+
+All three APIs support Server-Sent Events (SSE) streaming:
+
+- **OpenAI Chat Completions**: Aggregates delta content and tool calls
+- **Anthropic Messages**: Aggregates content blocks and tool use
+- **OpenAI Responses**: Aggregates structured output chunks (newly added!)
+
+The addon automatically detects streaming responses by checking for `text/event-stream` content type.

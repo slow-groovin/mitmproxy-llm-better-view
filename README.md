@@ -20,60 +20,21 @@ git clone https://github.com/slow-groovin/mitmproxy-llm-better-view.git
 
 Add persistent configuration in `~/.mitmproxy/config.yaml`:
 
-#### For OpenAI Chat Completions API:
 ```yaml
 # ... your other configs
 scripts:
-  - <dir path>/addon/openai_req.py
-  - <dir path>/addon/openai_res.py
-  - <dir path>/addon/openai_res_sse.py
+  - <dir path>/addon/llm_views.py
 ```
 
-#### For Anthropic Messages API:
-```yaml
-# ... your other configs
-scripts:
-  - <dir path>/addon/anthropic_req.py
-  - <dir path>/addon/anthropic_res.py
-  - <dir path>/addon/anthropic_res_sse.py
-```
-
-#### For OpenAI Responses API:
-```yaml
-# ... your other configs
-scripts:
-  - <dir path>/addon/openai_responses_req.py
-  - <dir path>/addon/openai_responses_res.py
-```
-
-#### Load all APIs at once:
-```yaml
-# ... your other configs
-scripts:
-  # OpenAI Chat Completions
-  - <dir path>/addon/openai_req.py
-  - <dir path>/addon/openai_res.py
-  - <dir path>/addon/openai_res_sse.py
-  # Anthropic Messages
-  - <dir path>/addon/anthropic_req.py
-  - <dir path>/addon/anthropic_res.py
-  - <dir path>/addon/anthropic_res_sse.py
-  # OpenAI Responses
-  - <dir path>/addon/openai_responses_req.py
-  - <dir path>/addon/openai_responses_res.py
-```
-
-> You can also specify the scripts at launch using the `-s` parameter:
+> You can also specify the script at launch using the `-s` parameter:
 > ```bash
-> # OpenAI Chat Completions
-> mitmweb -s ./addon/openai_req.py -s ./addon/openai_res.py -s ./addon/openai_res_sse.py
-> 
-> # Anthropic Messages
-> mitmweb -s ./addon/anthropic_req.py -s ./addon/anthropic_res.py -s ./addon/anthropic_res_sse.py
-> 
-> # OpenAI Responses
-> mitmweb -s ./addon/openai_responses_req.py -s ./addon/openai_responses_res.py
+> mitmweb -s ./addon/llm_views.py
 > ```
+
+**Note:** The single `llm_views.py` file automatically handles all supported LLM APIs:
+- OpenAI Chat Completions (streaming & non-streaming)
+- OpenAI Responses API (streaming & non-streaming)
+- Anthropic Messages API (streaming & non-streaming)
 
 ### Method 2: Tampermonkey script
 
@@ -89,7 +50,7 @@ This uses mitmproxy's [contentviews](https://docs.mitmproxy.org/stable/addons/co
 #### Supported APIs:
 - **OpenAI Chat Completions API** (`/v1/chat/completions`): Full support for streaming and non-streaming requests
 - **Anthropic Messages API** (`/v1/messages`): Full support for streaming and non-streaming requests, including tool use
-- **OpenAI Responses API** (`/v1/responses`): Support for structured outputs with JSON schemas
+- **OpenAI Responses API** (`/v1/responses`): Support for structured outputs with JSON schemas, **including streaming (SSE) support**
 
 ### Method 2: Tampermonkey script
 
@@ -112,6 +73,7 @@ Uses JS to fetch data on the page, render it as static HTML, and embed it into t
 
 ### OpenAI Responses API Support
 - Request body parsing with structured input and response format schemas
-- Response parsing with structured outputs
+- Response parsing with structured outputs (streaming and non-streaming)
 - JSON schema validation support
 - Token usage tracking
+- **Full SSE streaming support** for real-time structured output delivery
