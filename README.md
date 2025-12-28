@@ -5,7 +5,7 @@ Support for OpenAI Chat Completions, OpenAI Responses API, and Anthropic Message
 ![compare](./docs/compare-1.png)
 ![](https://raw.githubusercontent.com/slow-groovin/mitmproxy-llm-better-view/refs/heads/main/docs/mitm-better-view.webp)
 
-[中文文档](./docs/README_CN.md)
+[中文文档](./docs/README_CN.md) | [Examples](./EXAMPLES.md)
 
 ## Quick Start
 This project provides two tools (**The two are conflicting**):
