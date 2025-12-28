@@ -42,8 +42,8 @@ def handle_response_basis(body: Dict[str, Any]) -> str:
 
     # 获取token使用情况
     usage = body.get("usage", {})
-    input_tokens = usage and usage.get("input_tokens", "N/A")
-    output_tokens = usage and usage.get("output_tokens", "N/A")
+    input_tokens = usage.get("input_tokens", "N/A")
+    output_tokens = usage.get("output_tokens", "N/A")
 
     # 计算所有标签的最大长度，实现右对齐
     labels = ["id", "type", "role", "model", "input_tokens", "output_tokens"]

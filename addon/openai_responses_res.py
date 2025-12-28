@@ -17,17 +17,14 @@ def indent_text(text: str, n: int) -> str:
         return text
     indent = " " * n
     # 尝试美化JSON
-    try:
-        if isinstance(text, dict):
-            text = json.dumps(text, indent=4, ensure_ascii=False)
-        elif isinstance(text, str):
-            parsed = json.loads(text)
-            text = json.dumps(parsed, indent=4, ensure_ascii=False)
-    except (json.JSONDecodeError, TypeError):
-        pass
-    
     if isinstance(text, dict):
         text = json.dumps(text, indent=4, ensure_ascii=False)
+    elif isinstance(text, str):
+        try:
+            parsed = json.loads(text)
+            text = json.dumps(parsed, indent=4, ensure_ascii=False)
+        except (json.JSONDecodeError, TypeError):
+            pass
     
     indented_lines = [
         (indent + line) if line.strip() else line for line in str(text).splitlines()
