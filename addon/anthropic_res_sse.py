@@ -7,29 +7,9 @@ from mitmproxy.contentviews._api import Contentview
 from mitmproxy import contentviews
 from mitmproxy.http import Response
 
+from llm_utils import multi_line_splitter, indent_text_with_json as indent_text, SPLIT_LINE
 
-def multi_line_splitter(line: int) -> str:
-    """生成分割线"""
-    return "\n " * line + "\n"
-
-
-def indent_text(text: str, n: int) -> str:
-    """将多行文本整体缩进 n 个空格"""
-    indent = " " * n
-    # 确保在缩进前先尝试美化JSON字符串
-    try:
-        parsed_json = json.loads(text)
-        text = json.dumps(parsed_json, indent=4, ensure_ascii=False)
-    except json.JSONDecodeError:
-        # 如果不是有效的JSON，则保持原样
-        pass
-    indented_lines = [
-        (indent + line) if line.strip() else line for line in text.splitlines()
-    ]
-    return "\n".join(indented_lines)
-
-
-split_line = "\n----------------------------------\n"
+split_line = SPLIT_LINE
 
 
 def handle_response_basis(body: Dict[str, Any]) -> str:

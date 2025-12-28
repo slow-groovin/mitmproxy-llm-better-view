@@ -6,21 +6,9 @@ from mitmproxy.contentviews._api import Contentview
 from mitmproxy import contentviews
 from mitmproxy.http import Response
 
+from llm_utils import multi_line_splitter, indent_text, SPLIT_LINE
 
-def multi_line_splitter(line: int) -> str:
-    return "\n " * line + "\n"
-
-
-def indent_text(text: str, n: int) -> str:
-    """将多行文本整体缩进 n 个空格"""
-    indent = " " * n
-    indented_lines = [
-        (indent + line) if line.strip() else line for line in text.splitlines()
-    ]
-    return "\n".join(indented_lines)
-
-
-split_line = "\n----------------------------------\n"
+split_line = SPLIT_LINE
 
 
 def handle_response_basis(body: Any) -> str:
