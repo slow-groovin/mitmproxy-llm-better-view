@@ -359,10 +359,24 @@ def handle_anthropic_request_basis(body: Any) -> str:
     return basic_result
 
 
-def handle_anthropic_system_prompt(system: str) -> str:
+def handle_anthropic_system_prompt(system: Any) -> str:
     """处理Anthropic系统提示词"""
+    if not system:
+        return ""
+    
+    # Handle system as a list of content blocks (with cache_control, type, text)
+    if isinstance(system, list):
+        system_text = ""
+        for item in system:
+            if isinstance(item, dict):
+                if item.get("type") == "text":
+                    system_text += item.get("text", "")
+            else:
+                system_text += str(item)
+        system = system_text
+    
     if system:
-        return f"## System Prompt📌\n{SPLIT_LINE}{indent_text(system, 4)}{SPLIT_LINE}"
+        return f"## System Prompt📌\n{SPLIT_LINE}{indent_text(str(system), 4)}{SPLIT_LINE}"
     return ""
 
 
