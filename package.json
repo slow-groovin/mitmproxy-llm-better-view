@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@logtape/logtape": "^2.0.2",
     "@vueuse/core": "^14.2.0",
     "lit": "^3.3.2",
     "lit-html": "^3.3.2",

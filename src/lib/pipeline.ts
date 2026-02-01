@@ -28,7 +28,7 @@ export type Flow = {
     http_version: string;
     status_code: number;
     reason: string;
-    headers: Array<Record<string, string>>;
+    headers: Array<[string, string]>;
     contentLength: number;
     contentHash: string;
     timestamp_start: number;
@@ -36,7 +36,7 @@ export type Flow = {
   };
 };
 
-export type HookFunc = (type: 'request' | 'response', data: any, flow: Flow) => Promise<DocumentFragment | HTMLElement | null | void>;
+export type HookFunc = (type: 'request' | 'response', text: any, flow: Flow) => Promise<DocumentFragment | HTMLElement | null | void>;
 
 const originalFetch = unsafeWindow.fetch;
 
@@ -48,9 +48,9 @@ export function initRouteListener(hook: HookFunc) {
     }
 
     const dataUrl = `http://${window.location.host}/flows/${uuid}/${action}/content/Auto.json`;
-    const json = await getFlowData(dataUrl);
+    const data = await getFlowData(dataUrl);
     
-    const node = await hook(action, json, flow);
+    const node = await hook(action, data, flow);
     
     if (node) {
       insertNodeToPage(node);

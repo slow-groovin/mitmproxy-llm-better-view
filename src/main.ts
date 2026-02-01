@@ -3,17 +3,24 @@ import './style.css';
 import App from './App.vue';
 
 
-import { initRouteListener, type Flow } from './lib/pipeline';
+import { initRouteListener,} from './lib/pipeline';
+import { isAnthropicReq, isAnthropicRes, isGeminiReq, isGeminiRes, isOpenAIReq, isOpenAIRes } from './llm/judge';
+import { toast } from 'vue-sonner';
 
 initRouteListener(async (_type, data, flow) => {
-
-  if (!isOpenaiFlow(flow)) {
-    console.log("NOT openai")
-    return null;
+  if(isOpenAIReq(_type,data,flow)){
+    toast("Openai req")
+  }else if(isOpenAIRes(_type,data,flow)){
+    toast("Openai res")
+  }else if(isAnthropicReq(_type,data,flow)){
+    toast("isAnthropicReq")
+  }else if(isAnthropicRes(_type,data,flow)){
+    toast("isAnthropic res")
+  }else if(isGeminiReq(_type,data,flow)){
+    toast("gemini req")
+  }else if(isGeminiRes(_type,data,flow)){
+    toast("gemini res")
   }
-  const isLLMReq = isLLMRequest(data.text ? JSON.parse(data.text) : data)
-  const isLLMRes = isLLMResponse(data.text ? JSON.parse(data.text) : data)
-  console.log('isLLMReq', isLLMReq, 'isLLMRes', isLLMRes)
 
   return null;
 });
@@ -28,15 +35,3 @@ createApp(App).mount(app);
 
 
 
-
-function isOpenaiFlow(flow: Flow): boolean {
-  return flow.request.path.endsWith('/completions');
-}
-
-function isLLMRequest(parsedObj: any): boolean {
-  return (!!parsedObj) && (!!parsedObj['messages'] || !!parsedObj['prompt']) && (!!parsedObj['model']);
-}
-
-function isLLMResponse(parsedObj: any): boolean {
-  return (!!parsedObj) && (!!parsedObj['choices']) && (!!parsedObj['model']);
-}

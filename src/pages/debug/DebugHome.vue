@@ -4,6 +4,7 @@ import Tabs from '../../components/Tabs.vue';
 import TestButton from '../../components/debug/TestButton.vue';
 import SonnerTest from './SonnerTest.vue';
 import BrowserPermissionTest from './BrowserPermissionTest.vue';
+import LogTapeTest from './LogTapeTest.vue';
 
 interface TabItem {
   name: string;
@@ -15,6 +16,7 @@ const tabs = shallowRef<TabItem[]>([
   { name: 'TestButton', component: TestButton as Component },
   { name: 'SonnerTest', component: SonnerTest as Component },
   { name: 'BrowserPermission', component: BrowserPermissionTest as Component },
+  { name: 'LogTape', component: LogTapeTest as Component },
 ]);
 </script>
 
