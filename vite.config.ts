@@ -7,7 +7,8 @@ export default defineConfig({
   plugins: [
     vue(),
     monkey({
-      entry: 'src/old/index.ts',
+      // entry: 'src/old/index.ts',
+      entry: 'src/main.ts',
       userscript: {
         name: {
           '': 'mitmproxy-llm-better-view',

@@ -1,0 +1,12 @@
+.floating-panel {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  width: 32rem;
+  height: 24rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  padding: 16px;
+  z-index: 9999;
+}
