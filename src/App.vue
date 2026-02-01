@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import 'vue-sonner/style.css';
+import { Toaster } from 'vue-sonner';
 import { ref, shallowRef, type Component } from 'vue';
-import TestButton from './components/debug/TestButton.vue';
 
 const showDebug = ref(false);
 const isDev=import.meta.env.DEV
@@ -8,7 +9,7 @@ const DebugHome = shallowRef<Component>();
 
 async function toggleDebug() {
   if (!DebugHome.value) {
-    const module = await import('./Debug/DebugHome.vue');
+    const module = await import('./pages/debug/DebugHome.vue');
     DebugHome.value = module.default as Component;
   }
   showDebug.value = !showDebug.value;
@@ -16,10 +17,9 @@ async function toggleDebug() {
 </script>
 
 <template>
-  <div class="floating-panel">
-    <TestButton/>
-  </div>
-  
+  <!-- <div class="floating-panel">
+  </div> -->
+  <Toaster />
   <template v-if="isDev">
     <button class="debug-toggle-btn" @click="toggleDebug">
       {{ showDebug ? 'Hide Debug' : 'Show Debug' }}

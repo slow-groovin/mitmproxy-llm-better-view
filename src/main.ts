@@ -3,10 +3,9 @@ import './style.css';
 import App from './App.vue';
 
 
-import { initRouteListener } from './lib/pipeline';
-import type { Flow } from './lib/pipeline';
+import { initRouteListener, type Flow } from './lib/pipeline';
 
-initRouteListener(async (type, data, flow) => {
+initRouteListener(async (_type, data, flow) => {
 
   if (!isOpenaiFlow(flow)) {
     console.log("NOT openai")

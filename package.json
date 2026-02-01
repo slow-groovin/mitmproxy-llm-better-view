@@ -9,9 +9,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@vueuse/core": "^14.2.0",
     "lit": "^3.3.2",
     "lit-html": "^3.3.2",
-    "vue": "^3.5.19"
+    "vue": "^3.5.19",
+    "vue-sonner": "^2.0.9"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.1",
