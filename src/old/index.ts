@@ -6,7 +6,6 @@ import { openai_res_template } from './templates/openai-res';
 import { openai_res_sse_template } from './templates/openai-res-sse';
 import { CallAction, Flow } from './types';
 import { LRUCache, omit } from './utils';
-import style from './style.css'
 /**
 
  */

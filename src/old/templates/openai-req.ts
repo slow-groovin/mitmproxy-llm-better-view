@@ -78,7 +78,7 @@ const renderParameterItem = (name: string, param: any, required: any[] = []) => 
 };
 
 // 渲染工具内容
-const renderToolContent = (tool: any, index: number) => {
+const renderToolContent = (tool: any, _index: number) => {
   if (!tool.function) {
     return html`<div class="json-content">${JSON.stringify(tool, null, 2)}</div>`;
   }

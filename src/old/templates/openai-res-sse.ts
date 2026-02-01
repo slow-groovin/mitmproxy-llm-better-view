@@ -81,7 +81,7 @@ const renderTokenUsage = (usage: any) => {
   `
 }
 
-const renderToolCall = (toolCall: any, index: number) => html`
+const renderToolCall = (toolCall: any, _index: number) => html`
   <div class="tool-call-item">
     <div>
       <div class="tool-call-name">${toolCall.function?.name || "Unknown Function"}</div>

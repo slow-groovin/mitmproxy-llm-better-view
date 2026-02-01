@@ -66,7 +66,7 @@ const renderTokenUsage = (usage: any) => {
 };
 
 // 渲染单个工具调用
-const renderToolCall = (toolCall: any, index: number) => {
+const renderToolCall = (toolCall: any, _index: number) => {
   const parsedArguments = toolCall.function?.arguments ?
     JSON.parse(toolCall.function.arguments) : {};
 
