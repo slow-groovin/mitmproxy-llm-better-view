@@ -22,7 +22,8 @@ export default defineConfig({
         namespace: "npm/vite-plugin-monkey",
         include: [
           "http://localhost:8081/*",
-          "http://127.0.0.1:8081/*"
+          "http://127.0.0.1:8081/*",
+          "http://127.0.0.1:9090/*"
         ],
       },
       build: {
