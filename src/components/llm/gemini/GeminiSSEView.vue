@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { formatDate } from '@/utils/format/formatDate';
-import type { ParsedSSEChunk } from '@/types/gemini/sse';
+import { formatDate } from '../../../utils/format/formatDate';
+import type { ParsedSSEChunk } from '../../../types/gemini/sse';
 import CollapsibleSection from '../shared/CollapsibleSection.vue';
 import InfoItem from '../shared/InfoItem.vue';
 import JsonViewer from '../shared/JsonViewer.vue';
@@ -264,7 +264,7 @@ const promptFeedback = computed(() => {
   background: #faf5ff;
   border-radius: 6px;
   border-left: 3px solid #7c3aed;
-' }
+}
 
 .function-call-header {
   display: flex;
@@ -433,7 +433,7 @@ const promptFeedback = computed(() => {
 }
 
 .event-content.raw {
-  font-family: 'Monaco', 'Menlo', monospace;
+  /* font-family: 'Monaco', 'Menlo', monospace; */
   background: #1e293b;
   color: #e2e8f0;
 }

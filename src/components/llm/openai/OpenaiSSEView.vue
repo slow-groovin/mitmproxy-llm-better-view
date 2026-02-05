@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { formatDate } from '@/utils/format/formatDate';
-import type { OpenaiParsedSSEChunk } from '@/types/openai/chat-sse';
+import { formatDate } from '../../../utils/format/formatDate';
+import type { OpenaiParsedSSEChunk } from '../../../types/openai/chat-sse';
 import CollapsibleSection from '../shared/CollapsibleSection.vue';
 import InfoItem from '../shared/InfoItem.vue';
 import JsonViewer from '../shared/JsonViewer.vue';

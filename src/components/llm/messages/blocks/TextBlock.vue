@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import ProseContent from '../../shared/ProseContent.vue';
-import { detectContentFormat } from '@/utils/format/formatContent';
+import { detectContentFormat } from '../../../../utils/format/formatContent';
 
 interface Props {
   id?: string;

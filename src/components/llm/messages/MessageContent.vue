@@ -7,7 +7,7 @@ import ToolUseBlock from './blocks/ToolUseBlock.vue';
 import ToolResultBlock from './blocks/ToolResultBlock.vue';
 import ThinkingBlock from './blocks/ThinkingBlock.vue';
 import FunctionCallBlock from './blocks/FunctionCallBlock.vue';
-import { hashId } from '@/utils/id/hashId';
+import { hashId } from '../../../utils/id/hashId';
 
 type Platform = 'openai' | 'claude' | 'gemini';
 

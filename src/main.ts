@@ -14,7 +14,7 @@ import {
   isGeminiRes,
 } from './llm/judge';
 import { initRouteListener, type HookFunc, type Flow } from './lib/pipeline';
-
+logger.debug`main.ts`;
 // Helper function to check if response is SSE
 function isSSE(flow: Flow): boolean {
   return flow.response.headers.some(h => {
@@ -34,14 +34,7 @@ function parseResponseData(data: any): any | null {
   }
 }
 
-// Dashboard state - shared with Dashboard.vue for data passing
-export const dashboardData = ref<{
-  type: string;
-  data: unknown;
-  flow?: Flow;
-  platform?: 'openai' | 'claude' | 'gemini';
-  view?: 'request' | 'response' | 'sse' | 'raw';
-} | null>(null);
+
 
 // Hook function for processing LLM requests/responses
 const handleLLMData: HookFunc = async (type, text, flow) => {
@@ -97,13 +90,13 @@ const handleLLMData: HookFunc = async (type, text, flow) => {
     }
 
     if (platform && data) {
-      dashboardData.value = {
-        type,
-        data,
-        flow,
-        platform,
-        view
-      };
+      // dashboardData.value = {
+      //   type,
+      //   data,
+      //   flow,
+      //   platform,
+      //   view
+      // };
       logger.info('Dashboard data updated', { platform, view });
     } else {
       logger.warn('Unknown type or no data', { type, hasData: !!data });

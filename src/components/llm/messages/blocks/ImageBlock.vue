@@ -83,5 +83,5 @@ function onError() {
   font-family: 'Monaco', 'Menlo', monospace;
   margin-top: 4px;
   color: #94a3b8;
-;
+}
 </style>

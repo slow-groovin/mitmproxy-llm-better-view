@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { formatDate } from '@/utils/format/formatDate';
-import type { OpenaiChatResponse } from '@/types/openai/chat-response';
+import { formatDate } from  '../../../utils/format/formatDate';
+import type { OpenaiChatResponse } from '../../../types/openai/chat-response';
 import CollapsibleSection from '../shared/CollapsibleSection.vue';
 import InfoItem from '../shared/InfoItem.vue';
 import JsonViewer from '../shared/JsonViewer.vue';
@@ -52,7 +52,7 @@ const finishReasonClass = (reason: string | null) => {
       />
     </CollapsibleSection>
 
-    <CollapsibleSection title="Full Response" default-open="false">
+    <CollapsibleSection title="Full Response" :default-open="false">
       <JsonViewer :data="data" collapsible />
     </CollapsibleSection>
   </div>

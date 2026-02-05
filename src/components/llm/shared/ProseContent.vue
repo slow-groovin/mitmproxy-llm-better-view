@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue';
 import { marked } from 'marked';
-import type { ContentFormat } from '@/utils/format/formatContent';
-import { detectContentFormat, formatContent } from '@/utils/format/formatContent';
+import type { ContentFormat } from '../../../utils/format/formatContent';
+import { detectContentFormat, formatContent } from '../../../utils/format/formatContent';
 
 interface Props {
   content: string;

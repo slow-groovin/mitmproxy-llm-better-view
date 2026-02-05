@@ -52,7 +52,7 @@ const propertyKeys = computed(() => {
         :type="(schemaProperties[propName] as any).type"
         :description="(schemaProperties[propName] as any).description"
         :required="schemaRequired.includes(propName)"
-        :enum="(schemaProperties[propName] as any).enum"
+        :enums="(schemaProperties[propName] as any).enum"
         :properties="(schemaProperties[propName] as any).properties"
       />
     </div>

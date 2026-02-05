@@ -6,7 +6,7 @@ interface Props {
   type?: string;
   description?: string;
   required?: boolean;
-  enum?: unknown[];
+  enums?: unknown[];
   properties?: Record<string, unknown>;
 }
 
@@ -45,9 +45,9 @@ const typeBadgeClass = computed(() => {
     <div v-if="description" class="parameter-description">
       {{ description }}
     </div>
-    <div v-if="enum && enum.length > 0" class="parameter-enum">
+    <div v-if="enums && enums.length > 0" class="parameter-enum">
       <span class="enum-label">Enum:</span>
-      <span class="enum-values">{{ enum.join(', ') }}</span>
+      <span class="enum-values">{{ enums.join(', ') }}</span>
     </div>
     <div v-if="hasNestedProperties" class="parameter-properties">
       <div class="properties-title">Properties:</div>

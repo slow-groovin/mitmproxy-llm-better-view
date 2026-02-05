@@ -8,7 +8,7 @@ type Platform = 'openai' | 'claude' | 'gemini';
 // OpenAI message types
 interface OpenaiMessage {
   role: 'system' | 'user' | 'assistant' | 'tool';
-  content: string | Array<{ type: { text?: string; image_url?: { url: string } }> | null;
+  content: string | Array<{ type: { text?: string; image_url?: { url: string } }}> | null;
   tool_call_id?: string;
   tool_calls?: Array<{ id: string; function: { name: string; arguments: string } }>;
   name?: string;

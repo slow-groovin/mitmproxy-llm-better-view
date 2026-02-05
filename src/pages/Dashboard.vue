@@ -1,21 +1,25 @@
 <script setup lang="ts">
-import { watch, computed, shallowRef, onMounted } from 'vue';
-import { dashboardData, dashboardView, initDashboardInjector, destroyDashboardInjector } from '../main';
+import { watch, computed, shallowRef, onMounted, ref } from 'vue';
 import { logger } from '../lib/logtape';
 
 // Import type guards
 import {
   isOpenAIReq,
   isOpenAIRes,
-  isOpenAISSE,
-  isClaudeReq,
-  isClaudeRes,
-  isClaudeSSE,
+  isAnthropicReq,
+  isAnthropicRes,
   isGeminiReq,
-  isGeminiRes,
-  isGeminiSSE
+  isGeminiRes
 } from '../llm/judge';
 
+// Dashboard state - shared with Dashboard.vue for data passing
+const dashboardData = ref<{
+  type: string;
+  data: unknown;
+  flow?: Flow;
+  platform?: 'openai' | 'claude' | 'gemini';
+  view?: 'request' | 'response' | 'sse' | 'raw';
+} | null>(null);
 // Import platform-specific view components
 import OpenaiRequestView from '../components/llm/openai/OpenaiRequestView.vue';
 import OpenaiResponseView from '../components/llm/openai/OpenaiResponseView.vue';
@@ -30,6 +34,8 @@ import GeminiResponseView from '../components/llm/gemini/GeminiResponseView.vue'
 import GeminiSSEView from '../components/llm/gemini/GeminiSSEView.vue';
 
 import JsonViewer from '../components/llm/shared/JsonViewer.vue';
+import { Flow } from '../lib/pipeline';
+
 
 // View tabs
 const viewTabs = [
@@ -52,8 +58,8 @@ const currentView = computed(() => {
   if (localView.value !== 'auto') {
     return localView.value;
   }
-  // Otherwise use auto-detected view from main.ts
-  return dashboardView.value;
+  // Otherwise use auto-detected view
+  return autoDetectedView.value;
 });
 
 // Computed platform
@@ -67,30 +73,20 @@ const data = computed(() => {
 });
 
 // Auto-detect view from data type
-const autoDetectedView = computed('auto' | 'request' | 'response' | 'sse' | 'raw'>(() => {
-  if (!dashboardData.value) return 'raw';
+const autoDetectedView = computed<'auto' | 'request' | 'response' | 'sse' | 'raw'>(() => {
+  if (!dashboardData.value || !dashboardData.value.flow) return 'raw';
 
-  const { type, data: d } = dashboardData.value;
+  const { type, data: d, flow } = dashboardData.value;
+  const action = type as 'request' | 'response';
 
   // Try type detection functions first
-  if (isOpenAIReq(type, d, dashboardData.value.flow)) return 'request';
-  if (isOpenAIRes(type, d, dashboardData.value.flow)) return 'response';
-  if (isOpenAISSE(type, d, dashboardData.value.flow)) return 'sse';
-  if (isClaudeReq(type, d, dashboardData.value.flow)) return 'request';
-  if (isClaudeRes(type, d, dashboardData.value.flow)) return 'response';
-  if (isClaudeSSE(type, d, dashboardData.value.flow)) return 'sse';
-  if (isGeminiReq(type, d, dashboardData.value.flow)) return 'request';
-  if (isGeminiRes(type, d, dashboardData.value.flow)) return 'response';
-  if (isGeminiSSE(type, d, dashboardData.value.flow)) return 'sse';
+  if (isOpenAIReq(action, d, flow)) return 'request';
+  if (isOpenAIRes(action, d, flow)) return 'sse';  // OpenAI responses are usually SSE
+  if (isAnthropicReq(action, d, flow)) return 'request';
+  if (isAnthropicRes(action, d, flow)) return 'sse';  // Anthropic responses are usually SSE
+  if (isGeminiReq(action, d, flow) || isGeminiRes(action, d, flow)) return 'sse';
 
   return 'raw';
-});
-
-// Update dashboardView when auto-detected view changes
-watch(autoDetectedView, (newView) => {
-  if (localView.value === 'auto') {
-    dashboardView.value = newView;
-  }
 });
 
 // Determine which component to render
@@ -157,21 +153,19 @@ const dataTypeDisplay = computed(() => {
 // Handle inject/destroy
 function handleInject() {
   try {
-    initDashboardInjector();
     isInjected.value = true;
     logger.info('Dashboard injected');
   } catch (error) {
-    logger.error('Failed to inject dashboard:', error);
+    logger.error('Failed to inject dashboard:', error as Error);
   }
 }
 
 function handleDestroy() {
   try {
-    destroyDashboardInjector();
     isInjected.value = false;
     logger.info('Dashboard destroyed');
   } catch (error) {
-    logger.error('Failed to destroy dashboard:', error);
+    logger.error('Failed to destroy dashboard:', error as Error);
   }
 }
 

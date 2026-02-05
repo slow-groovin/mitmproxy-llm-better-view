@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { formatDate } from '@/utils/format/formatDate';
-import type { ClaudeResponse } from '@/types/claude/claude-response';
+import type { ClaudeResponse } from '../../../types/claude/claude-response';
 import CollapsibleSection from '../shared/CollapsibleSection.vue';
 import InfoItem from '../shared/InfoItem.vue';
 import JsonViewer from '../shared/JsonViewer.vue';
@@ -112,7 +112,7 @@ const stopReasonClass = (reason: string) => {
 .error-type {
   font-weight: 600;
   color: #dc2626;
-'  font-size: 0.875rem;
+  font-size: 0.875rem;
 }
 
 .error-message {
