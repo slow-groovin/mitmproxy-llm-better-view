@@ -7,7 +7,7 @@ vite-plugin-monkey@7.x + vue3 (making 外挂式辅助页面 for mitmweb(react sp
 
 # 质量要求
 1. 需要完全满足的单一职责原则
-2. 生成的代码带有合理的关键步骤注释, 和简要合理的函数功能注释
+2. edit和新增代码时, 必须带有简短且合理的注释
 
 # 注意!
 - 严格遵循用户指令的任务要求!
@@ -16,9 +16,11 @@ vite-plugin-monkey@7.x + vue3 (making 外挂式辅助页面 for mitmweb(react sp
 # 任务路线
 1. 三种api厂商标准, 的请求/响应的typescript类型声明(共计6种)  以及SSE响应时的wrapper类型声明(3种), 总共9种  (type创建在 ./src/types目录下)
 2. 三种SSE的解析转换函数
-3. 6个可视化页面组件
+3. 为每种标准的api的requst/response生成组件
 4. 交互流程
 
+后续:
+1. 增加openai response api的类型
 # 过程描述
 ## 原来过程
 大致为: 监听route变动 -> 在打开 <uuid>/request或response时 -> GET访问flow api获取完整数据 -> 渲染出数据可视化 -> 插入到页面内位置显示
