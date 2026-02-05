@@ -11,6 +11,7 @@ vite-plugin-monkey@7.x + vue3 (making 外挂式辅助页面 for mitmweb(react sp
 
 # 注意!
 - 严格遵循用户指令的任务要求!
+- ./src/old/ 下的文件仅供参考, 不要再进行更新!!!!
 
 # 任务路线
 1. 三种api厂商标准, 的请求/响应的typescript类型声明(共计6种)  以及SSE响应时的wrapper类型声明(3种), 总共9种  (type创建在 ./src/types目录下)
@@ -36,7 +37,7 @@ vite-plugin-monkey@7.x + vue3 (making 外挂式辅助页面 for mitmweb(react sp
 ├── types.ts (类型定义：定义流量对象及 API 操作的 TypeScript 接口)
 └── utils.ts (通用工具：LRU 缓存实现及对象操作辅助函数)
 ```
->!!!  src/old/ 下的文件不要再进行更新!!!!
+
 
 ## 新的整体流程架构变动(pipeline.ts)
 监听route变动 -> 在打开 <uuid>/request或response时 -> GET访问flow api获取完整数据 -> **hook函数执行, 接受type和data, 返回一个document node**  -> 插入node到页面内位置显示
