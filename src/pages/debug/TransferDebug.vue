@@ -4,7 +4,7 @@ import { useLocalStorage } from '@vueuse/core';
 import { toast } from 'vue-sonner';
 import type { TransferResult } from '../../lib/transfer/types';
 import { logger } from '../../lib/logtape';
-import { openaiTransferService } from '../../lib/transfer/openai-service';
+import { openaiTransferService } from '../../lib/transfer/openai-transfer-service';
 
 interface Flow {
   id: string;
