@@ -19,7 +19,7 @@ async function toggleDebug() {
 <template>
   <!-- <div class="floating-panel">
   </div> -->
-  <Toaster  position="top-center"/>
+  <Toaster  position="top-center" :duration="1000"/>
   <template v-if="isDev">
     <button class="debug-toggle-btn" @click="toggleDebug">
       {{ showDebug ? 'Hide Debug' : 'Show Debug' }}

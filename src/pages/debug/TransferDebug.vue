@@ -69,9 +69,7 @@ async function performTransfer(transferService: ITransferService) {
   loading.value = true;
   result.value = null;
 
-  const loadingToastId = toast.loading('获取 flow 并转换中...', {
-    duration: Infinity,
-  });
+  const loadingToastId = toast.loading('获取 flow 并转换中...');
 
   try {
     const flow = await getFlow(uuid);
