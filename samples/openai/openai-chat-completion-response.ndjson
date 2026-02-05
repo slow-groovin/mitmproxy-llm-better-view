@@ -1,0 +1,120 @@
+/**
+# OpenAI Chat Completions API - Response 技术规格
+
+## 1. 非流式 (stream: false 或省略) - 单次 JSON 返回
+{
+  "id":               string,               // 唯一完成ID，如 "chatcmpl-xxx"
+  "object":           "chat.completion",
+  "created":          integer,              // Unix timestamp (秒)
+  "model":            string,               // 实际使用的模型名
+  "system_fingerprint": string | null,      // 后端配置指纹（可能不存在）
+  "choices":          array[object],        // 通常长度 = n (默认1)
+    // 每个 choice:
+    {
+      "index":          integer,            // 0,1,2...
+      "message":        object,             // 完整 assistant 消息
+        {
+          "role":       "assistant",
+          "content":    string | null,      // 生成的文本 (refusal/tool_calls 时可能 null)
+          "refusal":    string | null,      // 拒绝原因 (若有)
+          "tool_calls": array[object] | null // 函数调用 (若有)
+        }
+      "finish_reason":  string | null,      // "stop" | "length" | "tool_calls" | "content_filter" 等
+      "logprobs":       object | null       // 若请求了 logprobs
+    }
+  "usage":            object,               // token 使用统计
+    {
+      "prompt_tokens":            integer,
+      "completion_tokens":        integer,
+      "total_tokens":             integer,
+      "prompt_tokens_details":    object | null,   // 如 { "cached_tokens": N }
+      "completion_tokens_details": object | null   // 如 { "reasoning_tokens": N }
+    }
+}
+**/
+{
+    "id": "chatcmpl-20260205124517405751937F39Ps41d",
+    "model": "gemini-flash-latest",
+    "object": "chat.completion",
+    "created": 1770266718,
+    "choices": [
+        {
+            "index": 0,
+            "message": {
+                "role": "assistant",
+                "content": "",
+                "tool_calls": [
+                    {
+                        "id": "call_f02de592ba7c4015ab10dffc5528f98c",
+                        "type": "function",
+                        "function": {
+                            "name": "mcp__CherryFetch__fetchHtml",
+                            "arguments": "{\"url\":\"https://www.agent.md/home\"}"
+                        }
+                    }
+                ]
+            },
+            "finish_reason": "tool_calls"
+        }
+    ],
+    "usage": {
+        "prompt_tokens": 1450,
+        "completion_tokens": 33,
+        "total_tokens": 1483,
+        "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "text_tokens": 1450,
+            "audio_tokens": 0,
+            "image_tokens": 0
+        },
+        "completion_tokens_details": {
+            "text_tokens": 0,
+            "audio_tokens": 0,
+            "reasoning_tokens": 0
+        },
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "input_tokens_details": null,
+        "claude_cache_creation_5_m_tokens": 0,
+        "claude_cache_creation_1_h_tokens": 0
+    }
+}
+
+//example2
+{
+    "id": "chatcmpl-20260205124149652538628SZkkgYiG",
+    "model": "gpt2.5",
+    "object": "chat.completion",
+    "created": 1770266512,
+    "choices": [
+        {
+            "index": 0,
+            "message": {
+                "role": "assistant",
+                "content": "好的，这是一个非常宏大且引人入胜的设定！\n\n如果？**"
+            },
+            "finish_reason": "stop"
+        }
+    ],
+    "usage": {
+        "prompt_tokens": 947,
+        "completion_tokens": 405,
+        "total_tokens": 1352,
+        "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "text_tokens": 947,
+            "audio_tokens": 0,
+            "image_tokens": 0
+        },
+        "completion_tokens_details": {
+            "text_tokens": 0,
+            "audio_tokens": 0,
+            "reasoning_tokens": 0
+        },
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "input_tokens_details": null,
+        "claude_cache_creation_5_m_tokens": 0,
+        "claude_cache_creation_1_h_tokens": 0
+    }
+}

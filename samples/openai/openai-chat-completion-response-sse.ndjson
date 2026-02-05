@@ -1,0 +1,67 @@
+/**
+OpenAI Chat Completion Stream (SSE) - Chunk JSON Schema (text spec)
+
+Event format:
+  data: {json object}
+  ...
+  data: [DONE]
+
+Chunk JSON structure:
+
+{
+  "id":                string                  // 聊天完成唯一ID，所有chunk相同
+  "object":            "chat.completion.chunk" // 固定值
+  "created":           integer                 // Unix timestamp (秒)，所有chunk相同
+  "model":             string                  // 模型名称，例如 "gpt-4o", "o1-mini"
+  "service_tier":      string?                 // 可选: "auto", "default", ...
+  "system_fingerprint": string?                // 可选，已弃用
+  "choices":           array                    // 通常长度1，除非 n>1
+  [
+    {
+      "index":         integer                 // 通常 0
+      "delta":         object                  // 核心增量内容
+      {
+        "role":        string?                 // 仅第一个chunk常见: "assistant"
+        "content":     string?                 // 文本片段，逐块追加
+        "tool_calls":  array?                  // 工具调用增量数组
+        "function_call": object?               // 已弃用，旧版函数调用
+        // 最后一个有finish_reason的delta可能为 {}
+      }
+      "finish_reason": string?                 // null 或 "stop", "length", "tool_calls", "content_filter"
+      "logprobs":      object|null             // 流式通常为 null
+    }
+  ]
+  "usage":             object?                 // 仅最后一个chunk出现（需 stream_options: {"include_usage": true}）
+  {
+    "prompt_tokens":     integer,
+    "completion_tokens": integer,
+    "total_tokens":      integer
+    // 可能包含 completion_tokens_details 等扩展字段
+  }
+}
+
+Notes:
+- 所有非结束chunk的 finish_reason = null
+- 最后一个有效chunk的 delta 可能为空对象 {}，finish_reason 非空
+- 带 usage 的chunk 其 choices 可能为空数组 []
+- 流结束标记: data: [DONE]
+**/
+
+data: {"choices":[{"delta":{"content":"","reasoning_content":"现在我","role":"assistant"},"index":0}],"created":1770261425,"id":"0217702","model":"glm-4-7","service_tier":"default","object":"chat.completion.chunk","usage":null}
+
+data: {"choices":[{"delta":{"content":"","reasoning_content":"需要","role":"assistant"},"index":0}],"created":1770261425,"id":"0217702","model":"glm-4-7","service_tier":"default","object":"chat.completion.chunk","usage":null}
+
+data: {"choices":[{"delta":{"content":"","role":"assistant","tool_calls":[{"function":{"arguments":"{","name":"write"},"id":"call_f2d2ane0oev8dwyhjt9vykeq","index":0,"type":"function"}]},"index":0}],"created":1770261425,"id":"0217702","model":"glm-4-7","service_tier":"default","object":"chat.completion.chunk","usage":null}
+
+data: {"choices":[{"delta":{"content":"","role":"assistant","tool_calls":[{"function":{"arguments":"\""},"index":0}]},"index":0}],"created":1770261425,"id":"0217702","model":"glm-4-7","service_tier":"default","object":"chat.completion.chunk","usage":null}
+
+data: {"choices":[{"delta":{"content":"","role":"assistant","tool_calls":[{"function":{"arguments":"content\""},"index":0}]},"index":0}],"created":1770261425,"id":"0217702","model":"glm-4-7","service_tier":"default","object":"chat.completion.chunk","usage":null}
+
+data: {"choices":[{"delta":{"content":"","role":"assistant","tool_calls":[{"function":{"arguments":"}"},"index":0}]},"index":0}],"created":1770261425,"id":"0217702","model":"glm-4-7","service_tier":"default","object":"chat.completion.chunk","usage":null}
+
+data: {"choices":[{"delta":{"content":"","role":"assistant"},"finish_reason":"tool_calls","index":0}],"created":1770261425,"id":"0217702","model":"glm-4-7","service_tier":"default","object":"chat.completion.chunk","usage":null}
+
+data: {"choices":[],"created":1770262125,"id":"0217702","model":"glm-4-7","service_tier":"default","object":"chat.completion.chunk","usage":{"completion_tokens":563,"prompt_tokens":23159,"total_tokens":23722,"prompt_tokens_details":{"cached_tokens":18688},"completion_tokens_details":{"reasoning_tokens":141}}}
+
+data: [DONE]
+
