@@ -1,0 +1,127 @@
+/**
+{
+  // 主要内容数组（通常 1 个元素，n_candidates >1 时多个）
+  "candidates": [
+    {
+      // 模型生成的单条候选内容
+      "content": {
+        "parts": [                     // 内容分块列表（最重要）
+          // 以下几种 part 只能出现其中一种（互斥）
+          { "text": "纯文本回复..." },                     // 普通文本
+          { "functionCall": {                               // Function Calling / Tools
+              "name": "函数名",
+              "args": { "参数1": 值, "参数2": 值, ... }
+            }
+          },
+          { "functionResponse": {                           // 函数执行结果（多轮）
+              "name": "函数名",
+              "response": { ...任意结构... }
+            }
+          },
+          { "inlineData": { ... } },                        // 文件/图片/base64 数据（少见）
+          { ...其他如 executableCode 等（较新版本） }
+        ],
+        "role": "model"               // 固定为 "model"
+      },
+
+      "finishReason": "STOP" | "MAX_TOKENS" | "SAFETY" | "RECITATION" | "OTHER" | ...,
+      "safetyRatings": [              // 安全评级（每条 candidate 都有）
+        {
+          "category": "HARM_CATEGORY_XXX",
+          "probability": "NEGLIGIBLE" | "LOW" | "MEDIUM" | "HIGH",
+          "blocked": true/false,
+          ...
+        },
+        ...
+      ],
+      "citationMetadata": { ... },    // 引用来源（grounding 时出现）
+      "groundingMetadata": { ... },   // grounding / search 增强信息
+      "index": 0,                     // candidate 序号
+      "tokenCount": 123,              // 该 candidate 的 token 数（部分版本）
+      "avgLogprobs": -0.123,          // logprobs 相关（可选）
+      "finishMessage": "说明文字"     // 人类可读的结束原因说明（可选）
+    },
+    // ... 更多 candidates
+  ],
+
+  // 提示安全性反馈（如果 prompt 被 block）
+  "promptFeedback": {
+    "safetyRatings": [ ... 同上 ... ]
+  },
+
+  // 用量统计（几乎总是出现）
+  "usageMetadata": {
+    "promptTokenCount": 1234,
+    "candidatesTokenCount": 567,
+    "totalTokenCount": 1801,
+    "promptTokensDetails": [          // 模态细分（较新版本）
+      { "modality": "TEXT", "tokenCount": 1234 },
+      ...
+    ],
+    "cachedContentTokenCount": 0      // 缓存命中部分（有 cache 时）
+  },
+
+  // 元信息
+  "modelVersion": "gemini-2.5-flash" | "gemini-2.5-pro" | "...",
+  "responseId": "ci-xxxxxxxxxxxxxxxx",   // 响应唯一 ID
+
+  // 极少出现字段（视版本/功能）
+  // "modelStatus": { ... },
+  // "createTime": "2026-..."
+}
+  **/
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "functionCall": {
+              "name": "mcp__CherryFetch__fetchHtml",
+              "args": {
+                "url": "https://www.google.cn/home"
+              }
+            }
+          },
+          {
+            "functionCall": {
+              "name": "mcp__CherryFetch__fetchHtml",
+              "args": {
+                "url": "https://www.google.cn/home"
+              }
+            }
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0,
+      "finishMessage": "Model generated function call(s)."
+    },
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "您好，我为您两次调用了 `fetchHtml` 来获取 。"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 1173,
+    "candidatesTokenCount": 201,
+    "totalTokenCount": 1374,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 1173
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.5-flash-lite-preview-09-2025",
+  "responseId": "ci-EabKmGfLoz7IP757r-QM"
+}

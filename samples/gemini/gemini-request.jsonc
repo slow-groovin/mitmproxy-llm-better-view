@@ -1,0 +1,335 @@
+/**
+{
+  // 必填：对话内容（单轮或多轮历史）
+  "contents": [
+    {
+      "role": "user",           // 或 "model"
+      "parts": [                // 必填，至少一个part
+        {
+          "text": "你的提示文本"   // 纯文本
+        },
+        // 可选：多模态输入示例
+        {
+          "inlineData": {
+            "mimeType": "image/jpeg",
+            "data": "base64编码的图片数据"
+          }
+        },
+        {
+          "fileData": {
+            "mimeType": "application/pdf",
+            "fileUri": "https://files.google.com/..."   // File API上传后得到的URI
+          }
+        },
+        {
+          "functionCall": { ... }   // function calling响应时使用
+        }
+      ]
+    }
+    // 多轮时添加更多 {role, parts} 对象
+  ],
+
+  // 可选：系统指令（常用于角色设定）
+  "systemInstruction": {
+    "parts": [
+      {
+        "text": "你是一个专业的助手..."
+      }
+    ]
+  },
+
+  // 可选：生成配置（最常用字段）
+  "generationConfig": {
+    "temperature": 0.7,            // 0.0~2.0，默认~1.0
+    "topP": 0.95,                  // 0.0~1.0
+    "topK": 64,                    // 整数
+    "maxOutputTokens": 2048,       // 输出token上限
+    "candidateCount": 1,           // 返回候选数，通常1
+    "stopSequences": ["\n\n"],     // 停止序列
+    "responseMimeType": "application/json",   // 强制JSON输出（结合schema）
+    "responseSchema": { ... }      // JSON Schema（结构化输出）
+  },
+
+  // 可选：Gemini 3+ 新增思考控制（2025年末引入）
+  "thinkingLevel": "high",         // "low" | "medium" | "high"（默认视模型）
+  "mediaResolution": "high",       // 图像/视频分辨率处理："low"|"medium"|"high"
+
+  // 可选：工具（function calling / code execution 等）
+  "tools": [
+    {
+      "functionDeclarations": [ ... ]   // 函数定义
+    }
+  ],
+
+  // 可选：安全设置（覆盖默认）
+  "safetySettings": [
+    {
+      "category": "HARM_CATEGORY_HATE_SPEECH",
+      "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+    }
+    // 支持 HARM_CATEGORY_ 开头的4~5类
+  ],
+
+  // 其他高级/可选字段
+  "cachedContent": "projects/.../cachedContents/xxx",   // 缓存内容引用
+  "toolConfig": { ... },           // 工具行为配置
+  "labels": { "env": "prod" }      // 自定义标签（计费/监控）
+}
+  **/
+{
+    "generationConfig": {
+        "maxOutputTokens": 32000,
+        "topK": 64,
+        "topP": 0.95,
+        "thinkingConfig": {
+            "includeThoughts": true,
+            "thinkingLevel": "high"
+        }
+    },
+    "contents": [
+        {
+            "role": "user",
+            "parts": [
+                {
+                    "text": "hello!"
+                }
+            ]
+        },
+        {
+            "role": "model",
+            "parts": [
+                {
+                    "text": "**Acknowledge User's Greeting**\n\nI've registered",
+                    "thought": true
+                },
+                {
+                    "text": "Hello!"
+                }
+            ]
+        },
+        {
+            "role": "user",
+            "parts": [
+                {
+                    "text": "方的)"
+                },
+                {
+                    "text": "Called the Read tool with the following input: {\"filePath\":\"/homejudge.ts\"}"
+                },
+                {
+                    "text": "<file>\n00001| import { Flow } f...</file>"
+                }
+            ]
+        },
+        {
+            "role": "model",
+            "parts": [
+                {
+                    "text": "**Analyzing Gemini Request Detection**\n\nI'm.",
+                    "thought": true
+                },
+                {
+                    "text": "I will improve the."
+                },
+                {
+                    "functionCall": {
+                        "name": "grep",
+                        "args": {
+                            "pattern": "Gemini"
+                        }
+                    },
+                    "thoughtSignature": "EtNh="
+                }
+            ]
+        },
+        {
+            "role": "user",
+            "parts": [
+                {
+                    "functionResponse": {
+                        "name": "grep",
+                        "response": {
+                            "name": "grep",
+                            "content": "Found 12 matches\n/homexxxcandidates"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "role": "model",
+            "parts": [
+                {
+                    "text": "**Confirming Key Functions**\n",
+                    "thought": true
+                },
+                {
+                    "text": "I've updated `isGeminiPath>>>>\n```"
+                },
+                {
+                    "functionCall": {
+                        "name": "edit",
+                        "args": {
+                            "oldString": "function isGeminiPath",
+                            "filePath": "/llm/judge.ts",
+                            "newString": "function isGeminiPath(flow: Flow): boolean {\n"
+                        }
+                    },
+                    "thoughtSignature": "vg=="
+                }
+            ]
+        },
+        {
+            "role": "user",
+            "parts": [
+                {
+                    "functionResponse": {
+                        "name": "edit",
+                        "response": {
+                            "name": "edit",
+                            "content": "Edit applied successfully."
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "role": "user",
+            "parts": [
+                {
+                    "functionResponse": {
+                        "name": "grep",
+                        "response": {
+                            "name": "grep",
+                            "content": "No files found"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "role": "model",
+            "parts": [
+                {
+                    "text": "I have updated ."
+                }
+            ]
+        }
+    ],
+    "systemInstruction": {
+        "parts": [
+            {
+                "text": "You are "
+            }
+        ]
+    },
+    "tools": [
+        {
+            "functionDeclarations": [
+                {
+                    "name": "webfetch",
+                    "description": "- Fetches content from a specified URL",
+                    "parameters": {
+                        "required": [
+                            "url",
+                            "format"
+                        ],
+                        "type": "object",
+                        "properties": {
+                            "url": {
+                                "description": "The URL to fetch content from",
+                                "type": "string"
+                            },
+                            "format": {
+                                "description": "The format to return the content in (text, markdown, or html). Defaults to markdown.",
+                                "type": "string",
+                                "enum": [
+                                    "text",
+                                    "markdown",
+                                    "html"
+                                ]
+                            },
+                            "timeout": {
+                                "description": "Optional timeout in seconds (max 120)",
+                                "type": "number"
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "todowrite",
+                    "description": "Use this tool to create and manage a structured task list for your current c\n\n",
+                    "parameters": {
+                        "required": [
+                            "todos"
+                        ],
+                        "type": "object",
+                        "properties": {
+                            "todos": {
+                                "description": "The updated todo list",
+                                "type": "array",
+                                "items": {
+                                    "required": [
+                                        "content",
+                                        "status",
+                                        "priority",
+                                        "id"
+                                    ],
+                                    "type": "object",
+                                    "properties": {
+                                        "content": {
+                                            "description": "Brief description of the task",
+                                            "type": "string"
+                                        },
+                                        "status": {
+                                            "description": "Current status of the task: pending, in_progress, completed, cancelled",
+                                            "type": "string"
+                                        },
+                                        "priority": {
+                                            "description": "Priority level of the task: high, medium, low",
+                                            "type": "string"
+                                        },
+                                        "id": {
+                                            "description": "Unique identifier for the todo item",
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "todoread",
+                    "description": "Use this tool to read your todo list"
+                },
+                {
+                    "name": "context7_query-docs",
+                    "description": "Retrieves and queries up-to-date documentation and code examples from Context7 .",
+                    "parameters": {
+                        "required": [
+                            "libraryId",
+                            "query"
+                        ],
+                        "type": "object",
+                        "properties": {
+                            "libraryId": {
+                                "description": "Exact Context7-compatible library ID",
+                                "type": "string"
+                            },
+                            "query": {
+                                "description": "The question or task you need help with. ",
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "toolConfig": {
+        "functionCallingConfig": {
+            "mode": "AUTO"
+        }
+    }
+}
