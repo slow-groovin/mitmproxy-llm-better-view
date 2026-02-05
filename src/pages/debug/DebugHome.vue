@@ -6,6 +6,7 @@ import SonnerTest from './SonnerTest.vue';
 import BrowserPermissionTest from './BrowserPermissionTest.vue';
 import LogTapeTest from './LogTapeTest.vue';
 import PageInjectorTest from './PageInjectorTest.vue';
+import TransferDebug from './TransferDebug.vue';
 
 interface TabItem {
   name: string;
@@ -15,6 +16,7 @@ interface TabItem {
 // 使用 shallowRef 避免深度响应式
 const tabs = shallowRef<TabItem[]>([
   { name: 'TestButton', component: TestButton as Component },
+  { name: 'Transfer', component: TransferDebug as Component },
   { name: 'SonnerTest', component: SonnerTest as Component },
   { name: 'BrowserPermission', component: BrowserPermissionTest as Component },
   { name: 'LogTape', component: LogTapeTest as Component },

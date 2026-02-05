@@ -14,7 +14,7 @@ vite-plugin-monkey@7.x + vue3 (making 外挂式辅助页面 for mitmweb(react sp
 - ./src/old/ 下的文件仅供参考, 不要再进行更新!!!!
 
 # 任务路线
-1. 三种api厂商标准, 的请求/响应的typescript类型声明(共计6种)  以及SSE响应时的wrapper类型声明(3种), 总共9种  (type创建在 ./src/types目录下)
+1. 三种api厂商标准, 的请求/响应的typescript类型声明(共计6种)  以及SSE响应时的wrapper类型声明(3种), 总共9种  (type创建在 ./src/types目录下) ✅Done
 2. 三种SSE的解析转换函数
 3. 为每种标准的api的requst/response生成组件
 4. 交互流程
