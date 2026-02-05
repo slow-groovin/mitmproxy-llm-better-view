@@ -1,0 +1,62 @@
+import { ApiStandard, DataType } from "@/types/flow";
+import { TransferResult } from "./types";
+import { openaiTransferService } from "./openai-transfer-service";
+import { claudeTransferService } from "./claude-transfer-service";
+import { geminiTransferService } from "./gemini-transfer-service";
+
+/**
+ * 统一的 transfer 数据转换函数
+ * 根据传入的条件调用对应的 transfer-service
+ * @param standard API 标准类型
+ * @param dataType 数据类型
+ * @param dataAsText 原始文本数据
+ * @returns TransferResult 转换结果
+ */
+export function unifiedTransferData(
+  standard: ApiStandard,
+  dataType: DataType,
+  dataAsText: string
+): TransferResult {
+  // 根据 standard 选择对应的 service
+  const service = getTransferService(standard);
+
+  // 如果是 sse 类型，使用 transfer 方法处理
+  if (dataType === "sse") {
+    return service.transfer(dataAsText);
+  }
+
+  // 对于 request 和 response，数据应该是 JSON 格式，直接解析返回
+  try {
+    const parsedData = JSON.parse(dataAsText);
+    return {
+      success: true,
+      data: parsedData,
+      timestamp: Date.now(),
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+      rawSSE: dataAsText,
+      timestamp: Date.now(),
+    };
+  }
+}
+
+/**
+ * 根据 API 标准获取对应的 transfer service
+ * @param standard API 标准类型
+ * @returns ITransferService 对应的 service 实例
+ */
+function getTransferService(standard: ApiStandard) {
+  switch (standard) {
+    case "openai":
+      return openaiTransferService;
+    case "claude":
+      return claudeTransferService;
+    case "gemini":
+      return geminiTransferService;
+    default:
+      throw new Error(`Unsupported API standard: ${standard}`);
+  }
+}

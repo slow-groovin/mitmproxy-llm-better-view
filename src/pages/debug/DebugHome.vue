@@ -8,8 +8,9 @@ import LogTapeTest from './LogTapeTest.vue';
 import PageInjectorTest from './PageInjectorTest.vue';
 import TransferDebug from './TransferDebug.vue';
 import RenderDebug from './RenderDebug.vue';
+import DebugStorePage from './DebugStorePage.vue';
 
-interface TabItem {
+  interface TabItem {
   name: string;
   component: Component;
 }
@@ -30,8 +31,9 @@ const tabs = shallowRef<TabItem[]>([
   { name: 'LogTape', component: LogTapeTest as Component },
   { name: 'PageInjector', component: PageInjectorTest as Component },
   { name: 'Render', component: RenderDebug as Component },
+  { name: 'Pinia Store', component: DebugStorePage as Component },
 
-]);
+  ]);
 </script>
 
 <template>
@@ -70,13 +72,14 @@ const tabs = shallowRef<TabItem[]>([
 }
 
 .debug-header {
-  padding: 16px;
+  padding: 1px;
   background: #333;
   border-bottom: 1px solid #555;
   font-weight: 600;
-  font-size: 18px;
+  /* font-size: 18px; */
   display: flex;
-  justify-content: space-between;
+  gap: 14px;
+  /* justify-content: space-between; */
   align-items: center;
 }
 
@@ -84,11 +87,11 @@ const tabs = shallowRef<TabItem[]>([
   background: #555;
   border: 1px solid #777;
   color: white;
-  padding: 8px 12px;
+  padding: 8px 9px;
   cursor: pointer;
   border-radius: 4px;
-  font-size: 16px;
-  margin-right: 12rem;
+  /* font-size: 16px; */
+  /* margin-right: 12rem; */
   transition: background 0.2s;
 }
 

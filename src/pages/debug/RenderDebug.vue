@@ -2,258 +2,35 @@
 import { ref, computed, watch } from 'vue';
 import { useLocalStorage } from '@vueuse/core';
 import { toast } from 'vue-sonner';
-import type { ITransferService, TransferResult } from '../../lib/transfer/types';
-import { logger } from '../../lib/logtape';
-import { openaiTransferService } from '../../lib/transfer/openai-transfer-service';
-import { geminiTransferService } from '../../lib/transfer/gemini-transfer-service';
-import { claudeTransferService } from '../../lib/transfer/claude-transfer-service';
+import { useCurrentFlowStore } from '../../store/llm';
+import type { ApiStandard, DataType } from '../../types/flow'
+import ViewDashboardProxy from '@/components/llm/ViewDashboardProxy.vue';
 
-// Import view components
-import OpenaiRequestView from '../../components/llm/openai/OpenaiRequestView.vue';
-import OpenaiResponseView from '../../components/llm/openai/OpenaiResponseView.vue';
-import OpenaiSSEView from '../../components/llm/openai/OpenaiSSEView.vue';
-import ClaudeRequestView from '../../components/llm/claude/ClaudeRequestView.vue';
-import ClaudeResponseView from '../../components/llm/claude/ClaudeResponseView.vue';
-import ClaudeSSEView from '../../components/llm/claude/ClaudeSSEView.vue';
-import GeminiRequestView from '../../components/llm/gemini/GeminiRequestView.vue';
-import GeminiResponseView from '../../components/llm/gemini/GeminiResponseView.vue';
-import GeminiSSEView from '../../components/llm/gemini/GeminiSSEView.vue';
 
-interface Flow {
-  id: string;
-  request: {
-    host: string;
-    path: string;
-    content: string;
-  };
-  response: {
-    status_code: number;
-    headers: Array<[string, string]>;
-    contentLength: number;
-    content: string;
-  };
-}
 
-type Provider = 'openai' | 'claude' | 'gemini';
-type ViewType = 'request' | 'response' | 'sse';
+// Store 中的值(自动检测)
+const { standard: standard, dataType: dataType, dataAsText: dataAsText, flowId } = useCurrentFlowStore();
 
-interface RenderState {
-  provider: Provider;
-  viewType: ViewType;
-  data: unknown;
-  rawSSE?: string;
-}
+// 用户手动选择的值
+const userStandard = ref<ApiStandard | null>(null);
+const userDataType = ref<DataType | null>(null);
 
-const currentState = ref<RenderState | null>(null);
+// 实际使用的值:优先用户选择,否则用 store
+const activeStandard = computed(() => userStandard.value ?? standard);
+const activeDataType = computed(() => userDataType.value ?? dataType);
+
+// const currentState = ref<RenderState | null>(null);
 const loading = ref(false);
-const flowId = ref<string | null>(null);
 const flowInfo = ref<{ id: string; host: string; path: string } | null>(null);
+
 const rawSSEExpanded = useLocalStorage('render-debug-raw-sse-expanded', true);
 const detailsRef = ref<HTMLDetailsElement | null>(null);
 
-// 同步 details 元素的 open 状态
 watch(rawSSEExpanded, (newVal) => {
   if (detailsRef.value) {
     detailsRef.value.open = newVal;
   }
 }, { immediate: true });
-
-// 监听 details 的 toggle 事件
-function onToggle(event: Event) {
-  rawSSEExpanded.value = (event.target as HTMLDetailsElement).open;
-}
-
-function extractFlowId(url: string): string | null {
-  const regex = /#\/flows\/([0-9a-fA-F\-]{36})\/(request|response)/;
-  const match = url.match(regex);
-  return match ? match[1] : null;
-}
-
-async function getFlow(uuid: string): Promise<Flow | null> {
-  const response = await fetch(`http://${window.location.host}/flows`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch flows: ${response.statusText}`);
-  }
-  const flowArray = await response.json();
-  return flowArray.find((flow: Flow) => flow.id === uuid) || null;
-}
-
-// Get provider-specific transfer service
-function getTransferService(provider: Provider): ITransferService {
-  switch (provider) {
-    case 'openai': return openaiTransferService;
-    case 'claude': return claudeTransferService;
-    case 'gemini': return geminiTransferService;
-  }
-}
-
-// Parse request content based on provider
-function parseRequest(provider: Provider, content: string): unknown {
-  try {
-    return JSON.parse(content);
-  } catch {
-    return { raw: content };
-  }
-}
-
-// Parse SSE events based on provider
-function parseSSEEvents(provider: Provider, sseText: string): unknown[] {
-  const events: unknown[] = [];
-  const lines = sseText.split('\n');
-  let currentEvent: { event?: string; data?: string } = {};
-
-  for (const line of lines) {
-    if (line.startsWith('event:')) {
-      currentEvent.event = line.slice(6).trim();
-    } else if (line.startsWith('data:')) {
-      currentEvent.data = line.slice(5).trim();
-    } else if (line === '' && currentEvent.event && currentEvent.data) {
-      try {
-        events.push({
-          event: currentEvent.event,
-          type: 'chunk',
-          timestamp: Date.now(),
-          data: JSON.parse(currentEvent.data),
-          raw: currentEvent.data
-        });
-      } catch {
-        events.push({
-          event: currentEvent.event,
-          type: 'chunk',
-          timestamp: Date.now(),
-          raw: currentEvent.data
-        });
-      }
-      currentEvent = {};
-    }
-  }
-
-  return events;
-}
-
-// Main function to load and render data
-async function loadData(provider: Provider, viewType: ViewType) {
-  const url = window.location.href;
-  const uuid = extractFlowId(url);
-
-  if (!uuid) {
-    toast.error('无法找到 Flow ID', {
-      description: '请导航到 flow 页面 (#/flows/{uuid}/request 或 response)',
-    });
-    return;
-  }
-
-  loading.value = true;
-  currentState.value = null;
-
-  const loadingToastId = toast.loading(`加载 ${provider} ${viewType}...`);
-
-  try {
-    const flow = await getFlow(uuid);
-    if (!flow) {
-      throw new Error(`Flow not found with ID: ${uuid}`);
-    }
-
-    logger.debug`flow: ${flow}`;
-
-    flowId.value = uuid;
-    flowInfo.value = {
-      id: flow.id,
-      host: flow.request.host,
-      path: flow.request.path,
-    };
-
-    let data: unknown;
-    let rawSSE: string | undefined;
-
-    if (viewType === 'request') {
-      // Parse request content
-      data = parseRequest(provider, flow.request.content);
-      logger.debug(`data: ${data}`)
-    } else if (viewType === 'response') {
-      // Use transfer service to convert SSE to response
-      const transferService = getTransferService(provider);
-      const sseContent = await transferService.getSSEContent(flow);
-      const transferResult = transferService.transfer(sseContent);
-
-      if (!transferResult.success) {
-        throw new Error(transferResult.error || 'Transfer failed');
-      }
-
-      data = transferResult.data;
-      rawSSE = transferResult.rawSSE;
-    } else if (viewType === 'sse') {
-      // Parse raw SSE events
-      const transferService = getTransferService(provider);
-      rawSSE = await transferService.getSSEContent(flow);
-      data = parseSSEEvents(provider, rawSSE);
-    }
-
-    currentState.value = {
-      provider,
-      viewType,
-      data,
-      rawSSE,
-    };
-
-    toast.success('加载成功', {
-      id: loadingToastId,
-      description: `${provider} ${viewType} 数据已渲染`,
-    });
-  } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : String(error);
-    toast.error('加载失败', {
-      id: loadingToastId,
-      description: errorMsg,
-    });
-  } finally {
-    loading.value = false;
-  }
-}
-
-// Component mapping
-const componentMap: Record<Provider, Record<ViewType, unknown>> = {
-  openai: {
-    request: OpenaiRequestView,
-    response: OpenaiResponseView,
-    sse: OpenaiSSEView,
-  },
-  claude: {
-    request: ClaudeRequestView,
-    response: ClaudeResponseView,
-    sse: ClaudeSSEView,
-  },
-  gemini: {
-    request: GeminiRequestView,
-    response: GeminiResponseView,
-    sse: GeminiSSEView,
-  },
-};
-
-// Props mapping for different view types
-const currentComponent = computed(() => {
-  if (!currentState.value) return null;
-  const { provider, viewType } = currentState.value;
-  return componentMap[provider][viewType];
-});
-
-const currentProps = computed(() => {
-  if (!currentState.value) return {};
-  const { viewType, data } = currentState.value;
-
-  if (viewType === 'sse') {
-    // SSE views expect different props
-    if (Array.isArray(data)) {
-      return { chunks: data, events: data };
-    }
-  }
-
-  return { data };
-});
-
-const currentFlowId = computed(() => flowId.value || extractFlowId(window.location.href) || 'Not found');
-const hasData = computed(() => currentState.value !== null);
-const hasError = computed(() => false);
 
 async function copyToClipboard(text: string) {
   try {
@@ -262,6 +39,11 @@ async function copyToClipboard(text: string) {
   } catch (error) {
     toast.error('复制失败');
   }
+}
+
+function refreshData(standard: ApiStandard, datatype: DataType) {
+  userStandard.value = standard
+  userDataType.value = datatype
 }
 </script>
 
@@ -275,11 +57,23 @@ async function copyToClipboard(text: string) {
         <p>Render LLM Request/Response/SSE data</p>
       </div>
 
+      <!-- Store 自动检测值 -->
+      <div class="info-box">
+        <div class="info-row">
+          <span class="label">检测到:</span>
+          <span class="value">{{ standard }} - {{ dataType }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">当前使用:</span>
+          <span class="value">{{ activeStandard }} - {{ activeDataType }}</span>
+        </div>
+      </div>
+
       <!-- Flow 信息区 -->
       <div class="info-box">
         <div class="info-row">
           <span class="label">Flow ID:</span>
-          <span class="value">{{ currentFlowId }}</span>
+          <span class="value">{{ flowId }}</span>
         </div>
         <div v-if="flowInfo" class="info-row">
           <span class="label">Host:</span>
@@ -292,12 +86,12 @@ async function copyToClipboard(text: string) {
       </div>
 
       <!-- 当前状态区 -->
-      <div v-if="currentState" class="result-box">
+      <div class="result-box">
         <div class="status-badge success">
-          {{ currentState.provider }} {{ currentState.viewType }}
+          {{ activeStandard }} {{ activeDataType }}
         </div>
         <div class="success-msg">
-          {{ currentState.data ? '数据已加载' : '无数据' }}
+          {{ dataAsText ? '数据已加载' : '无数据' }}
         </div>
       </div>
     </div>
@@ -308,16 +102,18 @@ async function copyToClipboard(text: string) {
       <div class="button-group">
         <div class="group-label">OpenAI</div>
         <div class="group-buttons">
-          <button class="render-btn openai" :class="{ disabled: loading }" :disabled="loading" @click="loadData('openai', 'request')">
-            <span v-if="loading && currentState?.provider === 'openai' && currentState?.viewType === 'request'" class="loading-spinner"></span>
+          <button class="render-btn openai" :class="{ disabled: loading }" :disabled="loading"
+            @click="refreshData('openai', 'request')">
+
             Request
           </button>
-          <button class="render-btn openai" :class="{ disabled: loading }" :disabled="loading" @click="loadData('openai', 'response')">
-            <span v-if="loading && currentState?.provider === 'openai' && currentState?.viewType === 'response'" class="loading-spinner"></span>
+          <button class="render-btn openai" :class="{ disabled: loading }" :disabled="loading"
+            @click="refreshData('openai', 'response')">
+
             Response
           </button>
-          <button class="render-btn openai" :class="{ disabled: loading }" :disabled="loading" @click="loadData('openai', 'sse')">
-            <span v-if="loading && currentState?.provider === 'openai' && currentState?.viewType === 'sse'" class="loading-spinner"></span>
+          <button class="render-btn openai" :class="{ disabled: loading }" :disabled="loading"
+            @click="refreshData('openai', 'sse')">
             SSE
           </button>
         </div>
@@ -327,16 +123,16 @@ async function copyToClipboard(text: string) {
       <div class="button-group">
         <div class="group-label">Claude</div>
         <div class="group-buttons">
-          <button class="render-btn claude" :class="{ disabled: loading }" :disabled="loading" @click="loadData('claude', 'request')">
-            <span v-if="loading && currentState?.provider === 'claude' && currentState?.viewType === 'request'" class="loading-spinner"></span>
+          <button class="render-btn claude" :class="{ disabled: loading }" :disabled="loading"
+            @click="refreshData('claude', 'request')">
             Request
           </button>
-          <button class="render-btn claude" :class="{ disabled: loading }" :disabled="loading" @click="loadData('claude', 'response')">
-            <span v-if="loading && currentState?.provider === 'claude' && currentState?.viewType === 'response'" class="loading-spinner"></span>
+          <button class="render-btn claude" :class="{ disabled: loading }" :disabled="loading"
+            @click="refreshData('claude', 'response')">
             Response
           </button>
-          <button class="render-btn claude" :class="{ disabled: loading }" :disabled="loading" @click="loadData('claude', 'sse')">
-            <span v-if="loading && currentState?.provider === 'claude' && currentState?.viewType === 'sse'" class="loading-spinner"></span>
+          <button class="render-btn claude" :class="{ disabled: loading }" :disabled="loading"
+            @click="refreshData('claude', 'sse')">
             SSE
           </button>
         </div>
@@ -346,37 +142,24 @@ async function copyToClipboard(text: string) {
       <div class="button-group">
         <div class="group-label">Gemini</div>
         <div class="group-buttons">
-          <button class="render-btn gemini" :class="{ disabled: loading }" :disabled="loading" @click="loadData('gemini', 'request')">
-            <span v-if="loading && currentState?.provider === 'gemini' && currentState?.viewType === 'request'" class="loading-spinner"></span>
+          <button class="render-btn gemini" :class="{ disabled: loading }" :disabled="loading"
+            @click="refreshData('gemini', 'request')">
             Request
           </button>
-          <button class="render-btn gemini" :class="{ disabled: loading }" :disabled="loading" @click="loadData('gemini', 'response')">
-            <span v-if="loading && currentState?.provider === 'gemini' && currentState?.viewType === 'response'" class="loading-spinner"></span>
+          <button class="render-btn gemini" :class="{ disabled: loading }" :disabled="loading"
+            @click="refreshData('gemini', 'response')">
             Response
           </button>
-          <button class="render-btn gemini" :class="{ disabled: loading }" :disabled="loading" @click="loadData('gemini', 'sse')">
-            <span v-if="loading && currentState?.provider === 'gemini' && currentState?.viewType === 'sse'" class="loading-spinner"></span>
+          <button class="render-btn gemini" :class="{ disabled: loading }" :disabled="loading"
+            @click="refreshData('gemini', 'sse')">
             SSE
           </button>
         </div>
       </div>
     </div>
 
-    <!-- 渲染内容区 -->
-    <div v-if="currentState" class="render-content">
-      <div class="render-header">
-        <h3>{{ currentState.provider }} {{ currentState.viewType }}</h3>
-        <button v-if="currentState.rawSSE" class="copy-btn" @click="copyToClipboard(currentState.rawSSE)">
-          复制 SSE
-        </button>
-      </div>
-      <div class="render-body">
-        <component
-          :is="currentComponent"
-          v-bind="currentProps"
-        />
-      </div>
-    </div>
+    <view-dashboard-proxy v-if="activeDataType && activeStandard && dataAsText" :data-type="activeDataType"
+      :standard="activeStandard" :data="dataAsText" />
 
     <!-- 空状态 -->
     <div v-else class="empty-state">
@@ -387,6 +170,7 @@ async function copyToClipboard(text: string) {
 </template>
 
 <style scoped>
+/* 样式保持不变 */
 .render-debug {
   padding: 12px;
   overflow-y: auto;

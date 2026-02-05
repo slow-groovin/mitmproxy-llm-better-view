@@ -1,7 +1,5 @@
-/**
- * LLM 提供商类型
- */
-export type LLMProvider = 'openai' | 'claude' | 'gemini';
+import { ApiStandard } from "../../types/flow";
+
 
 /**
  * 转换结果类型
@@ -31,7 +29,7 @@ export interface Flow {
  * 所有 LLM 提供商的 transfer service 都需要实现此接口
  */
 export interface ITransferService {
-  readonly provider: LLMProvider;
+  readonly provider: ApiStandard;
   canHandle(flow: Flow): boolean;
   getSSEContent(flow: Flow): Promise<string>;
   transfer(sseText: string): TransferResult;

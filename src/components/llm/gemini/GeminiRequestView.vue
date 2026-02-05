@@ -1,18 +1,20 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { formatDate } from '@/utils/format/formatDate';
-import type { GeminiRequest } from '@/types/gemini/request';
+import type { GeminiRequest } from '../../../types/gemini/request';
 import CollapsibleSection from '../shared/CollapsibleSection.vue';
 import InfoItem from '../shared/InfoItem.vue';
 import JsonViewer from '../shared/JsonViewer.vue';
 import MessageItem from '../messages/MessageItem.vue';
 import ToolItem from '../tools/ToolItem.vue';
+import { logger } from '../../../lib/logtape';
 
 interface Props {
   data: GeminiRequest;
 }
 
 const props = defineProps<Props>();
+logger.debug`gemini request data: ${props.data}`
 
 const contents = computed(() => {
   return props.data.contents || [];

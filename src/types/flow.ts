@@ -1,3 +1,6 @@
+export type ApiStandard = 'openai' | 'claude' | 'gemini';
+export type DataType = 'request' | 'response' | 'sse';
+
 export type CallAction = { uuid: string, action: 'request' | 'response' }
 export type Flow = {
   id: string;
@@ -15,7 +18,7 @@ export type Flow = {
     port: number;
     path: string;
     http_version: string;
-    headers: Array<Record<string, string>>;
+    headers: Array<[string, string[]]>;
     contentLength: number;
     contentHash: string;
     timestamp_start: number;
@@ -26,7 +29,7 @@ export type Flow = {
     http_version: string;
     status_code: number;
     reason: string;
-    headers: Array<Record<string, string>>;
+    headers: Array<[string, string[]]>;
     contentLength: number;
     contentHash: string;
     timestamp_start: number;

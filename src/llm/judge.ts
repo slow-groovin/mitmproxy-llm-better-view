@@ -1,6 +1,8 @@
-import { Flow } from '../lib/pipeline'
+
 
 // --- 辅助函数 ---
+
+import { Flow } from "../types/flow"
 
 export function isJson(flow: Flow): boolean {
   return flow.response.headers.some(h => {

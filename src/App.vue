@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import 'vue-sonner/style.css';
-import { Toaster } from 'vue-sonner';
-import { ref, shallowRef, type Component } from 'vue';
+import { toast, Toaster } from 'vue-sonner';
+import { nextTick, onMounted, ref, shallowRef, type Component } from 'vue';
+import { logger } from './lib/logtape';
+import { HookFunc, initRouteListener } from './lib/pipeline';
+import { isOpenAIReq, isOpenAIRes, isSSE, isAnthropicReq, isAnthropicRes, isGeminiReq, isGeminiRes } from './llm/judge';
+import { useCurrentFlowStore } from './store/llm';
+import { ApiStandard, DataType } from './types/flow';
 
 const showDebug = ref(false);
 const isDev=import.meta.env.DEV
@@ -14,6 +19,87 @@ async function toggleDebug() {
   }
   showDebug.value = !showDebug.value;
 }
+
+
+const { setLLMData } = useCurrentFlowStore();
+
+onMounted(() => {
+
+
+  // Hook function for processing LLM requests/responses
+  const handleLLMData: HookFunc = async (type, flowData, flow) => {
+    logger.debug`Detected request/response ${{ type, flowData, flow }}`;
+    try {
+      let standard: ApiStandard | null = null;
+      let dataType: DataType | null = null;
+      const dataAsText = flowData.text
+      // Parse the response data
+      // const data = parseResponseData(dataAsText);
+      // logger.debug`dataTExt: ${dataAsText}`
+      // Detect platform and view type
+      if (isOpenAIReq(type, dataAsText, flow)) {
+        standard = 'openai';
+        dataType = 'request';
+        toast('OpenAI Request detected');
+      } else if (isOpenAIRes(type, dataAsText, flow)) {
+        standard = 'openai';
+        if (isSSE(flow)) {
+          dataType = 'sse';
+          toast('OpenAI SSE detected');
+        } else {
+          dataType = 'response';
+          toast('OpenAI Response detected');
+        }
+      } else if (isAnthropicReq(type, dataAsText, flow)) {
+        standard = 'claude';
+        dataType = 'request';
+        toast('Claude Request detected');
+      } else if (isAnthropicRes(type, dataAsText, flow)) {
+        standard = 'claude';
+        if (isSSE(flow)) {
+          dataType = 'sse';
+          toast('Claude SSE detected');
+        } else {
+          dataType = 'response';
+          toast('Claude Response detected');
+        }
+      } else if (isGeminiReq(type, dataAsText, flow)) {
+        standard = 'gemini';
+        dataType = 'request';
+        toast('Gemini Request detected');
+      } else if (isGeminiRes(type, dataAsText, flow)) {
+        standard = 'gemini';
+        if (isSSE(flow)) {
+          dataType = 'sse';
+          toast('Gemini SSE detected');
+        } else {
+          dataType = 'response';
+          toast('Gemini Response detected');
+        }
+      }
+
+      if (standard && dataAsText && dataType) {
+        setLLMData(standard, dataType, dataAsText, flow);
+        await nextTick();
+        logger.info`Dashboard data updated  ${{ platform: standard, view: dataType }}`;
+      } else {
+        logger.warn('Unknown type or no data', { type, hasData: !!dataAsText });
+      }
+    } catch (error) {
+      logger.error(error as Error);
+      toast('Error processing request');
+    }
+
+    // Return null to not modify the original response
+    return null;
+  };
+
+  // Initialize route listener
+  initRouteListener(handleLLMData);
+
+
+})
+
 </script>
 
 <template>
