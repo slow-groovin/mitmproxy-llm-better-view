@@ -1,4 +1,4 @@
-import type { Flow, TransferResult } from './types';
+import type { Flow, TransferResult, ITransferService } from './types';
 import type { OpenaiChatResponse, Choice, ChoiceMessage } from '../../types/openai/chat-response';
 import type {
   OpenaiChatCompletionChunk,
@@ -32,7 +32,8 @@ interface AggregatedToolCallState {
  * OpenAI Chat Transfer Service
  * 处理 OpenAI 聊天 API 的 SSE 流式响应转换
  */
-export class OpenaiTransferService {
+export class OpenaiTransferService implements ITransferService {
+  readonly provider = 'openai' as const;
   /**
    * 检查是否为 OpenAI 聊天 API 的 Flow
    */

@@ -1,4 +1,9 @@
 /**
+ * LLM 提供商类型
+ */
+export type LLMProvider = 'openai' | 'claude' | 'gemini';
+
+/**
  * 转换结果类型
  */
 export interface TransferResult {
@@ -19,4 +24,15 @@ export interface Flow {
     headers: Array<[string, string]>;
     contentLength: number;
   };
+}
+
+/**
+ * Transfer Service 接口
+ * 所有 LLM 提供商的 transfer service 都需要实现此接口
+ */
+export interface ITransferService {
+  readonly provider: LLMProvider;
+  canHandle(flow: Flow): boolean;
+  getSSEContent(flow: Flow): Promise<string>;
+  transfer(sseText: string): TransferResult;
 }

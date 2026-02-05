@@ -2,9 +2,11 @@
 import { ref, computed, watch } from 'vue';
 import { useLocalStorage } from '@vueuse/core';
 import { toast } from 'vue-sonner';
-import type { TransferResult } from '../../lib/transfer/types';
+import type { ITransferService, TransferResult } from '../../lib/transfer/types';
 import { logger } from '../../lib/logtape';
 import { openaiTransferService } from '../../lib/transfer/openai-transfer-service';
+import { geminiTransferService } from '../../lib/transfer/gemini-transfer-service';
+import { claudeTransferService } from '../../lib/transfer/claude-transfer-service';
 
 interface Flow {
   id: string;
@@ -53,7 +55,7 @@ async function getFlow(uuid: string): Promise<Flow | null> {
   return flowArray.find((flow: Flow) => flow.id === uuid) || null;
 }
 
-async function performTransfer() {
+async function performTransfer(transferService: ITransferService) {
   const url = window.location.href;
   const uuid = extractFlowId(url);
 
@@ -85,9 +87,9 @@ async function performTransfer() {
       path: flow.request.path,
     };
 
-    const sseContent = await openaiTransferService.getSSEContent(flow);
+    const sseContent = await transferService.getSSEContent(flow);
     logger.debug`sseContent: ${sseContent}`;
-    const transferResult = openaiTransferService.transfer(sseContent);
+    const transferResult = transferService.transfer(sseContent);
     result.value = transferResult;
 
     if (transferResult.success) {
@@ -174,10 +176,20 @@ const formattedData = computed(() => {
       </div>
     </div>
 
-    <button class="transfer-btn" :class="{ disabled: loading }" :disabled="loading" @click="performTransfer">
-      <span v-if="loading" class="loading-spinner"></span>
-      {{ loading ? '转换中...' : '开始转换' }}
-    </button>
+    <div class="button-group">
+      <button class="transfer-btn" :class="{ disabled: loading }" :disabled="loading" @click="performTransfer(openaiTransferService)">
+        <span v-if="loading" class="loading-spinner"></span>
+        {{ loading ? '转换中...' : 'OpenAI' }}
+      </button>
+      <button class="transfer-btn" :class="{ disabled: loading }" :disabled="loading" @click="performTransfer(claudeTransferService)">
+        <span v-if="loading" class="loading-spinner"></span>
+        {{ loading ? '转换中...' : 'Claude' }}
+      </button>
+      <button class="transfer-btn" :class="{ disabled: loading }" :disabled="loading" @click="performTransfer(geminiTransferService)">
+        <span v-if="loading" class="loading-spinner"></span>
+        {{ loading ? '转换中...' : 'Gemini' }}
+      </button>
+    </div>
 
     <!-- 结果详情 -->
     <div v-if="result" class="results">
@@ -266,6 +278,12 @@ const formattedData = computed(() => {
   word-break: break-all;
 }
 
+.button-group {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+}
+
 .transfer-btn {
   padding: 8px 16px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -280,7 +298,7 @@ const formattedData = computed(() => {
   justify-content: center;
   gap: 6px;
   transition: all 0.2s;
-  margin-top: auto;
+  flex: 1;
 }
 
 .transfer-btn:hover:not(.disabled) {
