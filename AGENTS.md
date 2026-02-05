@@ -12,8 +12,12 @@ making 外挂式辅助页面 for mitmweb(react spa) 网站
 大致为: 监听route变动 -> 在打开 <uuid>/request或response时 -> GET访问flow api获取完整数据 -> 渲染出数据可视化 -> 插入到页面内位置显示
 
 ## 改造方案
+### 整体流程
 监听route变动 -> 在打开 <uuid>/request或response时 -> GET访问flow api获取完整数据 -> **hook函数执行, 接受type和data, 返回一个document node**  -> 插入node到页面内位置显示
 整个过程比较固定, 使用一个 pipeline.ts 中定义 export function initRouteListener(hook: Func)
+
+### 新增: 可手动切换
+用户可以手动切换, 进行不同llm格式的预览
                                                                            
 
 
