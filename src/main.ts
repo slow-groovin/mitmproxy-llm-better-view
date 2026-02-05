@@ -6,8 +6,10 @@ import App from './App.vue';
 import { initRouteListener,} from './lib/pipeline';
 import { isAnthropicReq, isAnthropicRes, isGeminiReq, isGeminiRes, isOpenAIReq, isOpenAIRes } from './llm/judge';
 import { toast } from 'vue-sonner';
+import { logger } from './lib/logtape';
 
 initRouteListener(async (_type, data, flow) => {
+  logger.debug("detect request.");
   if(isOpenAIReq(_type,data,flow)){
     toast("Openai req")
   }else if(isOpenAIRes(_type,data,flow)){
