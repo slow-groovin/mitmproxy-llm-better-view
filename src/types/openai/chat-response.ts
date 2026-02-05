@@ -14,7 +14,7 @@ export type Choice = {
   logprobs?: LogProbs | null;
 };
 
-export type ChatCompletionResponse = {
+export type OpenaiChatResponse = {
   id: string;
   object: 'chat.completion';
   created: number;

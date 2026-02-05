@@ -1,0 +1,87 @@
+{
+  // 消息的全局唯一标识符
+  "id": "msg_01XFDUDYJgAACzvnptvVoYEL",
+
+  // 固定值，标识这是一个完整的消息对象
+  "type": "message",
+
+  // 固定为 "assistant"，表示这是模型生成的回复
+  "role": "assistant",
+
+  // 内容块数组（最核心的部分）
+  // 几乎总是数组，即使只有一段文字
+  "content": [
+    // 普通文本回复（最常见的情况）
+    {
+      "type": "text",
+      "text": "你好！这是我的回答内容..."
+      // 当启用 RAG / citations 功能时，可能出现以下字段（可选）
+      // "citations": [
+      //   {
+      //     "type": "document",
+      //     "document": { "type": "text", "text": "...", "source": {...} },
+      //     "start": 42,
+      //     "end": 168
+      //   }
+      // ]
+    },
+
+    // 当模型决定调用工具时，会出现这个块
+    {
+      "type": "tool_use",
+
+      // 由模型生成的工具调用唯一ID（后续 tool_result 要引用这个id）
+      "id": "toolu_01A2B3C4D5E6F7G8H9I0J1K2",
+
+      // 调用的工具名称，必须与你传的 tools 数组中的 name 匹配
+      "name": "get_current_weather",
+
+      // 工具的参数对象，符合该工具的 input_schema
+      "input": {
+        "city": "上海",
+        "unit": "celsius"
+      }
+    },
+
+    // 极少见，但在某些 beta 功能或未来版本中可能出现其他 content block 类型
+    // {
+    //   "type": "???",
+    //   ...
+    // }
+  ],
+
+  // 使用的模型完整名称（你请求时指定的模型）
+  "model": "claude-3-5-sonnet-20241022",
+
+  // 停止原因（非常重要，用于判断后续逻辑）
+  "stop_reason": "end_turn", 
+  // 可选值：
+  //   "end_turn"           → 模型认为回答完成
+  //   "max_tokens"         → 达到 max_tokens 限制，被强制截断
+  //   "stop_sequence"      → 命中了你设置的自定义 stop_sequences 中的某一个
+  //   "tool_use"           → 模型决定调用工具（最常见于工具调用场景）
+
+  // 如果 stop_reason 是 "stop_sequence"，则这里会返回具体命中的停止序列
+  // 否则为 null
+  "stop_sequence": null,
+  // 示例： "stop_sequence": "DONE"
+
+  // 使用量统计（非常重要，用于计费和调试）
+  "usage": {
+    // 本次请求的输入 token 数（包含 system prompt、历史消息、tools 等全部）
+    "input_tokens": 284,
+
+    // 本次模型生成的输出 token 数（content 部分的 token）
+    "output_tokens": 67,
+
+    // 某些实验性/未来版本中可能出现（目前大部分情况下没有）
+    // "cache_read_input_tokens": 0,
+    // "cache_creation_input_tokens": 0
+  },
+
+  // 极少出现，仅在某些特殊配置或 beta 功能下可能存在
+  // "error": null,
+
+  // 目前官方标准响应中不会出现，但某些 wrapper/SDK 可能会额外添加
+  // "timestamp": "2026-02-04T12:34:56Z"
+}

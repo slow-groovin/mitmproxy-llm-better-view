@@ -55,7 +55,7 @@ export type JSONSchemaFormat = {
 
 export type ResponseFormat = { type: ResponseFormatType } | { type: 'json_schema'; json_schema: JSONSchemaFormat };
 
-export type ChatCompletionRequest = {
+export type OpenaiChatRequest = {
   model: string;
   messages: ChatMessage[];
   temperature?: number | null;

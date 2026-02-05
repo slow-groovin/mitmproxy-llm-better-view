@@ -1,0 +1,260 @@
+import type { ClaudeRequest} from './claude-request';
+import type { SSEEventData } from './claude-sse';
+
+// Test request type
+//@ts-ignore
+const claudeReq: ClaudeRequest ={
+    "model": "glm-4.7",
+    "messages": [
+        {
+            "role": "user",
+            "content": ""
+        },
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "text",
+                    "text": ""
+                },
+                {
+                    "type": "text",
+                    "text": "<local-command-stdout></local-command-stdout>"
+                },
+                {
+                    "type": "text",
+                    "text": "中"
+                }
+            ]
+        },
+        {
+            "role": "assistant",
+            "content": [
+                {
+                    "type": "thinking",
+                    "thinking": "用户希望我参",
+                    "signature": ""
+                },
+                {
+                    "type": "text",
+                    "text": "让我先查看 目录中的内容，了解数据格式。"
+                },
+                {
+                    "type": "tool_use",
+                    "id": "call_3s0",
+                    "name": "Bash",
+                    "input": {
+                        "command": "ls -la /llm-better-view/sample/gemini",
+                        "description": "List files in sample/gemini"
+                    }
+                },
+                {
+                    "type": "tool_use",
+                    "id": "call_0olv7y",
+                    "name": "Bash",
+                    "input": {
+                        "command": "find /gemini -type f | head -20",
+                        "description": "Find files in gemini sample"
+                    }
+                }
+            ]
+        },
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "tool_result",
+                    "content": "Exit code 2\nls: 无法访问 没有那个文件或目录",
+                    "is_error": true,
+                    "tool_use_id": "call_3s0"
+                },
+                {
+                    "tool_use_id": "call_0olv7y",
+                    "type": "tool_result",
+                    "content": "find: ‘件或目录",
+                    "is_error": false
+                }
+            ]
+        },
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "text",
+                    "text": "[SUGGESTION MODE: Suggest what the user might naturally type next into Claude Code.]anation.",
+                    "cache_control": {
+                        "type": "ephemeral"
+                    }
+                }
+            ]
+        }
+    ],
+    "system": [
+        {
+            "type": "text",
+            "text": "x-anthropic-billing-header: cc_version=2.1.19.1ee; cc_entrypoint=cli"
+        },
+        {
+            "type": "text",
+            "text": "You are Claude Code, Anthropic's official CLI for Claude.",
+            "cache_control": {
+                "type": "ephemeral"
+            }
+        },
+        {
+            "type": "text",
+            "text": "\nYou are an interactive CLI tool that helps  AGENTS.md",
+            "cache_control": {
+                "type": "ephemeral"
+            }
+        }
+    ],
+    "tools": [
+        {
+            "name": "Task",
+            "description": "Launch a new agent to handle complex, \n",
+            "input_schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                    "description": {
+                        "description": "A short (3-5 word) description of the task",
+                        "type": "string"
+                    },
+                    "prompt": {
+                        "description": "The task for the agent to perform",
+                        "type": "string"
+                    },
+                    "subagent_type": {
+                        "description": "The type of specialized agent to use for this task",
+                        "type": "string"
+                    },
+                    "model": {
+                        "description": "Optional model to use for this agent. If not specified, inherits from parent. Prefer haiku for quick, straightforward tasks to minimize cost and latency.",
+                        "type": "string",
+                        "enum": [
+                            "sonnet",
+                            "opus",
+                            "haiku"
+                        ]
+                    },
+                    "resume": {
+                        "description": "Optional agent ID to resume from. If provided, the agent will continue from the previous execution transcript.",
+                        "type": "string"
+                    },
+                    "run_in_background": {
+                        "description": "Set to true to run this agent in the background. The tool result will include an output_file path - use Read tool or Bash tail to check on output.",
+                        "type": "boolean"
+                    },
+                    "max_turns": {
+                        "description": "Maximum number of agentic turns (API round-trips) before stopping. Used internally for warmup.",
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991
+                    },
+                    "allowed_tools": {
+                        "description": "Tools to grant this agent. User will be prompted to approve if not already allowed. Example: [\"Bash(git commit*)\", \"Read\"]",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "description",
+                    "prompt",
+                    "subagent_type"
+                ],
+                "additionalProperties": false
+            }
+        },
+        {
+            "name": "Bash",
+            "description": "Executes a given bash command ",
+            "input_schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                    "command": {
+                        "description": "The command to execute",
+                        "type": "string"
+                    },
+                    "timeout": {
+                        "description": "Optional timeout in milliseconds (max 600000)",
+                        "type": "number"
+                    },
+                    "description": {
+                        "description": "Clear, concise description ",
+                        "type": "string"
+                    },
+                    "run_in_background": {
+                        "description": "Set to true to run this command in the background. Use TaskOutput to read the output later.",
+                        "type": "boolean"
+                    },
+                    "dangerouslyDisableSandbox": {
+                        "description": "Set this to true to dangerously override sandbox mode and run commands without sandboxing.",
+                        "type": "boolean"
+                    },
+                    "_simulatedSedEdit": {
+                        "description": "Internal: pre-computed sed edit result from preview",
+                        "type": "object",
+                        "properties": {
+                            "filePath": {
+                                "type": "string"
+                            },
+                            "newContent": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "filePath",
+                            "newContent"
+                        ],
+                        "additionalProperties": false
+                    }
+                },
+                "required": [
+                    "command"
+                ],
+                "additionalProperties": false
+            }
+        },
+        {
+            "name": "mcp__ide__executeCode",
+            "description": "Execute python code in the Jupytrted.",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "description": "The code to be executed on the kernel."
+                    }
+                },
+                "required": [
+                    "code"
+                ],
+                "additionalProperties": false,
+                "$schema": "http://json-schema.org/draft-07/schema#"
+            }
+        }
+    ],
+    "metadata": {
+        "user_id": "user_352f3ae5"
+    },
+    "max_tokens": 500,
+    "thinking": {
+        "budget_tokens": 31999,
+        "type": "enabled"
+    },
+    "stream": true
+}
+
+const claudeSSE:SSEEventData[]=[
+  {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" conversation"}},
+   {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"output_tokens":281}},
+   {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":")"}}
+]
+
+
+//@ts-ignore
+let _=claudeSSE

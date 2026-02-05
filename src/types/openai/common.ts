@@ -31,7 +31,7 @@ export type Usage = {
   completion_tokens_details?: CompletionTokensDetails;
   input_tokens?: number;
   output_tokens?: number;
-  input_tokens_details?: PromptTokensDetails;
+  input_tokens_details?: PromptTokensDetails|null;
   claude_cache_creation_5_m_tokens?: number;
   claude_cache_creation_1_h_tokens?: number;
 };

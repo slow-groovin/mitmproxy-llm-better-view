@@ -1,5 +1,16 @@
 import type { ToolCall, Usage, LogProbs } from './common';
 
+export type OpenaiChatCompletionChunk = {
+  id: string;
+  object: 'chat.completion.chunk';
+  created: number;
+  model: string;
+  service_tier?: string;
+  system_fingerprint?: string;
+  choices: StreamChoice[];
+  usage?: Usage|null;
+};
+
 export type Delta = {
   role?: 'assistant';
   content?: string;
@@ -11,30 +22,21 @@ export type Delta = {
 export type StreamChoice = {
   index: number;
   delta: Delta;
-  finish_reason: 'stop' | 'length' | 'tool_calls' | 'content_filter' | string | null;
+  finish_reason?: 'stop' | 'length' | 'tool_calls' | 'content_filter' | string | null;
   logprobs?: LogProbs | null;
 };
 
-export type ChatCompletionChunk = {
-  id: string;
-  object: 'chat.completion.chunk';
-  created: number;
-  model: string;
-  service_tier?: string;
-  system_fingerprint?: string;
-  choices: StreamChoice[];
-  usage?: Usage;
-};
 
-export type SSEEvent = {
+
+export type OpenaiSSEEvent = {
   event?: string;
   data: string | null;
   timestamp?: number;
 };
 
-export type ParsedSSEChunk = {
+export type OpenaiParsedSSEChunk = {
   type: 'chunk' | 'done' | 'error';
-  data: ChatCompletionChunk | null;
+  data: OpenaiChatCompletionChunk | null;
   raw: string;
   timestamp?: number;
 };

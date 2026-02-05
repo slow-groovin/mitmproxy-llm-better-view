@@ -33,7 +33,7 @@
 }
 **/
 {
-    "id": "chatcmpl-20260205124517405751937F39Ps41d",
+    "id": "chatcmpl-202602051245174057519",
     "model": "gemini-flash-latest",
     "object": "chat.completion",
     "created": 1770266718,
@@ -82,7 +82,7 @@
 
 //example2
 {
-    "id": "chatcmpl-20260205124149652538628SZkkgYiG",
+    "id": "chatcmpl-20260205124149652G",
     "model": "gpt2.5",
     "object": "chat.completion",
     "created": 1770266512,
