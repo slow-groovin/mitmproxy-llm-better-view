@@ -12,47 +12,30 @@ import {
   isAnthropicRes,
   isGeminiReq,
   isGeminiRes,
+  isSSE,
 } from './llm/judge';
 import { initRouteListener, type HookFunc, type Flow } from './lib/pipeline';
 logger.debug`main.ts`;
 // Helper function to check if response is SSE
-function isSSE(flow: Flow): boolean {
-  return flow.response.headers.some(h => {
-    const [key, value] = h;
-    return key.toLowerCase() === 'content-type' && value.includes('text/event-stream');
-  });
-}
-
-// Helper function to parse response data
-function parseResponseData(data: any): any | null {
-  try {
-    // Handle buffer or string
-    const text = typeof data === 'string' ? data : (data.text || data.toString('utf-8'));
-    return typeof text === 'string' ? JSON.parse(text) : data;
-  } catch {
-    return null;
-  }
-}
 
 
 
 // Hook function for processing LLM requests/responses
-const handleLLMData: HookFunc = async (type, text, flow) => {
-  logger.debug('Detected request/response', { type, text: !!text, flow });
-
+const handleLLMData: HookFunc = async (type, flowData, flow) => {
+  logger.debug`Detected request/response ${{ type, flowData, flow }}`;
   try {
     let platform: 'openai' | 'claude' | 'gemini' | null = null;
     let view: 'request' | 'response' | 'sse' | 'raw' = 'raw';
-
+    const dataAsText=flowData.text
     // Parse the response data
-    const data = parseResponseData(text);
-
+    // const data = parseResponseData(dataAsText);
+    // logger.debug`dataTExt: ${dataAsText}`
     // Detect platform and view type
-    if (isOpenAIReq(type, data, flow)) {
+    if (isOpenAIReq(type, dataAsText, flow)) {
       platform = 'openai';
       view = 'request';
       toast('OpenAI Request detected');
-    } else if (isOpenAIRes(type, data, flow)) {
+    } else if (isOpenAIRes(type, dataAsText, flow)) {
       platform = 'openai';
       if (isSSE(flow)) {
         view = 'sse';
@@ -61,11 +44,11 @@ const handleLLMData: HookFunc = async (type, text, flow) => {
         view = 'response';
         toast('OpenAI Response detected');
       }
-    } else if (isAnthropicReq(type, data, flow)) {
+    } else if (isAnthropicReq(type, dataAsText, flow)) {
       platform = 'claude';
       view = 'request';
       toast('Claude Request detected');
-    } else if (isAnthropicRes(type, data, flow)) {
+    } else if (isAnthropicRes(type, dataAsText, flow)) {
       platform = 'claude';
       if (isSSE(flow)) {
         view = 'sse';
@@ -74,11 +57,11 @@ const handleLLMData: HookFunc = async (type, text, flow) => {
         view = 'response';
         toast('Claude Response detected');
       }
-    } else if (isGeminiReq(type, data, flow)) {
+    } else if (isGeminiReq(type, dataAsText, flow)) {
       platform = 'gemini';
       view = 'request';
       toast('Gemini Request detected');
-    } else if (isGeminiRes(type, data, flow)) {
+    } else if (isGeminiRes(type, dataAsText, flow)) {
       platform = 'gemini';
       if (isSSE(flow)) {
         view = 'sse';
@@ -89,7 +72,7 @@ const handleLLMData: HookFunc = async (type, text, flow) => {
       }
     }
 
-    if (platform && data) {
+    if (platform && dataAsText) {
       // dashboardData.value = {
       //   type,
       //   data,
@@ -99,7 +82,7 @@ const handleLLMData: HookFunc = async (type, text, flow) => {
       // };
       logger.info('Dashboard data updated', { platform, view });
     } else {
-      logger.warn('Unknown type or no data', { type, hasData: !!data });
+      logger.warn('Unknown type or no data', { type, hasData: !!dataAsText });
     }
   } catch (error) {
     logger.error(error as Error);
