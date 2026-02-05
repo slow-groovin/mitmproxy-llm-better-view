@@ -10,7 +10,7 @@ export type PageInjectorOptions = {
 
 export function initPageInjector(options?: PageInjectorOptions) {
   const component = options?.component || Dashboard;
-  
+
   ensureContainer();
   mountVueApp(component);
 }
@@ -31,11 +31,11 @@ function ensureContainer() {
   container.toggleAttribute('open');
   container.id = 'mitmproxy-llm-better-view-dash-container';
   container.classList.add('llm-better-view');
-  
+
   const summaryElement = document.createElement('summary');
   summaryElement.textContent = 'LLM Better View Dashboard';
   container.prepend(summaryElement);
-  
+
   contentview.insertBefore(container, secondChild);
 }
 
@@ -50,11 +50,11 @@ function mountVueApp(component: Component) {
 
   const appContainer = document.createElement('div');
   appContainer.id = 'vue-dashboard-mount-point';
-  
+
   while (container.childNodes.length > 1) {
     container.removeChild(container.lastChild!);
   }
-  
+
   container.appendChild(appContainer);
 
   vueAppInstance = createApp(component);
@@ -72,3 +72,7 @@ export function destroyPageInjector() {
     container = null;
   }
 }
+
+// Re-export with Dashboard-specific names for main.ts
+export const initDashboardInjector = initPageInjector;
+export const destroyDashboardInjector = destroyPageInjector;
