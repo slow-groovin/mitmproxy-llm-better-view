@@ -47,10 +47,7 @@ function isMarkdown(str: string): boolean {
     str.includes('\n## ') ||
     str.includes('\n### ') ||
     str.includes('\n1. ') ||
-    str.includes('\n- ') ||
-    str.includes('**') ||
-    str.includes('__') ||
-    str.includes('[')
+    str.includes('\n- ')
   );
 }
 

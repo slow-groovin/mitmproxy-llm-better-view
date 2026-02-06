@@ -1,15 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-type Platform = 'openai' | 'claude' | 'gemini';
 
 interface Props {
   role: string;
-  platform?: Platform;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  platform: 'openai'
 });
 
 const roleClass = computed(() => {

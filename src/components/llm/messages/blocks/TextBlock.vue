@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, ref } from 'vue';
 import ProseContent from '../../shared/ProseContent.vue';
 import { detectContentFormat } from '../../../../utils/format/formatContent';
 
@@ -14,89 +14,109 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const showRaw = ref(false);
-const format = ref<'text' | 'json' | 'xml' | 'markdown'>('text');
-
-onMounted(() => {
-  format.value = detectContentFormat(props.text);
-});
-
+const format = computed(() => detectContentFormat(props.text));
 const canToggle = computed(() => format.value !== 'text' && props.isProse);
-const displayContent = ref(props.text);
-
-function toggleRaw() {
-  showRaw.value = !showRaw.value;
-}
 </script>
 
 <template>
   <div class="text-block">
-    <div v-if="canToggle" class="text-block-header" @click="toggleRaw">
-      <span class="text-block-badge" :class="format">{{ format }}</span>
-      <span class="text-block-toggle">{{ showRaw ? '▼' : '▶' }} View Raw</span>
+    <!-- 悬浮控制栏 -->
+    <div v-if="canToggle" class="text-block-header">
+      <!-- 左侧：弱化的格式标识 -->
+      <span class="format-label">{{ format }}</span>
+      
+      <!-- 右侧：查看原文按钮 -->
+      <button 
+        class="view-raw-btn" 
+        type="button"
+        @click="showRaw = !showRaw"
+      >
+        {{ showRaw ? '▼' : '▶' }} View Raw
+      </button>
     </div>
-    <div v-if="showRaw" class="text-block-raw">
-      <pre>{{ text }}</pre>
+    
+    <pre v-if="showRaw" class="text-block-raw">{{ text }}</pre>
+    
+    <div v-else class="text-block-content">
+      <ProseContent :content="text" :format="format" />
     </div>
-    <ProseContent v-else :content="text" :format="format" />
   </div>
 </template>
 
 <style scoped>
 .text-block {
-  margin: 4px 0;
+  margin: 0px 0;
+  position: relative;
 }
 
 .text-block-header {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 8px;
-  cursor: pointer;
-  margin-bottom: 4px;
+  justify-content: space-between; /* 左右分布 */
+  align-items: flex-start;        /* 顶部对齐 */
+  margin-bottom: -2px;           /* 负边距，让 header 覆盖在内容上方 (高度约为一行字) */
+  position: relative;
+  pointer-events: none;           /* 容器本身不阻挡鼠标 */
+  font-family: inherit;
 }
 
-.text-block-badge {
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-size: 1rem;
-  font-weight: 600;
+/* 左侧格式标签 - 弱化样式 */
+.format-label {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #49515d;         /* 浅灰色，不抢眼 */
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   text-transform: uppercase;
-  background: #e5e7eb;
-  color: #374151;
+  letter-spacing: 0.05em;
+  pointer-events: auto;   /* 允许选中文字 */
+  
+  /* 可选：如果左侧文字也会重叠，可以加一点点背景，或者保持完全透明显得更干净 */
+  background: rgba(144, 126, 126, 0.4);
+  backdrop-filter: blur(2px);
+  padding: 0 4px;
+  border-radius: 4px;
 }
 
-.text-block-badge.json {
-  background: #dbeafe;
-  color: #1d4ed8;
-}
-
-.text-block-badge.xml {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.text-block-badge.markdown {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.text-block-toggle {
-  font-size: 1.2000000000000002rem;
+/* 右侧按钮 */
+.view-raw-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  
+  border: none;
+  background: rgba(255, 255, 255, 0.6); /* 轻微背景防止文字重叠看不清 */
+  backdrop-filter: blur(2px);
+  padding: 2px 6px;
+  border-radius: 4px;
+  
+  font-size: 0.85rem;
   color: #64748b;
+  cursor: pointer;
+  pointer-events: auto;   /* 恢复点击事件 */
+  transition: all 0.2s;
+}
+
+.view-raw-btn:hover {
+  background: rgba(255, 255, 255, 0.9);
+  color: #334155;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .text-block-raw {
-  font-family: 'Monaco', 'Menlo', monospace;
+  font-family: Monaco, Menlo, monospace;
   background: #1e293b;
   color: #e2e8f0;
-  padding: 12px;
+  /* 顶部 padding 加大，避免 Raw 模式下文字被悬浮按钮遮挡 */
+  padding: 32px 12px 12px 12px; 
   border-radius: 6px;
-  font-size: 1.4rem;
+  font-size: 2.0rem;
+  line-height: 1.5;
   white-space: pre-wrap;
   overflow-x: auto;
+  margin: 0;
 }
 
-.text-block-raw pre {
-  margin: 0;
+.text-block-content {
+  /* 视具体 ProseContent 样式而定，通常不需要额外 padding，
+     因为 format 标签很小，且 view raw 在右侧，一般不会遮挡正文首行重要信息 */
 }
 </style>

@@ -6,6 +6,7 @@ import InfoItem from '../shared/InfoItem.vue';
 import JsonViewer from '../shared/JsonViewer.vue';
 import MessageItem from '../messages/MessageItem.vue';
 import ToolItem from '../tools/ToolItem.vue';
+import OpenaiMessageItem from './OpenaiMessageItem.vue';
 
 interface Props {
   data: OpenaiChatRequest;
@@ -75,7 +76,7 @@ const stopValue = computed(() => {
       <div v-if="messages.length === 0" class="empty-state">
         No messages
       </div>
-      <MessageItem
+      <OpenaiMessageItem
         v-for="(message, index) in messages"
         :key="index"
         :role="message.role"
