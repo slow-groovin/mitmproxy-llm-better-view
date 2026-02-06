@@ -72,7 +72,7 @@ export type Part =
   | ExecutableCodePart
   | CodeExecutionResultPart;
 
-export type Content = {
+export type GeminiReqContent = {
   role: MessageRole;
   parts: Part[];
 };
@@ -138,7 +138,7 @@ export type SafetySetting = {
 };
 
 export type GeminiRequest = {
-  contents: Content[];
+  contents: GeminiReqContent[];
   systemInstruction?: SystemInstruction;
   generationConfig?: GenerationConfig;
   tools?: Tool[];

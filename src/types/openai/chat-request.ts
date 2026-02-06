@@ -30,7 +30,7 @@ export type ToolMessage = BaseMessage & {
   name?: string;
 };
 
-export type ChatMessage = BaseMessage | AssistantMessage | ToolMessage;
+export type OpenaiChatMessage = BaseMessage | AssistantMessage | ToolMessage;
 
 export type ToolFunctionDefinition = {
   name: string;
@@ -57,7 +57,7 @@ export type ResponseFormat = { type: ResponseFormatType } | { type: 'json_schema
 
 export type OpenaiChatRequest = {
   model: string;
-  messages: ChatMessage[];
+  messages: OpenaiChatMessage[];
   temperature?: number | null;
   top_p?: number | null;
   max_tokens?: number | null;

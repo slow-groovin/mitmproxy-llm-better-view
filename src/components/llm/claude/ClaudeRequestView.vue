@@ -78,7 +78,7 @@ const thinkingConfig = computed(() => {
         :role="message.role"
         :index="index"
         :message="message"
-        platform="claude"
+        apiStandard="claude"
       />
     </CollapsibleSection>
 

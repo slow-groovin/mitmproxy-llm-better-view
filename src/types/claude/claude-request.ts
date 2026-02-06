@@ -78,7 +78,7 @@ export type MessageRole = 'user' | 'assistant';
 /**
  * Message in conversation
  */
-export interface Message {
+export interface ClaudeMessage {
   role: MessageRole;
   content: string | ContentBlock[];
 }
@@ -150,7 +150,7 @@ export interface Metadata {
  */
 export interface ClaudeRequest {
   model: string;
-  messages: Message[];
+  messages: ClaudeMessage[];
   system?: string | SystemMessage[];
   tools?: Tool[];
   tool_choice?: {

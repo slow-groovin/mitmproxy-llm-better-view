@@ -2,67 +2,65 @@
 import { computed, ref } from 'vue';
 import RoleBadge from './RoleBadge.vue';
 import MessageContent from './MessageContent.vue';
+import { ApiStandard } from '@/types/flow';
+import { OpenaiChatMessage } from '@/types/openai/chat-request';
+import { ClaudeMessage } from '@/types/claude/claude-request';
+import { GeminiReqContent } from '@/types/gemini/request';
 
-type Platform = 'openai' | 'claude' | 'gemini';
 
 // OpenAI message types
-interface OpenaiMessage {
-  role: 'system' | 'user' | 'assistant' | 'tool';
-  content: string | Array<{ type: { text?: string; image_url?: { url: string } }}> | null;
-  tool_call_id?: string;
-  tool_calls?: Array<{ id: string; function: { name: string; arguments: string } }>;
-  name?: string;
-}
 
 // Claude message types
-interface ClaudeContentBlock {
-  type: string;
-  text?: string;
-  thinking?: string;
-  signature?: string;
-  id?: string;
-  name?: string;
-  input?: Record<string, unknown>;
-  tool_use_id?: string;
-  content?: string;
-  is_error?: boolean;
-  source?: {
-    type: string;
-    media_type: string;
-    data: string;
-  };
-}
+// interface ClaudeContentBlock {
+//   type: string;
+//   text?: string;
+//   thinking?: string;
+//   signature?: string;
+//   id?: string;
+//   name?: string;
+//   input?: Record<string, unknown>;
+//   tool_use_id?: string;
+//   content?: string;
+//   is_error?: boolean;
+//   source?: {
+//     type: string;
+//     media_type: string;
+//     data: string;
+//   };
+// }
 
-interface ClaudeMessage {
-  role: 'user' | 'assistant';
-  content: string | ClaudeContentBlock[];
-}
+
+// interface ClaudeMessage {
+//   role: 'user' | 'assistant';
+//   content: string | ClaudeContentBlock[];
+// }
 
 // Gemini message types
-interface GeminiPart {
-  text?: string;
-  inlineData?: { mimeType: string; data: string };
-  fileData?: { mimeType: string; fileUri: string };
-  functionCall?: { name: string; args: Record<string, unknown> };
-  functionResponse?: { name: string; response: Record<string, unknown> };
-  executableCode?: { language: string; code: string };
-  codeExecutionResult?: { outcome: string; output: string };
-  thought?: boolean;
-  thoughtSignature?: string;
-}
+// interface GeminiPart {
+//   text?: string;
+//   inlineData?: { mimeType: string; data: string };
+//   fileData?: { mimeType: string; fileUri: string };
+//   functionCall?: { name: string; args: Record<string, unknown> };
+//   functionResponse?: { name: string; response: Record<string, unknown> };
+//   executableCode?: { language: string; code: string };
+//   codeExecutionResult?: { outcome: string; output: string };
+//   thought?: boolean;
+//   thoughtSignature?: string;
+// }
 
-interface GeminiMessage {
-  role: 'user' | 'model' | 'function';
-  parts: GeminiPart[];
-}
+type GeminiMessage=GeminiReqContent
+// interface GeminiMessage {
+//   role: 'user' | 'model' | 'function';
+//   parts: GeminiPart[];
+// }
 
 interface Props {
   id?: string;
   role: string;
   index: number;
   defaultOpen?: boolean;
-  message: OpenaiMessage | ClaudeMessage | GeminiMessage;
-  platform: Platform;
+  message: OpenaiChatMessage | ClaudeMessage | GeminiMessage;
+  apiStandard: ApiStandard;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -83,21 +81,21 @@ const roleClass = computed(() => {
 
 // Handle tool call display (OpenAI)
 const toolCalls = computed(() => {
-  if (props.platform !== 'openai') return [];
-  const msg = props.message as OpenaiMessage;
+  if (props.apiStandard !== 'openai') return [];
+  const msg = props.message as OpenaiChatMessage;
   return msg.tool_calls || [];
 });
 
 // Handle tool result (OpenAI tool role)
 const toolCallId = computed(() => {
-  if (props.platform !== 'openai') return null;
-  const msg = props.message as OpenaiMessage;
+  if (props.apiStandard !== 'openai') return null;
+  const msg = props.message as OpenaiChatMessage;
   return msg.tool_call_id || null;
 });
 
 const toolName = computed(() => {
-  if (props.platform !== 'openai') return null;
-  const msg = props.message as OpenaiMessage;
+  if (props.apiStandard !== 'openai') return null;
+  const msg = props.message as OpenaiChatMessage;
   return msg.name || null;
 });
 </script>
@@ -108,7 +106,7 @@ const toolName = computed(() => {
       <div class="message-header-left">
         <span class="toggle-icon">{{ toggleIcon }}</span>
         <span class="message-index">#{{ index + 1 }}</span>
-        <RoleBadge :role="role" :platform="platform" />
+        <RoleBadge :role="role" :platform="apiStandard" />
         <span v-if="toolName" class="tool-name-badge">{{ toolName }}</span>
       </div>
       <span v-if="id" class="message-id">{{ id.slice(0, 8) }}</span>
@@ -118,7 +116,7 @@ const toolName = computed(() => {
         <span class="tool-call-id-label">Tool Call ID:</span>
         <span class="tool-call-id-value">{{ toolCallId }}</span>
       </div>
-      <MessageContent :content="message" :platform="platform" />
+      <MessageContent :content="message" :platform="apiStandard" />
       <div v-if="toolCalls.length > 0" class="tool-calls">
         <div v-for="(tool, idx) in toolCalls" :key="tool.id" class="tool-call-item">
           <div class="tool-call-name">

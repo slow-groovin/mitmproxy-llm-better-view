@@ -57,7 +57,7 @@ const stopValue = computed(() => {
 
 <template>
   <div class="openai-request-view">
-    <CollapsibleSection title="Basic Info" :default-open="true">
+    <CollapsibleSection title="Basic Info" :default-open="true" storage-key="basic-info">
       <InfoItem label="Model" :value="data.model" />
       <InfoItem label="Temperature" :value="data.temperature" />
       <InfoItem label="Top P" :value="data.top_p" />
@@ -81,11 +81,11 @@ const stopValue = computed(() => {
         :role="message.role"
         :index="index"
         :message="message"
-        platform="openai"
+        apiStandard="openai"
       />
     </CollapsibleSection>
 
-    <CollapsibleSection v-if="tools.length > 0" title="Tools" :count="tools.length" variant="tools">
+    <CollapsibleSection v-if="tools.length > 0" title="Tools" storage-key="tools" :count="tools.length" variant="tools">
       <ToolItem
         v-for="(tool, index) in tools"
         :key="index"
@@ -95,7 +95,7 @@ const stopValue = computed(() => {
       />
     </CollapsibleSection>
 
-    <CollapsibleSection title="Full Request" :default-open="false">
+    <CollapsibleSection title="Full Request" storage-key="full-content" :default-open="false">
       <JsonViewer :data="data" :collapsible="true" />
     </CollapsibleSection>
   </div>

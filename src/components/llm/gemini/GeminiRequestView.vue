@@ -102,7 +102,7 @@ const thinkingConfig = computed(() => {
         :role="content.role"
         :index="index"
         :message="content"
-        platform="gemini"
+        apiStandard="gemini"
       />
     </CollapsibleSection>
 
