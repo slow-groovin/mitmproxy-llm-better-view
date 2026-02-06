@@ -12,6 +12,7 @@ import type {
   TextContentItem,
   ImageContentItem,
 } from '@/types/openai/chat-request';
+import OpenaiAssistantToolCalls from './OpenaiAssistantToolCalls.vue';
 
 interface Props {
   id?: string;
@@ -22,191 +23,125 @@ interface Props {
 
 const props = defineProps<Props>();
 
-// Use sessionStorage to remember fold state
 const storageKey = computed(() => `openai-msg-${props.id || props.index}-open`);
 const isOpen = useSessionStorage(storageKey, true);
 
-const toggleIcon = computed(() => (isOpen.value ? '▼' : '▶'));
-
-// Get role class for styling
-const roleClass = computed(() => {
-  const role = props.role.toLowerCase();
-  return `role-${role}`;
-});
-
-// Parse content into renderable items
+// 内容项解析
 const contentItems = computed(() => {
   const content = props.message.content as MessageContent;
+  if (!content) return [];
 
-  if (content === null || content === undefined) {
-    return [];
-  }
-
-  // String content
   if (typeof content === 'string') {
-    return [{ type: 'text', text: content, id: 'content-0' }];
+    return [{ type: 'text', text: content, id: 'content-0', url: undefined }];
   }
 
-  // Array content (text + images)
   if (Array.isArray(content)) {
-    return content.map((item, idx) => {
-      if (item.type === 'text') {
-        return {
-          type: 'text',
-          text: (item as TextContentItem).text,
-          id: `content-${idx}`,
-        };
-      }
-      if (item.type === 'image_url') {
-        return {
-          type: 'image',
-          url: (item as ImageContentItem).image_url.url,
-          id: `content-${idx}`,
-        };
-      }
-      return { type: 'unknown', id: `content-${idx}` };
-    });
+    return content.map((item, idx) => ({
+      type: item.type,
+      text: item.type === 'text' ? (item as TextContentItem).text : undefined,
+      url: item.type === 'image_url' ? (item as ImageContentItem).image_url.url : undefined,
+      id: `content-${idx}`,
+    }));
   }
 
   return [];
 });
 
-// Tool calls (from assistant message)
-const toolCalls = computed(() => {
+// 工具调用请求 (来自assistant)
+const toolRequests = computed(() => {
   if (props.message.role !== 'assistant') return [];
-  const msg = props.message as AssistantMessage;
-  return msg.tool_calls || [];
+  return (props.message as AssistantMessage).tool_calls || [];
 });
 
-// Tool call info (from tool message)
-const toolCallInfo = computed(() => {
+// 工具调用响应 (来自tool)
+const toolResponse = computed(() => {
   if (props.message.role !== 'tool') return null;
   const msg = props.message as ToolMessage;
-  return {
-    id: msg.tool_call_id,
-    name: msg.name,
-  };
+  return { id: msg.tool_call_id, name: msg.name };
 });
 
-// Check if has content to display
-const hasContent = computed(() => {
-  return contentItems.value.length > 0;
-});
+const hasContent = computed(() => contentItems.value.length > 0);
 
-// Check if has tool calls to display
-const hasToolCalls = computed(() => {
-  return toolCalls.value.length > 0;
-});
-
-// Check if message has anything to display
-const hasAnything = computed(() => {
-  return hasContent.value || hasToolCalls.value || toolCallInfo.value !== null;
-});
-
-// Scroll to element by selector
-function scrollToElement(selector: string) {
-  const el = document.querySelector(selector);
-  if (el) {
-    el.scrollIntoView({ behavior: 'smooth' });
-  }
+function scrollTo(selector: string) {
+  document.querySelector(selector)?.scrollIntoView({ behavior: 'smooth' });
 }
 </script>
 
 <template>
-  <div class="message-item" :class="roleClass">
-    <div class="message-header" @click="isOpen = !isOpen" :title="id">
-      <div class="message-header-left">
-        <span class="toggle-icon">{{ toggleIcon }}</span>
-        <span class="message-index">#{{ index + 1 }}</span>
+  <div class="message" :class="`role-${role.toLowerCase()}`">
+    <div class="header" @click="isOpen = !isOpen" :title="id">
+      <div class="header-left">
+        <span class="toggle">{{ isOpen ? '▼' : '▶' }}</span>
+        <span class="index">#{{ index + 1 }}</span>
         <RoleBadge :role="role" />
-        <span v-if="toolCallInfo?.name" class="tool-name-badge">{{ toolCallInfo.name }}</span>
-
-       
+        <span v-if="toolResponse?.name" class="tool-name">{{ toolResponse.name }}</span>
       </div>
-      <span v-if="id" class="message-id">{{ id.slice(0, 8) }}</span>
 
-       <!-- 添加 .stop 修饰符 -->
-        <span v-if="toolCallInfo?.id" :id="'tool-result-' + toolCallInfo.id" class="tool-call-id-header"
-          @click.stop="scrollToElement(`#tool-call-${toolCallInfo.id}`)">
-          {{ toolCallInfo.id }}
-        </span>
+      <span v-if="id" class="msg-id">{{ id.slice(0, 8) }}</span>
+      <span v-if="toolResponse?.id" :id="`tool-response-${toolResponse.id}`" class="tool-id clickable"
+        @click.stop="scrollTo(`#tool-request-${toolResponse.id}`)">
+        {{ toolResponse.id }}
+      </span>
     </div>
 
-    <div v-show="isOpen" class="message-content-wrapper">
-      <!-- Tool call info for tool messages -->
-      <div v-if="toolCallInfo" class="tool-call-info">
-        <span class="tool-call-id-label">Tool Call ID:</span>
-        <span class="tool-call-id-value">{{ toolCallInfo.id }}</span>
-      </div>
-
-      <!-- Content items (text and images) -->
-      <template v-for="item in contentItems" :key="item.id">
-        <div v-if="item.text === ''" hidden=""></div>
-        <TextBlock v-else-if="item.type === 'text' && typeof item.text === 'string'" :id="item.id" :text="item.text"
-          is-prose />
-        <ImageBlock v-else-if="item.type === 'image'" :id="item.id" :url="item.url" />
-        <div v-else>Unsupported: {{ item }}</div>
+    <div v-show="isOpen" class="content">
+      <!-- 内容块 -->
+      <template v-if="hasContent">
+        <template v-for="item in contentItems" :key="item.id">
+          <TextBlock v-if="item.type === 'text' && item.text" :id="item.id" :text="item.text" is-prose />
+          <ImageBlock v-else-if="item.type === 'image'" :id="item.id" :url="item.url!" />
+        </template>
       </template>
+      <div v-else class="empty" hidden></div>
 
+      <!-- 工具调用 -->
+      <OpenaiAssistantToolCalls v-if="toolRequests.length" :tool-calls="toolRequests" />
 
-      <!-- Empty content warning -->
-      <div v-if="!hasAnything" class="empty-content">(no content)</div>
-
-
-
-
-
-
-      <!-- Tool calls for assistant messages -->
-      <div v-if="hasToolCalls" class="tool-calls">
-        <div v-for="(tool, idx) in toolCalls" :key="tool.id" class="tool-call-item">
-          <div class="tool-call-name">
-            <span class="tool-call-badge">tool_call</span>
-            <a class="tool-def-link" @click.prevent="scrollToElement(`#tool-def-${tool.function.name}`)">{{
-              tool.function.name
-              }}</a>
-            <span class="tool-call-index">#{{ idx + 1 }}</span>
-            <a class="tool-msg-link" @click.prevent="scrollToElement(`#tool-result-${tool.id}`)"
-              :id="'tool-call-' + tool.id">{{
-              tool.id }}</a>
-          </div>
-          <div class="tool-call-args">
-            <pre>{{ JSON.stringify(tool.function.arguments, null, 2) }}</pre>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.message-item {
+:root {
+  --border-system: #f59e0b;
+  --border-user: #3b82f6;
+  --border-assistant: #10b981;
+  --border-tool: #8b5cf6;
+  --bg-hover: #f8fafc;
+  --bg-content: rgba(136, 188, 197, 0.08);
+  --bg-tool: #f8fafc;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+  --font-mono: 'Monaco', 'Menlo', monospace;
+}
+
+.message {
   border-bottom: 2px solid rgba(126, 180, 233, 0.31);
   padding: 4px 8px;
 }
 
-.message-item:last-child {
+.message:last-child {
   border-bottom: none;
 }
 
-/* Role-based left border colors */
 .role-system {
-  border-left: 3px solid #f59e0b;
+  border-left: 3px solid var(--border-system);
 }
 
 .role-user {
-  border-left: 3px solid #3b82f6;
+  border-left: 3px solid var(--border-user);
 }
 
 .role-assistant {
-  border-left: 3px solid #10b981;
+  border-left: 3px solid var(--border-assistant);
 }
 
 .role-tool {
-  border-left: 3px solid #8b5cf6;
+  border-left: 3px solid var(--border-tool);
 }
 
-.message-header {
+.header {
   padding: 6px 0;
   cursor: pointer;
   display: flex;
@@ -214,101 +149,82 @@ function scrollToElement(selector: string) {
   align-items: center;
 }
 
-.message-header:hover {
-  background: #f8fafc;
+.header:hover {
+  background: var(--bg-hover);
   margin: 0 -12px;
   padding: 6px 12px;
   border-radius: 4px;
 }
 
-.message-header-left {
+.header-left {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.toggle-icon {
-  transition: transform 0.2s;
-  color: #64748b;
+.toggle {
+  color: var(--text-secondary);
   font-size: 1.2rem;
+  transition: transform 0.2s;
 }
 
-.message-index {
+.index {
   font-size: 1.2rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   font-weight: 500;
 }
 
-.message-id {
-  font-size: 1.2rem;
-  color: #64748b;
-  font-family: 'Monaco', 'Menlo', monospace;
+.msg-id,
+.tool-id {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
 }
 
-.tool-name-badge {
+.tool-name {
   padding: 3px 8px;
   border-radius: 4px;
   font-size: 1.2rem;
   font-weight: 700;
   background: #f3e8ff;
   color: #7c3aed;
-  font-family: 'Monaco', 'Menlo', monospace;
+  font-family: var(--font-mono);
 }
 
-.message-content-wrapper {
-  padding: 2px 16px;
-  font-size: initial;
-  background-color: rgba(136, 188, 197, 0.08);
+.content {
+  padding: 0px 16px;
+  background: var(--bg-content);
   overflow-y: auto;
 }
 
-.empty-content {
-  color: #94a3b8;
+.empty {
+  color: var(--text-muted);
   font-style: italic;
   padding: 8px 0;
 }
 
-.tool-call-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 0;
-  margin-bottom: 8px;
-  font-size: 1.2rem;
+.tool-requests {
+  margin-top: 0;
 }
 
-.tool-call-id-label {
-  color: #64748b;
-  font-weight: 500;
-}
-
-.tool-call-id-value {
-  color: #1e293b;
-  font-family: 'Monaco', 'Menlo', monospace;
-}
-
-.tool-calls {
-  margin-top: 0px;
-}
-
-.tool-call-item {
-  background: #f8fafc;
+.tool-request {
+  background: var(--bg-tool);
   border-radius: 6px;
   padding: 2px;
   margin-bottom: 4px;
 }
 
-.tool-call-name {
+.tool-request-header {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 8px;
   font-weight: 600;
-  color: #1e293b;
   font-size: 1.4rem;
+  color: var(--text-primary);
 }
 
-.tool-call-badge {
+.badge {
   padding: 2px 6px;
   border-radius: 3px;
   font-size: 1rem;
@@ -318,23 +234,16 @@ function scrollToElement(selector: string) {
   color: #1d4ed8;
 }
 
-.tool-call-index {
-  color: #64748b;
+.tool-idx {
+  color: var(--text-secondary);
   font-size: 1.2rem;
 }
 
-/* Tool call ID in header - right aligned, unobtrusive */
-.tool-call-id-header {
+.tool-id {
   margin-left: auto;
-  font-size: 1.1rem;
-  z-index: 10;
-  color: #94a3b8;
-  
-  font-family: 'Monaco', 'Menlo', monospace;
 }
 
-/* Tool definition link - looks like normal text but shows as link on hover */
-.tool-def-link {
+.clickable {
   color: inherit;
   text-decoration: none;
   cursor: pointer;
@@ -342,37 +251,16 @@ function scrollToElement(selector: string) {
   transition: all 0.2s;
 }
 
-.tool-def-link:hover {
+.clickable:hover {
   color: #1d4ed8;
   border-bottom-color: #1d4ed8;
 }
 
-/* Tool message link - unobtrusive but shows as link on hover */
-.tool-msg-link {
-  margin-left: auto;
-  font-size: 1.1rem;
-  color: #94a3b8;
-  text-decoration: none;
-  cursor: pointer;
-  font-family: 'Monaco', 'Menlo', monospace;
-  border-bottom: 1px dotted transparent;
-  transition: all 0.2s;
-}
-
-.tool-msg-link:hover {
-  color: #1d4ed8;
-  border-bottom-color: #1d4ed8;
-}
-
-.tool-call-args {
-  font-family: 'Monaco', 'Menlo', monospace;
-  /* padding: 8px; */
+.tool-args {
+  font-family: var(--font-mono);
   border-radius: 4px;
   font-size: 1.28rem;
   overflow-x: auto;
-}
-
-.tool-call-args pre {
   margin: 0;
 }
 </style>
