@@ -17,7 +17,7 @@ const componentMap = {
   openai: {
     request: defineAsyncComponent(() => import('./openai/OpenaiRequestView.vue')),
     response: defineAsyncComponent(() => import('./openai/OpenaiResponseView.vue')),
-    sse: defineAsyncComponent(() => import('./openai/OpenaiSSEView.vue')),
+    sse: defineAsyncComponent(() => import('./openai/OpenaiResponseView.vue')),
   },
   claude: {
     request: defineAsyncComponent(() => import('./claude/ClaudeRequestView.vue')),

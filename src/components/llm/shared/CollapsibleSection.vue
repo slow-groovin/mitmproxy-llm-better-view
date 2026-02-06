@@ -76,7 +76,7 @@ const toggleIcon = computed(() => isOpen.value ? '▼' : '▶');
 
 .section-title {
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 2rem;
   color: #1e293b;
 }
 

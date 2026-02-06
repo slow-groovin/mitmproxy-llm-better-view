@@ -45,7 +45,7 @@ export type Tool = {
 
 export type ToolChoice = 'none' | 'auto' | 'required' | { type: 'function'; function: { name: string } };
 
-export type ResponseFormatType = 'text' | 'json_object' | 'json_schema';
+export type ResponseFormatType = 'text' | 'json_object' ;
 
 export type JSONSchemaFormat = {
   name: string;
