@@ -102,6 +102,14 @@ const hasToolCalls = computed(() => {
 const hasAnything = computed(() => {
   return hasContent.value || hasToolCalls.value || toolCallInfo.value !== null;
 });
+
+// Scroll to element by selector
+function scrollToElement(selector: string) {
+  const el = document.querySelector(selector);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth' });
+  }
+}
 </script>
 
 <template>
@@ -110,16 +118,21 @@ const hasAnything = computed(() => {
       <div class="message-header-left">
         <span class="toggle-icon">{{ toggleIcon }}</span>
         <span class="message-index">#{{ index + 1 }}</span>
-        <RoleBadge :role="role"  />
+        <RoleBadge :role="role" />
         <span v-if="toolCallInfo?.name" class="tool-name-badge">{{ toolCallInfo.name }}</span>
 
-        <!-- TODO1: 靠右显示, id指定为 ${id}, 不明显样式 -->
-        <span v-if="toolCallInfo?.id" class="">{{ toolCallInfo.id }}</span>
+       
       </div>
       <span v-if="id" class="message-id">{{ id.slice(0, 8) }}</span>
+
+       <!-- 添加 .stop 修饰符 -->
+        <span v-if="toolCallInfo?.id" :id="'tool-result-' + toolCallInfo.id" class="tool-call-id-header"
+          @click.stop="scrollToElement(`#tool-call-${toolCallInfo.id}`)">
+          {{ toolCallInfo.id }}
+        </span>
     </div>
 
-    <div v-if="isOpen" class="message-content-wrapper">
+    <div v-show="isOpen" class="message-content-wrapper">
       <!-- Tool call info for tool messages -->
       <div v-if="toolCallInfo" class="tool-call-info">
         <span class="tool-call-id-label">Tool Call ID:</span>
@@ -128,8 +141,9 @@ const hasAnything = computed(() => {
 
       <!-- Content items (text and images) -->
       <template v-for="item in contentItems" :key="item.id">
-        <div v-if="item.text===''" hidden=""></div>
-        <TextBlock v-else-if="item.type === 'text' && typeof item.text==='string'" :id="item.id" :text="item.text" is-prose />
+        <div v-if="item.text === ''" hidden=""></div>
+        <TextBlock v-else-if="item.type === 'text' && typeof item.text === 'string'" :id="item.id" :text="item.text"
+          is-prose />
         <ImageBlock v-else-if="item.type === 'image'" :id="item.id" :url="item.url" />
         <div v-else>Unsupported: {{ item }}</div>
       </template>
@@ -138,7 +152,7 @@ const hasAnything = computed(() => {
       <!-- Empty content warning -->
       <div v-if="!hasAnything" class="empty-content">(no content)</div>
 
-  
+
 
 
 
@@ -148,14 +162,13 @@ const hasAnything = computed(() => {
         <div v-for="(tool, idx) in toolCalls" :key="tool.id" class="tool-call-item">
           <div class="tool-call-name">
             <span class="tool-call-badge">tool_call</span>
-            
-            <!-- TODO1: add link to tool def `#tool-def-${name}`  hover时样式需要能看出来是跳转连接-->
-            <span>{{ tool.function.name }}</span>
+            <a class="tool-def-link" @click.prevent="scrollToElement(`#tool-def-${tool.function.name}`)">{{
+              tool.function.name
+              }}</a>
             <span class="tool-call-index">#{{ idx + 1 }}</span>
-            
-            <!-- TODO1: add link to tool message `#${id}`, 改为不明显样式, hover时样式需要能看出来是跳转连接-->
-             <!-- TODO1: 注意, 当前已经是 `/#/path...` 的路由模式, 所以使用document.querySelector('#title').scrollIntoView({ behavior: 'smooth' }) 进行跳转 -->
-            <span>{{ tool.id }}</span>
+            <a class="tool-msg-link" @click.prevent="scrollToElement(`#tool-result-${tool.id}`)"
+              :id="'tool-call-' + tool.id">{{
+              tool.id }}</a>
           </div>
           <div class="tool-call-args">
             <pre>{{ JSON.stringify(tool.function.arguments, null, 2) }}</pre>
@@ -310,11 +323,50 @@ const hasAnything = computed(() => {
   font-size: 1.2rem;
 }
 
+/* Tool call ID in header - right aligned, unobtrusive */
+.tool-call-id-header {
+  margin-left: auto;
+  font-size: 1.1rem;
+  z-index: 10;
+  color: #94a3b8;
+  
+  font-family: 'Monaco', 'Menlo', monospace;
+}
+
+/* Tool definition link - looks like normal text but shows as link on hover */
+.tool-def-link {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  border-bottom: 1px dotted transparent;
+  transition: all 0.2s;
+}
+
+.tool-def-link:hover {
+  color: #1d4ed8;
+  border-bottom-color: #1d4ed8;
+}
+
+/* Tool message link - unobtrusive but shows as link on hover */
+.tool-msg-link {
+  margin-left: auto;
+  font-size: 1.1rem;
+  color: #94a3b8;
+  text-decoration: none;
+  cursor: pointer;
+  font-family: 'Monaco', 'Menlo', monospace;
+  border-bottom: 1px dotted transparent;
+  transition: all 0.2s;
+}
+
+.tool-msg-link:hover {
+  color: #1d4ed8;
+  border-bottom-color: #1d4ed8;
+}
+
 .tool-call-args {
   font-family: 'Monaco', 'Menlo', monospace;
-  background: #1e293b;
-  color: #e2e8f0;
-  padding: 8px;
+  /* padding: 8px; */
   border-radius: 4px;
   font-size: 1.28rem;
   overflow-x: auto;
