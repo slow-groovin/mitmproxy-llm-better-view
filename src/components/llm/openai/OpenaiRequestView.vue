@@ -82,7 +82,6 @@ const stopValue = computed(() => {
         :role="message.role"
         :index="index"
         :message="message"
-        apiStandard="openai"
       />
     </CollapsibleSection>
 

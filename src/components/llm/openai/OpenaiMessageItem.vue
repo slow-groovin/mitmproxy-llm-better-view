@@ -112,14 +112,24 @@ const hasAnything = computed(() => {
         <span class="message-index">#{{ index + 1 }}</span>
         <RoleBadge :role="role"  />
         <span v-if="toolCallInfo?.name" class="tool-name-badge">{{ toolCallInfo.name }}</span>
+
+        <!-- TODO1: 靠右显示, id 改为页面内跳转目标: #${id}, 样式需要能看出来是id -->
+        <span v-if="toolCallInfo?.id" class="">{{ toolCallInfo.id }}</span>
       </div>
       <span v-if="id" class="message-id">{{ id.slice(0, 8) }}</span>
     </div>
 
     <div v-if="isOpen" class="message-content-wrapper">
-            <!-- Content items (text and images) -->
+      <!-- Tool call info for tool messages -->
+      <div v-if="toolCallInfo" class="tool-call-info">
+        <span class="tool-call-id-label">Tool Call ID:</span>
+        <span class="tool-call-id-value">{{ toolCallInfo.id }}</span>
+      </div>
+
+      <!-- Content items (text and images) -->
       <template v-for="item in contentItems" :key="item.id">
-        <TextBlock v-if="item.type === 'text' && typeof item.text==='string'" :id="item.id" :text="item.text" is-prose />
+        <div v-if="item.text===''" hidden=""></div>
+        <TextBlock v-else-if="item.type === 'text' && typeof item.text==='string'" :id="item.id" :text="item.text" is-prose />
         <ImageBlock v-else-if="item.type === 'image'" :id="item.id" :url="item.url" />
         <div v-else>Unsupported: {{ item }}</div>
       </template>
@@ -128,11 +138,7 @@ const hasAnything = computed(() => {
       <!-- Empty content warning -->
       <div v-if="!hasAnything" class="empty-content">(no content)</div>
 
-      <!-- Tool call info for tool messages -->
-      <div v-if="toolCallInfo" class="tool-call-info">
-        <span class="tool-call-id-label">Tool Call ID:</span>
-        <span class="tool-call-id-value">{{ toolCallInfo.id }}</span>
-      </div>
+  
 
 
 
@@ -142,8 +148,13 @@ const hasAnything = computed(() => {
         <div v-for="(tool, idx) in toolCalls" :key="tool.id" class="tool-call-item">
           <div class="tool-call-name">
             <span class="tool-call-badge">tool_call</span>
+            
+            <!-- TODO1: add link to tool def `#tool-def-${name}`  hover样式需要能看出来是跳转连接-->
             <span>{{ tool.function.name }}</span>
             <span class="tool-call-index">#{{ idx + 1 }}</span>
+            
+            <!-- TODO1: add link to tool message `#${id}`, 样式需要能看出来是跳转连接-->
+            <span>{{ tool.id }}</span>
           </div>
           <div class="tool-call-args">
             <pre>{{ JSON.stringify(tool.function.arguments, null, 2) }}</pre>
@@ -231,7 +242,7 @@ const hasAnything = computed(() => {
 }
 
 .message-content-wrapper {
-  padding: 4px 16px;
+  padding: 2px 16px;
   font-size: initial;
   background-color: rgba(136, 188, 197, 0.08);
   overflow-y: auto;
@@ -263,14 +274,14 @@ const hasAnything = computed(() => {
 }
 
 .tool-calls {
-  margin-top: 12px;
+  margin-top: 0px;
 }
 
 .tool-call-item {
   background: #f8fafc;
   border-radius: 6px;
-  padding: 12px;
-  margin-bottom: 8px;
+  padding: 2px;
+  margin-bottom: 4px;
 }
 
 .tool-call-name {
