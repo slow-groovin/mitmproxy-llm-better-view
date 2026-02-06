@@ -113,7 +113,7 @@ const hasAnything = computed(() => {
         <RoleBadge :role="role"  />
         <span v-if="toolCallInfo?.name" class="tool-name-badge">{{ toolCallInfo.name }}</span>
 
-        <!-- TODO1: 靠右显示, id 改为页面内跳转目标: #${id}, 样式需要能看出来是id -->
+        <!-- TODO1: 靠右显示, id指定为 ${id}, 不明显样式 -->
         <span v-if="toolCallInfo?.id" class="">{{ toolCallInfo.id }}</span>
       </div>
       <span v-if="id" class="message-id">{{ id.slice(0, 8) }}</span>
@@ -149,11 +149,12 @@ const hasAnything = computed(() => {
           <div class="tool-call-name">
             <span class="tool-call-badge">tool_call</span>
             
-            <!-- TODO1: add link to tool def `#tool-def-${name}`  hover样式需要能看出来是跳转连接-->
+            <!-- TODO1: add link to tool def `#tool-def-${name}`  hover时样式需要能看出来是跳转连接-->
             <span>{{ tool.function.name }}</span>
             <span class="tool-call-index">#{{ idx + 1 }}</span>
             
-            <!-- TODO1: add link to tool message `#${id}`, 样式需要能看出来是跳转连接-->
+            <!-- TODO1: add link to tool message `#${id}`, 改为不明显样式, hover时样式需要能看出来是跳转连接-->
+             <!-- TODO1: 注意, 当前已经是 `/#/path...` 的路由模式, 所以使用document.querySelector('#title').scrollIntoView({ behavior: 'smooth' }) 进行跳转 -->
             <span>{{ tool.id }}</span>
           </div>
           <div class="tool-call-args">
