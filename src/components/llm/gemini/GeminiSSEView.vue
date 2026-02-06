@@ -237,13 +237,13 @@ const promptFeedback = computed(() => {
 .safety-category {
   font-weight: 500;
   color: #1e293b;
-  font-size: 0.8rem;
+  font-size: 1.2800000000000002rem;
 }
 
 .safety-probability {
   font-family: 'Monaco', 'Menlo', monospace;
   color: #dc2626;
-  font-size: 0.8rem;
+  font-size: 1.2800000000000002rem;
 }
 
 .streamed-content {
@@ -252,7 +252,7 @@ const promptFeedback = computed(() => {
   color: #e2e8f0;
   padding: 12px;
   border-radius: 6px;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   white-space: pre-wrap;
   overflow-x: auto;
   line-height: 1.6;
@@ -276,7 +276,7 @@ const promptFeedback = computed(() => {
 .function-badge {
   padding: 2px 6px;
   border-radius: 3px;
-  font-size: 0.65rem;
+  font-size: 1rem;
   font-weight: 600;
   text-transform: uppercase;
   background: #7c3aed;
@@ -286,14 +286,14 @@ const promptFeedback = computed(() => {
 .function-name {
   font-weight: 600;
   color: #1e293b;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   font-family: 'Monaco', 'Menlo', monospace;
 }
 
 .thought-badge {
   padding: 2px 6px;
   border-radius: 3px;
-  font-size: 0.65rem;
+  font-size: 1rem;
   font-weight: 600;
   background: #fef3c7;
   color: #92400e;
@@ -305,7 +305,7 @@ const promptFeedback = computed(() => {
   color: #e2e8f0;
   padding: 10px;
   border-radius: 4px;
-  font-size: 0.8rem;
+  font-size: 1.2800000000000002rem;
   overflow-x: auto;
 }
 
@@ -341,7 +341,7 @@ const promptFeedback = computed(() => {
 .code-badge {
   padding: 2px 6px;
   border-radius: 3px;
-  font-size: 0.65rem;
+  font-size: 1rem;
   font-weight: 600;
   text-transform: uppercase;
   background: #d97706;
@@ -351,14 +351,14 @@ const promptFeedback = computed(() => {
 .code-language {
   font-weight: 600;
   color: #1e293b;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   font-family: 'Monaco', 'Menlo', monospace;
 }
 
 .code-outcome {
   font-weight: 600;
   color: #1e293b;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
 }
 
 .code-block {
@@ -367,7 +367,7 @@ const promptFeedback = computed(() => {
   color: #e2e8f0;
   padding: 10px;
   border-radius: 4px;
-  font-size: 0.8rem;
+  font-size: 1.2800000000000002rem;
   overflow-x: auto;
 }
 
@@ -381,7 +381,7 @@ const promptFeedback = computed(() => {
   color: #e2e8f0;
   padding: 10px;
   border-radius: 4px;
-  font-size: 0.8rem;
+  font-size: 1.2800000000000002rem;
   overflow-x: auto;
 }
 
@@ -418,12 +418,12 @@ const promptFeedback = computed(() => {
   color: #374151;
   padding: 2px 6px;
   border-radius: 3px;
-  font-size: 0.7rem;
+  font-size: 1.2rem;
   font-weight: 500;
 }
 
 .event-nonce {
-  font-size: 0.75rem;
+  font-size: 1.2000000000000002rem;
   color: #64748b;
   font-family: 'Monaco', 'Menlo', monospace;
 }

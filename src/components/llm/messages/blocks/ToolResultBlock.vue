@@ -85,7 +85,7 @@ const isJson = computed(() => {
 .tool-result-badge {
   padding: 2px 6px;
   border-radius: 3px;
-  font-size: 0.65rem;
+  font-size: 1rem;
   font-weight: 600;
   text-transform: uppercase;
   background: #7c3aed;
@@ -99,7 +99,7 @@ const isJson = computed(() => {
 .tool-result-error {
   padding: 2px 6px;
   border-radius: 3px;
-  font-size: 0.65rem;
+  font-size: 1rem;
   font-weight: 700;
   text-transform: uppercase;
   background: #dc2626;
@@ -107,7 +107,7 @@ const isJson = computed(() => {
 }
 
 .tool-result-id {
-  font-size: 0.7rem;
+  font-size: 1.2rem;
   color: #7c3aed;
   font-family: 'Monaco', 'Menlo', monospace;
 }
@@ -120,7 +120,7 @@ const isJson = computed(() => {
   margin-left: auto;
   transition: transform 0.2s;
   color: #7c3aed;
-  font-size: 0.75rem;
+  font-size: 1.2000000000000002rem;
 }
 
 .tool-result-block.error .toggle-icon {
@@ -137,7 +137,7 @@ const isJson = computed(() => {
   color: #e2e8f0;
   padding: 10px;
   border-radius: 4px;
-  font-size: 0.8rem;
+  font-size: 1.2800000000000002rem;
   overflow-x: auto;
 }
 

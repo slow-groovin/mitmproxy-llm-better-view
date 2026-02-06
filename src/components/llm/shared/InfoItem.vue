@@ -45,7 +45,7 @@ const shouldHide = computed(() => {
 }
 
 .info-label {
-  font-size: 0.8rem;
+  font-size: 1.2800000000000002rem;
   color: #64748b;
   font-weight: 500;
   min-width: 120px;
@@ -54,6 +54,6 @@ const shouldHide = computed(() => {
 .info-value {
   font-weight: 600;
   color: #1e293b;
-  font-size: 0.8rem;
+  font-size: 1.2800000000000002rem;
 }
 </style>

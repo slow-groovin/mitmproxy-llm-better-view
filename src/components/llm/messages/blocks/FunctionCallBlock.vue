@@ -69,7 +69,7 @@ const argsSummary = computed(() => {
 .function-call-badge {
   padding: 2px 6px;
   border-radius: 3px;
-  font-size: 0.65rem;
+  font-size: 1rem;
   font-weight: 600;
   text-transform: uppercase;
   background: #7c3aed;
@@ -79,14 +79,14 @@ const argsSummary = computed(() => {
 .function-call-name {
   font-weight: 600;
   color: #1e293b;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   font-family: 'Monaco', 'Menlo', monospace;
 }
 
 .function-call-signature {
   padding: 2px 6px;
   border-radius: 3px;
-  font-size: 0.65rem;
+  font-size: 1rem;
   font-weight: 600;
   background: #fef3c7;
   color: #92400e;
@@ -96,7 +96,7 @@ const argsSummary = computed(() => {
   margin-left: auto;
   transition: transform 0.2s;
   color: #7c3aed;
-  font-size: 0.75rem;
+  font-size: 1.2000000000000002rem;
 }
 
 .function-call-content {
@@ -109,7 +109,7 @@ const argsSummary = computed(() => {
   color: #e2e8f0;
   padding: 10px;
   border-radius: 4px;
-  font-size: 0.8rem;
+  font-size: 1.2800000000000002rem;
   overflow-x: auto;
 }
 

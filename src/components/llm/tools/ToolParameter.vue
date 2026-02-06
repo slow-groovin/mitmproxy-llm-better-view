@@ -80,13 +80,13 @@ const typeBadgeClass = computed(() => {
 
 .parameter-name {
   font-weight: 600;
-  font-size: 0.75rem;
+  font-size: 1.2000000000000002rem;
   color: #1e293b;
   font-family: 'Monaco', 'Menlo', monospace;
 }
 
 .parameter-type {
-  font-size: 0.7rem;
+  font-size: 1.2rem;
   color: #7c3aed;
   background: #f3e8ff;
   padding: 1px 4px;
@@ -120,7 +120,7 @@ const typeBadgeClass = computed(() => {
 }
 
 .parameter-required {
-  font-size: 0.65rem;
+  font-size: 1rem;
   color: #dc2626;
   background: #fef2f2;
   padding: 1px 4px;
@@ -131,7 +131,7 @@ const typeBadgeClass = computed(() => {
 }
 
 .parameter-description {
-  font-size: 0.75rem;
+  font-size: 1.2000000000000002rem;
   color: #64748b;
   margin-top: 2px;
   line-height: 1.4;
@@ -139,7 +139,7 @@ const typeBadgeClass = computed(() => {
 
 .parameter-enum {
   margin-top: 4px;
-  font-size: 0.7rem;
+  font-size: 1.2rem;
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
@@ -162,14 +162,14 @@ const typeBadgeClass = computed(() => {
 }
 
 .properties-title {
-  font-size: 0.7rem;
+  font-size: 1.2rem;
   font-weight: 600;
   color: #475569;
   margin-bottom: 4px;
 }
 
 .nested-parameter {
-  font-size: 0.7rem;
+  font-size: 1.2rem;
   padding: 2px 0;
   display: flex;
   flex-wrap: wrap;

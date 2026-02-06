@@ -67,7 +67,7 @@ const propertyKeys = computed(() => {
 
 .tool-description {
   margin: 6px 0;
-  font-size: 1rem;
+  font-size: 1.6rem;
   color: #374151;
   line-height: 1.5;
 }
@@ -80,7 +80,7 @@ const propertyKeys = computed(() => {
   font-weight: 600;
   color: #1e293b;
   margin-bottom: 6px;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
 }
 
 .tool-schema-json {
@@ -89,7 +89,7 @@ const propertyKeys = computed(() => {
   color: #e2e8f0;
   padding: 10px;
   border-radius: 4px;
-  font-size: 0.8rem;
+  font-size: 1.2800000000000002rem;
   overflow-x: auto;
 }
 

@@ -91,7 +91,7 @@ const tabs = shallowRef<TabItem[]>([
   cursor: pointer;
   border-radius: 4px;
   /* font-size: 16px; */
-  /* margin-right: 12rem; */
+  /* margin-right: 19.200000000000003rem; */
   transition: background 0.2s;
 }
 

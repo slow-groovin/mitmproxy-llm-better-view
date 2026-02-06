@@ -109,7 +109,7 @@ const thinkingConfig = computed(() => {
   color: #1e293b;
   padding: 12px;
   border-radius: 6px;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   white-space: pre-wrap;
   overflow-x: auto;
 }

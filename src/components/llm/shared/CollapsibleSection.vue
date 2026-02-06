@@ -82,7 +82,7 @@ const toggleIcon = computed(() => isOpen.value ? '▼' : '▶');
 
 .section-count {
   color: #64748b;
-  font-size: 0.85rem;
+  font-size: 1.36rem;
   margin-left: 4px;
 }
 
@@ -98,7 +98,7 @@ const toggleIcon = computed(() => isOpen.value ? '▼' : '▶');
   padding: 4px 8px;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 0.7rem;
+  font-size: 1.2rem;
   color: #1d4ed8;
   display: flex;
   align-items: center;
@@ -122,7 +122,7 @@ const toggleIcon = computed(() => isOpen.value ? '▼' : '▶');
 .toggle-icon {
   transition: transform 0.2s;
   color: #64748b;
-  font-size: 0.75rem;
+  font-size: 1.2000000000000002rem;
 }
 
 .section-content {

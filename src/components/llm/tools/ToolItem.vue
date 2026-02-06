@@ -143,7 +143,7 @@ const toolParameters = computed(() => {
 .toggle-icon {
   transition: transform 0.2s;
   color: #64748b;
-  font-size: 0.75rem;
+  font-size: 1.2000000000000002rem;
 }
 
 .tool-content {
@@ -155,7 +155,7 @@ const toolParameters = computed(() => {
 
 .tool-description {
   margin: 6px 0;
-  font-size: 1rem;
+  font-size: 1.6rem;
   color: #374151;
   line-height: 1.5;
 }
@@ -168,6 +168,6 @@ const toolParameters = computed(() => {
   font-weight: 600;
   color: #1e293b;
   margin-bottom: 6px;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
 }
 </style>

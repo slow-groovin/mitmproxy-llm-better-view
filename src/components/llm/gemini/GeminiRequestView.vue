@@ -142,7 +142,7 @@ const thinkingConfig = computed(() => {
   color: #1e293b;
   padding: 12px;
   border-radius: 6px;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   white-space: pre-wrap;
   overflow-x: auto;
 }
@@ -172,7 +172,7 @@ const thinkingConfig = computed(() => {
 .function-badge {
   padding: 2px 6px;
   border-radius: 3px;
-  font-size: 0.65rem;
+  font-size: 1rem;
   font-weight: 600;
   text-transform: uppercase;
   background: #f3e8ff;
@@ -182,12 +182,12 @@ const thinkingConfig = computed(() => {
 .function-name {
   font-weight: 600;
   color: #1e293b;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   font-family: 'Monaco', 'Menlo', monospace;
 }
 
 .function-description {
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   color: #64748b;
   line-height: 1.5;
 }
@@ -204,12 +204,12 @@ const thinkingConfig = computed(() => {
 .safety-category {
   font-weight: 600;
   color: #1e293b;
-  font-size: 0.8rem;
+  font-size: 1.2800000000000002rem;
 }
 
 .safety-threshold {
   font-family: 'Monaco', 'Menlo', monospace;
   color: #64748b;
-  font-size: 0.8rem;
+  font-size: 1.2800000000000002rem;
 }
 </style>

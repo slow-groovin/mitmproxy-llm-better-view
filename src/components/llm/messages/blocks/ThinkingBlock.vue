@@ -69,7 +69,7 @@ const preview = computed(() => {
 .thinking-badge {
   padding: 2px 6px;
   border-radius: 3px;
-  font-size: 0.65rem;
+  font-size: 1rem;
   font-weight: 600;
   text-transform: uppercase;
   background: #d97706;
@@ -77,14 +77,14 @@ const preview = computed(() => {
 }
 
 .thinking-lines {
-  font-size: 0.75rem;
+  font-size: 1.2000000000000002rem;
   color: #92400e;
 }
 
 .thinking-signature {
   padding: 2px 6px;
   border-radius: 3px;
-  font-size: 0.65rem;
+  font-size: 1rem;
   font-weight: 600;
   background: #dcfce7;
   color: #166534;
@@ -94,7 +94,7 @@ const preview = computed(() => {
   margin-left: auto;
   transition: transform 0.2s;
   color: #92400e;
-  font-size: 0.75rem;
+  font-size: 1.2000000000000002rem;
 }
 
 .thinking-content {
@@ -102,7 +102,7 @@ const preview = computed(() => {
   font-family: 'Monaco', 'Menlo', monospace;
   background: #1e293b;
   color: #e2e8f0;
-  font-size: 0.85rem;
+  font-size: 1.36rem;
   white-space: pre-wrap;
   line-height: 1.6;
   overflow-x: auto;
@@ -116,7 +116,7 @@ const preview = computed(() => {
   padding: 8px 12px;
   color: #78350f;
   font-style: italic;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   line-height: 1.5;
 }
 </style>

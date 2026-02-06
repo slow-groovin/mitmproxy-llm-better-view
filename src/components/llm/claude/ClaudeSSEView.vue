@@ -131,7 +131,7 @@ const thinkingContent = computed(() => {
   color: #e2e8f0;
   padding: 12px;
   border-radius: 6px;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   white-space: pre-wrap;
   overflow-x: auto;
   line-height: 1.6;
@@ -170,12 +170,12 @@ const thinkingContent = computed(() => {
   color: #374151;
   padding: 2px 6px;
   border-radius: 3px;
-  font-size: 0.7rem;
+  font-size: 1.2rem;
   font-weight: 500;
 }
 
 .event-index {
-  font-size: 0.75rem;
+  font-size: 1.2000000000000002rem;
   color: #64748b;
 }
 

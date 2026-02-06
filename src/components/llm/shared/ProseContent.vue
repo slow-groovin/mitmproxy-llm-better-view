@@ -96,7 +96,7 @@ function toggle() {
   border: 1px solid #e2e8f0;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 0.75rem;
+  font-size: 1.2000000000000002rem;
   color: #1d4ed8;
   margin-bottom: 8px;
   transition: background-color 0.2s;
@@ -141,7 +141,7 @@ function toggle() {
 }
 
 .prose h4 {
-  font-size: 0.9rem;
+  font-size: 1.4400000000000002rem;
 }
 
 .prose h5 {

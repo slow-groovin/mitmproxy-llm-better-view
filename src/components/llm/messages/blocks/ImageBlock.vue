@@ -79,7 +79,7 @@ function onError() {
 
 .image-mime {
   display: block;
-  font-size: 0.7rem;
+  font-size: 1.2rem;
   font-family: 'Monaco', 'Menlo', monospace;
   margin-top: 4px;
   color: #94a3b8;

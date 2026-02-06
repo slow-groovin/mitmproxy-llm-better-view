@@ -112,12 +112,12 @@ const stopReasonClass = (reason: string) => {
 .error-type {
   font-weight: 600;
   color: #dc2626;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
 }
 
 .error-message {
   color: #991b1b;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
 }
 
 .thinking-summary,
@@ -135,7 +135,7 @@ const stopReasonClass = (reason: string) => {
 .tool-use-badge {
   padding: 2px 6px;
   border-radius: 3px;
-  font-size: 0.65rem;
+  font-size: 1rem;
   font-weight: 600;
   text-transform: uppercase;
 }
@@ -153,12 +153,12 @@ const stopReasonClass = (reason: string) => {
 .tool-use-name {
   font-weight: 600;
   color: #1e293b;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   font-family: 'Monaco', 'Menlo', monospace;
 }
 
 .tool-use-id {
-  font-size: 0.7rem;
+  font-size: 1.2rem;
   color: #64748b;
   font-family: 'Monaco', 'Menlo', monospace;
 }
@@ -166,14 +166,14 @@ const stopReasonClass = (reason: string) => {
 .thinking-signed {
   padding: 2px 6px;
   border-radius: 3px;
-  font-size: 0.65rem;
+  font-size: 1rem;
   font-weight: 600;
   background: #dcfce7;
   color: #166534;
 }
 
 .thinking-length {
-  font-size: 0.7rem;
+  font-size: 1.2rem;
   color: #64748b;
 }
 </style>

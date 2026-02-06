@@ -99,13 +99,13 @@ const hasCacheTokens = computed(() => {
 }
 
 .usage-label {
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   color: #64748b;
   margin-bottom: 4px;
 }
 
 .usage-value {
-  font-size: 1.5rem;
+  font-size: 2.4000000000000004rem;
   font-weight: 700;
   color: #1e293b;
 }
@@ -121,13 +121,13 @@ const hasCacheTokens = computed(() => {
 }
 
 .usage-text {
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   color: #1e293b;
   font-weight: 500;
 }
 
 .usage-total {
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   color: #64748b;
   font-weight: 600;
   padding: 2px 6px;

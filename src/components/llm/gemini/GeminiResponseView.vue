@@ -208,13 +208,13 @@ const finishReasonClass = (reason: string | undefined) => {
 .safety-category {
   font-weight: 500;
   color: #1e293b;
-  font-size: 0.8rem;
+  font-size: 1.2800000000000002rem;
 }
 
 .safety-probability {
   font-family: 'Monaco', 'Menlo', monospace;
   color: #dc2626;
-  font-size: 0.8rem;
+  font-size: 1.2800000000000002rem;
 }
 
 .empty-state {
@@ -243,18 +243,18 @@ const finishReasonClass = (reason: string | undefined) => {
 .candidate-index {
   font-weight: 600;
   color: #1e293b;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
 }
 
 .token-count {
-  font-size: 0.75rem;
+  font-size: 1.2000000000000002rem;
   color: #64748b;
 }
 
 .finish-reason-badge {
   padding: 2px 6px;
   border-radius: 4px;
-  font-size: 0.75rem;
+  font-size: 1.2000000000000002rem;
   font-weight: 500;
 }
 
@@ -281,7 +281,7 @@ const finishReasonClass = (reason: string | undefined) => {
 .avg-logprobs,
 .finish-message {
   padding: 8px 16px;
-  font-size: 0.8rem;
+  font-size: 1.2800000000000002rem;
   color: #64748b;
   font-family: 'Monaco', 'Menlo', monospace;
 }
@@ -309,7 +309,7 @@ const finishReasonClass = (reason: string | undefined) => {
 .function-badge {
   padding: 2px 6px;
   border-radius: 3px;
-  font-size: 0.65rem;
+  font-size: 1rem;
   font-weight: 600;
   text-transform: uppercase;
   background: #7c3aed;
@@ -319,7 +319,7 @@ const finishReasonClass = (reason: string | undefined) => {
 .function-name {
   font-weight: 600;
   color: #1e293b;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   font-family: 'Monaco', 'Menlo', monospace;
   margin-left: 8px;
 }
@@ -327,7 +327,7 @@ const finishReasonClass = (reason: string | undefined) => {
 .thought-badge {
   padding: 2px 6px;
   border-radius: 3px;
-  font-size: 0.65rem;
+  font-size: 1rem;
   font-weight: 600;
   background: #fef3c7;
   color: #92400e;
@@ -340,7 +340,7 @@ const finishReasonClass = (reason: string | undefined) => {
   color: #e2e8f0;
   padding: 10px;
   border-radius: 4px;
-  font-size: 0.8rem;
+  font-size: 1.2800000000000002rem;
   overflow-x: auto;
   margin-top: 8px;
 }
@@ -357,7 +357,7 @@ const finishReasonClass = (reason: string | undefined) => {
 .code-badge {
   padding: 2px 6px;
   border-radius: 3px;
-  font-size: 0.65rem;
+  font-size: 1rem;
   font-weight: 600;
   text-transform: uppercase;
   background: #d97706;
@@ -367,7 +367,7 @@ const finishReasonClass = (reason: string | undefined) => {
 .code-language {
   font-weight: 600;
   color: #1e293b;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   font-family: 'Monaco', 'Menlo', monospace;
   margin-left: 8px;
 }
@@ -378,7 +378,7 @@ const finishReasonClass = (reason: string | undefined) => {
   color: #e2e8f0;
   padding: 10px;
   border-radius: 4px;
-  font-size: 0.8rem;
+  font-size: 1.2800000000000002rem;
   overflow-x: auto;
   margin-top: 8px;
 }
@@ -390,7 +390,7 @@ const finishReasonClass = (reason: string | undefined) => {
 .code-outcome {
   font-weight: 600;
   color: #1e293b;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   margin-left: 8px;
 }
 
@@ -400,7 +400,7 @@ const finishReasonClass = (reason: string | undefined) => {
   color: #e2e8f0;
   padding: 10px;
   border-radius: 4px;
-  font-size: 0.8rem;
+  font-size: 1.2800000000000002rem;
   overflow-x: auto;
   margin-top: 8px;
 }
@@ -413,7 +413,7 @@ const finishReasonClass = (reason: string | undefined) => {
 .data-badge {
   padding: 2px 6px;
   border-radius: 3px;
-  font-size: 0.65rem;
+  font-size: 1rem;
   font-weight: 600;
   text-transform: uppercase;
   background: #3b82f6;
@@ -423,14 +423,14 @@ const finishReasonClass = (reason: string | undefined) => {
 .data-mime {
   font-family: 'Monaco', 'Menlo', monospace;
   color: #1e293b;
-  font-size: 0.8rem;
+  font-size: 1.2800000000000002rem;
   margin-left: 8px;
 }
 
 .data-preview,
 .data-uri {
   color: #64748b;
-  font-size: 0.8rem;
+  font-size: 1.2800000000000002rem;
   margin-left: 8px;
 }
 
@@ -446,7 +446,7 @@ const finishReasonClass = (reason: string | undefined) => {
 .citation-section h4,
 .grounding-section h4 {
   margin: 0 0 12px 0;
-  font-size: 0.9rem;
+  font-size: 1.4400000000000002rem;
   color: #166534;
   font-weight: 600;
 }
@@ -471,17 +471,17 @@ const finishReasonClass = (reason: string | undefined) => {
 .grounding-uri {
   font-family: 'Monaco', 'Menlo', monospace;
   color: #1e40af;
-  font-size: 0.8rem;
+  font-size: 1.2800000000000002rem;
 }
 
 .citation-license {
   color: #64748b;
-  font-size: 0.8rem;
+  font-size: 1.2800000000000002rem;
 }
 
 .grounding-title {
   font-weight: 500;
   color: #1e293b;
-  font-size: 0.8rem;
+  font-size: 1.2800000000000002rem;
 }
 </style>

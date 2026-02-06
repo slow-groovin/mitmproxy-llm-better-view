@@ -58,7 +58,7 @@ function toggleRaw() {
 .text-block-badge {
   padding: 2px 6px;
   border-radius: 3px;
-  font-size: 0.65rem;
+  font-size: 1rem;
   font-weight: 600;
   text-transform: uppercase;
   background: #e5e7eb;
@@ -81,7 +81,7 @@ function toggleRaw() {
 }
 
 .text-block-toggle {
-  font-size: 0.75rem;
+  font-size: 1.2000000000000002rem;
   color: #64748b;
 }
 
@@ -91,7 +91,7 @@ function toggleRaw() {
   color: #e2e8f0;
   padding: 12px;
   border-radius: 6px;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   white-space: pre-wrap;
   overflow-x: auto;
 }

@@ -83,24 +83,24 @@ const argsPreview = computed(() => {
   color: #1d4ed8;
   padding: 2px 6px;
   border-radius: 3px;
-  font-size: 0.7rem;
+  font-size: 1.2rem;
   font-weight: 600;
 }
 
 .tool-call-name {
   font-weight: 600;
   color: #1e293b;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   font-family: 'Monaco', 'Menlo', monospace;
 }
 
 .tool-call-index {
-  font-size: 0.7rem;
+  font-size: 1.2rem;
   color: #94a3b8;
 }
 
 .tool-call-id {
-  font-size: 0.7rem;
+  font-size: 1.2rem;
   color: #64748b;
   font-family: 'Monaco', 'Menlo', monospace;
 }
@@ -109,7 +109,7 @@ const argsPreview = computed(() => {
   margin-left: auto;
   transition: transform 0.2s;
   color: #64748b;
-  font-size: 0.75rem;
+  font-size: 1.2000000000000002rem;
 }
 
 .tool-call-content {
@@ -117,7 +117,7 @@ const argsPreview = computed(() => {
   font-family: 'Monaco', 'Menlo', monospace;
   background: #1e293b;
   color: #e2e8f0;
-  font-size: 0.8rem;
+  font-size: 1.2800000000000002rem;
   overflow-x: auto;
 }
 
@@ -128,7 +128,7 @@ const argsPreview = computed(() => {
 .tool-call-preview {
   padding: 8px 12px;
   font-family: 'Monaco', 'Menlo', monospace;
-  font-size: 0.8rem;
+  font-size: 1.2800000000000002rem;
   color: #64748b;
   background: #f8fafc;
 }

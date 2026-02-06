@@ -60,7 +60,7 @@ const truncatedContent = computed(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   color: #1e293b;
 }
 
@@ -81,7 +81,7 @@ const truncatedContent = computed(() => {
   color: #e2e8f0;
   padding: 16px;
   border-radius: 6px;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   white-space: pre-wrap;
   overflow-x: auto;
 }

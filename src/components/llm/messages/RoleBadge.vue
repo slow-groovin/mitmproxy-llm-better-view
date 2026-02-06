@@ -35,7 +35,7 @@ const displayRole = computed(() => {
 .role-badge {
   padding: 2px 6px;
   border-radius: 3px;
-  font-size: 0.65rem;
+  font-size: 1rem;
   font-weight: 600;
   text-transform: uppercase;
 }

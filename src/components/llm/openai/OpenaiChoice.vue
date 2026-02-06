@@ -133,7 +133,7 @@ const finishReasonClassValue = computed(() => {
 .choice-index {
   font-weight: 600;
   color: #1e293b;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
 }
 
 .choice-badge {
@@ -141,14 +141,14 @@ const finishReasonClassValue = computed(() => {
   color: white;
   padding: 4px 8px;
   border-radius: 4px;
-  font-size: 0.75rem;
+  font-size: 1.2000000000000002rem;
   font-weight: 600;
 }
 
 .toggle-icon {
   transition: transform 0.2s;
   color: #64748b;
-  font-size: 0.75rem;
+  font-size: 1.2000000000000002rem;
 }
 
 .choice-content {
@@ -169,7 +169,7 @@ const finishReasonClassValue = computed(() => {
 .refusal-badge {
   padding: 2px 6px;
   border-radius: 3px;
-  font-size: 0.65rem;
+  font-size: 1rem;
   font-weight: 600;
   text-transform: uppercase;
   background: #dc2626;
@@ -178,7 +178,7 @@ const finishReasonClassValue = computed(() => {
 
 .refusal-text {
   color: #991b1b;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
 }
 
 .choice-message {
@@ -191,7 +191,7 @@ const finishReasonClassValue = computed(() => {
 
 .tool-calls-container h4 {
   margin-bottom: 12px;
-  font-size: 0.9rem;
+  font-size: 1.4400000000000002rem;
   color: #1e293b;
   font-weight: 600;
 }
@@ -199,7 +199,7 @@ const finishReasonClassValue = computed(() => {
 .finish-reason-badge {
   padding: 2px 6px;
   border-radius: 4px;
-  font-size: 0.75rem;
+  font-size: 1.2000000000000002rem;
   font-weight: 500;
 }
 
