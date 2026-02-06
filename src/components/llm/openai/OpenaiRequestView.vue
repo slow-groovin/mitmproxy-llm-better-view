@@ -67,7 +67,7 @@ const stopValue = computed(() => {
       <InfoItem label="Presence Penalty" :value="data.presence_penalty" />
     </CollapsibleSection>
 
-    <CollapsibleSection title="Messages" :count="messages.length" :default-open="true" variant="default">
+    <CollapsibleSection title="Messages" :count="messages.length" :default-open="true" storage-key="messages" variant="default">
       <div v-if="messages.length === 0" class="empty-state">
         No messages
       </div>
@@ -89,9 +89,8 @@ const stopValue = computed(() => {
       />
     </CollapsibleSection>
 
-    <CollapsibleSection title="Full Request" storage-key="full-content" :default-open="false">
-      <JsonViewer :data="data" :collapsible="true" />
-    </CollapsibleSection>
+    
+    <JsonViewer :data="data" title="Full Request" :collapsible="true" />
   </div>
 </template>
 

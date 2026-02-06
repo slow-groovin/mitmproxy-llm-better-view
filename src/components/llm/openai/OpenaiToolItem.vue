@@ -30,8 +30,8 @@ const toolParameters = computed(() => props.tool.function.parameters);
 const descriptionPreview = computed(() => {
   const desc = toolDescription.value;
   if (!desc) return '';
-  if (desc.length <= 60) return desc;
-  return desc.slice(0, 60) + '...';
+  if (desc.length <= 160) return desc;
+  return desc.slice(0, 160) + '...';
 });
 
 // Generate unique ID for the tool
@@ -139,6 +139,7 @@ const toggleIcon = computed(() => isOpen.value ? '▼' : '▶');
 
 .header-left {
   display: flex;
+  max-width: 100%;
   align-items: center;
   gap: 10px;
 }
@@ -175,7 +176,7 @@ const toggleIcon = computed(() => isOpen.value ? '▼' : '▶');
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 400px;
+  max-width: 70%;
 }
 
 .tool-content {

@@ -94,7 +94,7 @@ const toggle = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
+  padding: 6px 12px;
   background: transparent;
   border: none;
   cursor: pointer;
