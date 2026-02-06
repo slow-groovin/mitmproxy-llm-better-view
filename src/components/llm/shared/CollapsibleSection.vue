@@ -1,131 +1,177 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
+import { useStorage } from '@vueuse/core';
+import { ref } from 'vue';
 
 interface Props {
   title: string;
   defaultOpen?: boolean;
   count?: number | null;
-  icon?: string;
-  variant?: 'default' | 'tools';
+  /**
+   * 用于 LocalStorage 持久化的唯一键。
+   * 如果传入此值，展开状态将被保存。
+   */
+  storageKey?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  defaultOpen: true,
+  defaultOpen: false,
   count: null,
-  icon: '',
-  variant: 'default'
+  storageKey: undefined
 });
 
-const isOpen = ref(props.defaultOpen);
+// 状态管理逻辑
+// 如果提供了 storageKey，使用 useStorage (持久化)
+// 否则使用普通的 ref (非持久化)
+const isOpen = props.storageKey
+  ? useStorage(`llm-better-view-collapse-state-${props.storageKey}`, props.defaultOpen)
+  : ref(props.defaultOpen);
 
-const toggleClass = computed(() => ({
-  'tools': props.variant === 'tools'
-}));
-
-const toggleIcon = computed(() => isOpen.value ? '▼' : '▶');
+const toggle = () => {
+  isOpen.value = !isOpen.value;
+};
 </script>
 
 <template>
-  <div class="section">
-    <div class="section-header" @click="isOpen = !isOpen">
-      <div class="section-title">
-        {{ title }}
-        <span v-if="count !== null" class="section-count">({{ count }})</span>
+  <div class="collapse-card" :class="{ 'is-open': isOpen }">
+    <!-- 头部区域 -->
+    <button class="card-header" @click="toggle" type="button">
+      <div class="header-left">
+        <span class="title">{{ title }}</span>
+        <span v-if="count !== null" class="badge">{{ count }}</span>
       </div>
-      <div class="section-controls">
-        <button class="expand-collapse-btn" :class="toggleClass" @click.stop="isOpen = !isOpen">
-          <span class="toggle-icon">{{ toggleIcon }}</span>
-        </button>
+      
+      <div class="header-right">
+        <!-- 使用 SVG 替换原有字符图标，并添加旋转类 -->
+        <svg 
+          class="chevron-icon" 
+          xmlns="http://www.w3.org/2000/svg" 
+          width="20" 
+          height="20" 
+          viewBox="0 0 24 24" 
+          fill="none" 
+          stroke="currentColor" 
+          stroke-width="2" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"
+        >
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
       </div>
-    </div>
-    <div v-if="isOpen" class="section-content">
-      <slot />
+    </button>
+
+    <!-- 内容区域：使用 CSS Grid 技巧实现高度平滑过渡 -->
+    <div class="card-content-wrapper">
+      <div class="card-content-inner">
+        <div class="content-padding">
+          <slot />
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.section {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  margin-bottom: 12px;
-  overflow: hidden;
+/* 容器基础样式 */
+.collapse-card {
+  background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-bottom: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  margin-bottom: 16px;
+  overflow: hidden;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
-.section:last-child {
-  border-bottom: none;
+.collapse-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-.section-header {
-  padding: 10px 12px;
-  background: #f1f5f9;
-  border-bottom: 1px solid #e2e8f0;
-  cursor: pointer;
+/* 头部样式 */
+.card-header {
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 16px 20px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
   transition: background-color 0.2s;
+  outline: none;
 }
 
-.section-header:hover {
-  background: #e2e8f0;
+.card-header:hover {
+  background-color: #f8fafc;
 }
 
-.section-title {
-  font-weight: 600;
-  font-size: 2rem;
-  color: #1e293b;
-}
-
-.section-count {
-  color: #64748b;
-  font-size: 1.36rem;
-  margin-left: 4px;
-}
-
-.section-controls {
+.header-left {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.expand-collapse-btn {
-  background: #dbeafe;
-  border: none;
-  padding: 4px 8px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1.2rem;
-  color: #1d4ed8;
-  display: flex;
+/* 标题样式 - 更加现代和适中的字号 */
+.title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #1e293b;
+  letter-spacing: -0.01em;
+}
+
+
+.badge {
+  display: inline-flex;
   align-items: center;
-  gap: 2px;
-  transition: background-color 0.2s;
+  justify-content: center;
+  
+  /* 核心样式：浅蓝背景 + 深蓝文字 */
+  background-color: #dbeafe; 
+  color: #1e40af;
+  
+  font-size: 1.5rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px; /*稍微方一点的圆角，更数字化 */
+  margin-left: 8px;
 }
 
-.expand-collapse-btn:hover {
-  background: #bfdbfe;
+/* 图标样式与旋转动画 */
+.chevron-icon {
+  color: #94a3b8;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s;
 }
 
-.expand-collapse-btn.tools {
-  background: #f3e8ff;
-  color: #7c3aed;
+.collapse-card.is-open .chevron-icon {
+  transform: rotate(180deg);
+  color: #475569;
 }
 
-.expand-collapse-btn.tools:hover {
-  background: #e9d5ff;
+/* 
+  内容区域动画核心技巧 
+  使用 grid-template-rows 从 0fr 到 1fr 过渡，
+  这是目前纯 CSS 实现 height: auto 动画的最佳方案。
+*/
+.card-content-wrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.toggle-icon {
-  transition: transform 0.2s;
-  color: #64748b;
-  font-size: 1.2000000000000002rem;
+.collapse-card.is-open .card-content-wrapper {
+  grid-template-rows: 1fr;
+  border-top: 1px solid #f1f5f9; /* 展开时添加一条极细的分隔线 */
 }
 
-.section-content {
-  padding: 2px;
+.card-content-inner {
+  overflow: hidden;
+}
+
+.content-padding {
+  padding: 0.5rem;
+  color: #334155;
+  font-size: 1rem;
 }
 </style>
