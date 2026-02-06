@@ -24,10 +24,12 @@ function scrollTo(selector: string) {
 </script>
 <template>
   <div class="tool-calls">
-    <!-- Raw 切换按钮 -->
-    <button class="view-raw-btn" @click="showRaw = !showRaw">
-      {{ showRaw ? '▼' : '▶' }} Raw
-    </button>
+     <!-- Raw 切换按钮 - 使用 flex wrapper -->
+    <div class="raw-button-wrapper">
+      <button class="view-raw-btn" @click="showRaw = !showRaw">
+        {{ showRaw ? '▼' : '▶' }} Raw
+      </button>
+    </div>
 
     <!-- Raw 模式 -->
     <pre v-if="showRaw" class="raw-content">{{ JSON.stringify(toolCalls, null, 2) }}</pre>
@@ -37,10 +39,11 @@ function scrollTo(selector: string) {
       <div v-for="(req, idx) in toolCalls" :key="req.id" class="tool-request">
         <div class="tool-request-header">
           <span class="badge-call">tool_call</span>
+          <span class="tool-idx">#{{ idx + 1 }}</span>
+
           <a class="tool-fn clickable" @click.prevent="scrollTo(`#tool-def-${req.function.name}`)">
             {{ req.function.name }}
           </a>
-          <span class="tool-idx">#{{ idx + 1 }}</span>
           <a 
             :id="`tool-request-${req.id}`"
             class="tool-id clickable"
@@ -59,6 +62,11 @@ function scrollTo(selector: string) {
 .tool-calls {
   margin-top: 2px;
   position: relative;
+}
+.raw-button-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -2px;
 }
 
 .view-raw-btn {

@@ -4,7 +4,6 @@ import type { OpenaiChatRequest } from '../../../types/openai/chat-request';
 import CollapsibleSection from '../shared/CollapsibleSection.vue';
 import InfoItem from '../shared/InfoItem.vue';
 import JsonViewer from '../shared/JsonViewer.vue';
-import MessageItem from '../messages/MessageItem.vue';
 import ToolItem from '../tools/ToolItem.vue';
 import OpenaiMessageItem from './OpenaiMessageItem.vue';
 

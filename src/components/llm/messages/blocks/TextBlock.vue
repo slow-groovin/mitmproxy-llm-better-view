@@ -24,7 +24,7 @@
       <pre v-else-if="format === 'xml'" class="xml-content" v-html="highlightXml(text)" />
       
       <!-- 纯文本 -->
-      <pre v-else class="text-content">{{ text }}</pre>
+      <div v-else class="text-content">{{ text }}</div>
     </template>
   </div>
 </template>
@@ -125,12 +125,12 @@ function highlightXml(xml: string): string {
 
 /* 纯文本 */
 .text-content {
+  font-size: 1.2rem;
   font-family: inherit;
   white-space: pre-wrap;
   word-wrap: break-word;
   margin: 0;
   padding: 0;
-  line-height: 1.6;
 }
 
 /* XML 高亮 */

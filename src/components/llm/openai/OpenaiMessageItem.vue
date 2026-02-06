@@ -13,6 +13,7 @@ import type {
   ImageContentItem,
 } from '@/types/openai/chat-request';
 import OpenaiAssistantToolCalls from './OpenaiAssistantToolCalls.vue';
+import { hashId } from '@/utils/id/hashId';
 
 interface Props {
   id?: string;
@@ -23,7 +24,7 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const storageKey = computed(() => `openai-msg-${props.id || props.index}-open`);
+const storageKey = computed(() => `openai-msg-${props.id || hashId(JSON.stringify(props.message))}-open`);
 const isOpen = useSessionStorage(storageKey, true);
 
 // 内容项解析
