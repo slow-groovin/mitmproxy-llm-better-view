@@ -66,18 +66,18 @@ const htmlContent = computed(() => {
 :deep(h3) { font-size: 1.25em; }
 
 :deep(p) {
-  margin-bottom: 1.25em;
+  margin-bottom: 0.25em;
 }
 
-/* 列表样式 */
+/* 列表样式
 :deep(ul), :deep(ol) {
   margin-bottom: 1.25em;
   padding-left: 1.5em;
-}
+} */
 
-:deep(li) {
+/* :deep(li) {
   margin-bottom: 0.5em;
-}
+} */
 
 /* 代码样式 */
 :deep(code) {

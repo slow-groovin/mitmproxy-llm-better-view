@@ -4,7 +4,7 @@ import type { OpenaiChatRequest } from '../../../types/openai/chat-request';
 import CollapsibleSection from '../shared/CollapsibleSection.vue';
 import InfoItem from '../shared/InfoItem.vue';
 import JsonViewer from '../shared/JsonViewer.vue';
-import ToolItem from '../tools/ToolItem.vue';
+import OpenaiToolItem from './OpenaiToolItem.vue';
 import OpenaiMessageItem from './OpenaiMessageItem.vue';
 
 interface Props {
@@ -13,17 +13,9 @@ interface Props {
 
 const props = defineProps<Props>();
 
-// Extract messages for display
-const messages = computed(() => {
-  return props.data.messages || [];
-});
+const messages = computed(() => props.data.messages || []);
+const tools = computed(() => props.data.tools || []);
 
-// Extract tools for display
-const tools = computed(() => {
-  return props.data.tools || [];
-});
-
-// Extract tool choice
 const toolChoice = computed(() => {
   const tc = props.data.tool_choice;
   if (!tc) return 'none';
@@ -32,7 +24,6 @@ const toolChoice = computed(() => {
   return 'unknown';
 });
 
-// Extract response format
 const responseFormat = computed(() => {
   const rf = props.data.response_format;
   if (!rf) return 'none';
@@ -41,12 +32,6 @@ const responseFormat = computed(() => {
   return rf.type;
 });
 
-// Format stream value
-const streamValue = computed(() => {
-  return props.data.stream ? 'Yes' : 'No';
-});
-
-// Format stop value
 const stopValue = computed(() => {
   if (Array.isArray(props.data.stop)) {
     return props.data.stop.join(', ');
@@ -57,12 +42,23 @@ const stopValue = computed(() => {
 
 <template>
   <div class="openai-request-view">
-    <CollapsibleSection title="Basic Info" :default-open="true" storage-key="basic-info">
-      <InfoItem label="Model" :value="data.model" />
+    <div class="header">
+      <h2>OpenAI Chat Completions API Request</h2>
+      <div class="meta">
+        <code>{{ data.model }}</code>
+        <span class="divider">·</span>
+        <span>{{ messages.length }} messages</span>
+        <span v-if="tools.length > 0" class="divider">·</span>
+        <span v-if="tools.length > 0">{{ tools.length }} tools</span>
+        <span class="divider">·</span>
+        <span>stream: {{ data.stream ? 'true' : 'false' }}</span>
+      </div>
+    </div>
+
+    <CollapsibleSection title="Parameters" :default-open="true" storage-key="parameters">
       <InfoItem label="Temperature" :value="data.temperature" />
       <InfoItem label="Top P" :value="data.top_p" />
       <InfoItem label="Max Tokens" :value="data.max_tokens" />
-      <InfoItem label="Stream" :value="streamValue" />
       <InfoItem label="Tool Choice" :value="toolChoice" />
       <InfoItem label="Response Format" :value="responseFormat" />
       <InfoItem label="Seed" :value="data.seed" />
@@ -85,12 +81,11 @@ const stopValue = computed(() => {
     </CollapsibleSection>
 
     <CollapsibleSection v-if="tools.length > 0" title="Tools" storage-key="tools" :count="tools.length" variant="tools">
-      <ToolItem
+      <OpenaiToolItem
         v-for="(tool, index) in tools"
         :key="index"
-        :id="`tool-${index}`"
         :tool="tool"
-        platform="openai"
+        :index="index"
       />
     </CollapsibleSection>
 
@@ -103,6 +98,38 @@ const stopValue = computed(() => {
 <style scoped>
 .openai-request-view {
   padding: 2px;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h2 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.meta code {
+  background: #f3f4f6;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 13px;
+  font-family: 'SF Mono', Consolas, monospace;
+  color: #374151;
+}
+
+.divider {
+  color: #d1d5db;
 }
 
 .empty-state {
