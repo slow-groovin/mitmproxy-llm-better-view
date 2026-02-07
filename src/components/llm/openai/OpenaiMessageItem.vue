@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import { useSessionStorage } from '@vueuse/core';
 import RoleBadge from '../RoleBadge.vue';
-import TextBlock from '../../content/TextBlock.vue';
+import SmartViewer from '../../content/SmartViewer.vue';
 import ImageBlock from '../../content/ImageBlock.vue';
 import type {
   OpenaiChatMessage,
@@ -89,7 +89,7 @@ function scrollTo(selector: string) {
       <!-- 内容块 -->
       <template v-if="hasContent">
         <template v-for="item in contentItems" :key="item.id">
-          <TextBlock v-if="item.type === 'text' && item.text" :id="item.id" :text="item.text" />
+          <SmartViewer v-if="item.type === 'text' && item.text" :id="item.id" :text="item.text" />
           <ImageBlock v-else-if="item.type === 'image'" :id="item.id" :url="item.url!" />
         </template>
       </template>

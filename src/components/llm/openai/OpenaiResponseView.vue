@@ -6,7 +6,7 @@ import LabelValueRow from '../../content/LabelValueRow.vue';
 import OpenaiTokenUsage from './OpenaiTokenUsage.vue';
 import OpenaiChoice from './OpenaiChoice.vue';
 import BetterDetails from '@/components/container/BetterDetails.vue';
-import TextBlock from '../../content/TextBlock.vue';
+import SmartViewer from '../../content/SmartViewer.vue';
 
 interface Props {
   data: OpenaiChatResponse;
@@ -81,7 +81,7 @@ const getFinishReasonSummary = () => {
     </CollapsibleSection>
 
     <BetterDetails title="Full Response">
-      <TextBlock :text="JSON.stringify(data,null,2)"/>
+      <SmartViewer :text="JSON.stringify(data,null,2)"/>
     </BetterDetails>
 
   </div>

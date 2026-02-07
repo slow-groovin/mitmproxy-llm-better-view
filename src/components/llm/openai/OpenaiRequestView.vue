@@ -6,7 +6,7 @@ import LabelValueRow from '../../content/LabelValueRow.vue';
 import OpenaiToolItem from './OpenaiToolItem.vue';
 import OpenaiMessageItem from './OpenaiMessageItem.vue';
 import BetterDetails from '@/components/container/BetterDetails.vue';
-import TextBlock from '../../content/TextBlock.vue';
+import SmartViewer from '../../content/SmartViewer.vue';
 
 interface Props {
   data: OpenaiChatRequest;
@@ -91,7 +91,7 @@ const stopValue = computed(() => {
     </CollapsibleSection>
 
     <BetterDetails title="Full Request">
-      <TextBlock :text="JSON.stringify(data,null,2)"/>
+      <SmartViewer :text="JSON.stringify(data,null,2)"/>
     </BetterDetails>
   </div>
 </template>

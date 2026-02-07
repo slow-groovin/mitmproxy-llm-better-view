@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue';
 import type { Choice } from '@/types/openai/chat-response';
 import BetterDetails from '@/components/container/BetterDetails.vue';
-import TextBlock from '@/components/content/TextBlock.vue';
+import SmartViewer from '@/components/content/SmartViewer.vue';
 import OpenaiAssistantToolCalls from './OpenaiAssistantToolCalls.vue';
 
 interface Props {
@@ -81,13 +81,13 @@ const finishReason = computed(() => {
       <div v-if="reasoning" class="">
         <BetterDetails title="reasoning">
           <div class="reasoning">
-            <TextBlock :text="reasoning" />
+            <SmartViewer :text="reasoning" />
           </div>
         </BetterDetails>
       </div>
 
       <div v-if="content" class="choice-message">
-        <TextBlock :text="content" />
+        <SmartViewer :text="content" />
       </div>
       <OpenaiAssistantToolCalls v-if="toolCalls.length > 0" :tool-calls="toolCalls" variant="compact" />
     </div>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import TextBlock from '@/components/content/TextBlock.vue';
+import SmartViewer from '@/components/content/SmartViewer.vue';
 
 interface Props {
   arguments: string | object;
@@ -46,7 +46,7 @@ const parsedArgs = computed<Record<string, string>>(() => {
         
         <div class="param-name">{{ key }}</div>
         <div class="param-value">
-          <TextBlock :text="value" />
+          <SmartViewer :text="value" />
         </div>
       </div>
     </div>
