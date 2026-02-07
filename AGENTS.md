@@ -33,11 +33,12 @@ vite-plugin-monkey@7.x + vue3 (making 外挂式辅助页面 for mitmweb(react sp
 
 4. 交互流程
 ## 进行中的任务3
-OpenaiRequestView.vue以及子组件, 是一个成熟的, 经过人工调整的显示组件:
+OpenaiRequestView.vue以及 OpenaiResponseView.vue 以及子组件, 是成熟的, 经过人工调整的显示组件:
 1. 类型专用, 符合Openai Request types, 而不是通用组件接受各种不同标准的data, 耗费无尽的工作在适配上还不好
 2. 无字段损失/胡适
 3. tool-messages 根据tool id进行跳转
 4. 折叠 展开 并记忆状态, 通用的用localStorage, 详细的用sessionStorage
+
 
 
 后续:

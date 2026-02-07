@@ -43,7 +43,7 @@ export interface ToolUseBlock {
 export interface ToolResultBlock {
   type: 'tool_result';
   tool_use_id: string;
-  content: string;
+  content: string | {type: 'text', text:string}[];
   is_error?: boolean;
 }
 
