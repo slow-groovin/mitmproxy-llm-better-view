@@ -4,7 +4,7 @@ import { useSessionStorage } from '@vueuse/core';
 import RoleBadge from '../RoleBadge.vue';
 import SmartViewer from '../../content/SmartViewer.vue';
 import ImageBlock from '../../content/ImageBlock.vue';
-import type { ClaudeMessage, ContentBlock, TextBlock, ImageBlock as ImageBlockType, ToolUseBlock, ToolResultBlock } from '../../../types/claude/claude-request';
+import type { ClaudeMessage, ContentBlock, TextBlock, ImageBlock as ImageBlockType, ToolUseBlock, ToolResultBlock, ThinkingBlock } from '../../../types/claude/claude-request';
 import { hashId } from '@/utils/id/hashId';
 import BetterDetails from '@/components/container/BetterDetails.vue';
 
@@ -71,8 +71,13 @@ const toolUseBlocks = computed(() => {
   return contentBlocks.value.filter(b => b.type === 'tool_use') as (ToolUseBlock & { id: string })[];
 });
 
-// 工具结果块（仅 user 消息作为 tool_result 可能有，但通常 user 不会发送这个）
+// Thinking 块（仅 assistant 消息可能有）
+const thinkingBlocks = computed(() => {
+  if (props.message.role !== 'assistant') return [];
+  return contentBlocks.value.filter(b => b.type === 'thinking') as (ThinkingBlock & { id: string })[];
+});
 
+// 工具结果块（仅 user 消息作为 tool_result 可能有，但通常 user 不会发送这个）
 const toolResultBlocks = computed(() => {
   const blocks = contentBlocks.value.filter(b => b.type === 'tool_result') as (ToolResultBlock)[];
 
@@ -114,6 +119,19 @@ function scrollTo(selector: string) {
     </div>
 
     <div v-show="isOpen" class="content">
+
+
+      <!-- thinking 内容（仅 assistant 消息） -->
+      <template v-if="thinkingBlocks.length > 0">
+        <div v-for="block in thinkingBlocks" :key="block.id">
+          <BetterDetails title="thinking">
+            <div class="reasoning">
+              <SmartViewer :text="block.thinking" />
+            </div>
+          </BetterDetails>
+        </div>
+      </template>
+
       <!-- 文本内容 -->
       <template v-if="textBlocks.length > 0">
         <SmartViewer v-for="block in textBlocks" :key="block.id" :text="block.text" />
@@ -126,15 +144,20 @@ function scrollTo(selector: string) {
         </div>
       </template>
 
+
       <!-- 工具使用（仅 assistant 消息） -->
       <template v-if="toolUseBlocks.length > 0">
-        <div v-for="block in toolUseBlocks" class="tool-use-block">
-          <div class="tool-header">
-            <span class="tool-badge">TOOL USE</span>
-            <span class="tool-name-display">{{ block.name }}</span>
-            <span class="tool-id">{{ block.id }}</span>
-          </div>
-          <SmartViewer :text="JSON.stringify(block.input, null, 2)" />
+        <div v-for="block in toolUseBlocks" :key="block.id" class="tool-use-block">
+          <BetterDetails default-open>
+            <template #summary>
+              <div class="tool-header">
+                <span class="tool-badge">TOOL USE</span>
+                <span class="tool-name-display">{{ block.name }}</span>
+                <span class="tool-id">{{ block.id }}</span>
+              </div>
+            </template>
+             <SmartViewer :text="JSON.stringify(block.input, null, 2)" />
+          </BetterDetails>
         </div>
       </template>
 
@@ -234,7 +257,6 @@ function scrollTo(selector: string) {
   /* margin: var(--llm-spacing-md) 0; */
   background: var(--llm-bg-tool);
   border-radius: var(--llm-radius-lg);
-  padding: var(--llm-spacing-md);
 }
 
 .tool-header {
@@ -272,5 +294,12 @@ function scrollTo(selector: string) {
   color: var(--llm-text-muted);
   font-family: var(--llm-font-mono);
   margin-left: auto;
+}
+
+.reasoning {
+  margin-bottom: 12px;
+  border-left: 3px solid #8b5cf6;
+  background: #f5f3ff;
+  border-radius: 0 6px 6px 0;
 }
 </style>

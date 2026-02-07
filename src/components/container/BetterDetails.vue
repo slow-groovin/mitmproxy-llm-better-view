@@ -71,7 +71,5 @@ const slots = useSlots();
 }
 
 .details-content {
-  padding-left: 1.2em; /* 与箭头对齐 */
-  margin-top: 4px;
 }
 </style>
