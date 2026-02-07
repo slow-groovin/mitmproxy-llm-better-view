@@ -103,8 +103,7 @@ function scrollTo(selector: string) {
 .tool-request-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  /* gap: 8px; */
   font-weight: 600;
   font-size: 1.4rem;
   color: #1e293b;
@@ -124,7 +123,9 @@ function scrollTo(selector: string) {
   color: #64748b;
   font-size: 1.2rem;
 }
-
+.tool-fn{
+  margin-left: 1rem;
+}
 .tool-id {
   margin-left: auto;
   font-size: 1.1rem;

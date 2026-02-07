@@ -77,9 +77,9 @@ const highlightedCode = computed(() => {
   padding: 12px;
   font-size: 12px;
   line-height: 1.5;
-  white-space: pre-wrap;
-  word-break: break-all;
-  overflow-x: auto;
+  /* white-space: pre;*/
+  /* word-break: break-all; */
+  /* overflow-x: auto; */
   color: #24292e;
 }
 

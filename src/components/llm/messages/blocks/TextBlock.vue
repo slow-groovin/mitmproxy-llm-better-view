@@ -10,7 +10,7 @@
       </div>
     </div>
 
-    <div class="content-wrapper" @mouseenter="showButtons = true" @mouseleave="showButtons = false">
+    <div class="content-wrapper" @mouseenter="showButtons = true" @mouseleave="showButtons = false" >
       <!-- 右上角浮动按钮 -->
       <div class="floating-buttons" :class="{ visible: showButtons }">
         <WrapLineButton :active="wrapLines" title="Toggle word wrap" @click="wrapLines = !wrapLines" />
@@ -20,8 +20,8 @@
       <RawViewer v-if="showRaw" :content="text" :wrap-lines="wrapLines" />
       <ProseContent v-else-if="displayFormat === 'markdown'" v-model:content="textModel" />
       <XMLViewer v-else-if="displayFormat === 'xml'" v-model:content="textModel" />
-      <JsonViewer v-else-if="displayFormat === 'json'" v-model:content="textModel" />
-      <div v-else class="text-content" :style="{ whiteSpace: wrapLines ? 'pre-wrap' : 'pre' }">{{ text }}</div>
+      <JsonViewer v-else-if="displayFormat === 'json'" v-model:content="textModel"/>
+      <div v-else class="text-content" >{{ text }}</div>
     </div>
   </div>
 </template>
@@ -108,7 +108,13 @@ const handleFormatChange = (format: ContentFormat) => {
 /* 内容包装器 - 相对定位 */
 .content-wrapper {
   position: relative;
+  border-radius: 6px; /* 可选 */
+  min-height: 32px;
 }
+.content-wrapper:hover {
+  box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.6);
+}
+
 
 
 /* 浮动按钮容器 - 绝对定位在右上角 */
