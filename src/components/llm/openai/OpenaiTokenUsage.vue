@@ -25,19 +25,31 @@ const stats = computed(() => {
   // 4. Claude Specific Cache Writes
   const cacheCreation = (u.claude_cache_creation_5_m_tokens || 0) + (u.claude_cache_creation_1_h_tokens || 0);
 
+  // 计算百分比函数
+  const calcPercent = (value: number, total: number): number => {
+    if (total === 0) return 0;
+    return Math.round((value / total) * 100);
+  };
+
+  const promptStats = {
+    count: promptTotal,
+    cached: promptDetails.cached_tokens || 0,
+    audio: promptDetails.audio_tokens || 0,
+    image: promptDetails.image_tokens || 0,
+    // 计算输入 cached 百分比
+    cachedPercent: calcPercent(promptDetails.cached_tokens || 0, promptTotal)
+  };
+
+  const completionStats = {
+    count: completionTotal,
+    reasoning: completionDetails.reasoning_tokens || 0,
+    audio: completionDetails.audio_tokens || 0
+  };
+
   return {
     total,
-    prompt: {
-      count: promptTotal,
-      cached: promptDetails.cached_tokens || 0,
-      audio: promptDetails.audio_tokens || 0,
-      image: promptDetails.image_tokens || 0,
-    },
-    completion: {
-      count: completionTotal,
-      reasoning: completionDetails.reasoning_tokens || 0,
-      audio: completionDetails.audio_tokens || 0,
-    },
+    prompt: promptStats,
+    completion: completionStats,
     cacheCreation,
     // Helper to determine if we should show the cache write block
     hasCacheWrite: cacheCreation > 0
@@ -45,6 +57,7 @@ const stats = computed(() => {
 });
 
 const formatNum = (num: number) => num.toLocaleString();
+const formatPercent = (percent: number) => `${percent}%`;
 </script>
 
 <template>
@@ -60,7 +73,7 @@ const formatNum = (num: number) => num.toLocaleString();
       <div class="details">
         <div v-if="stats.prompt.cached > 0" class="detail-item cache-hit">
           <span class="dot"></span>
-          <span>Cached: {{ formatNum(stats.prompt.cached) }}</span>
+          <span>Cached: {{ formatNum(stats.prompt.cached) }} ({{ formatPercent(stats.prompt.cachedPercent) }})</span>
         </div>
         <div v-if="stats.prompt.audio > 0" class="detail-item">
           <span class="dot audio"></span>
@@ -153,6 +166,7 @@ const formatNum = (num: number) => num.toLocaleString();
   color: #0f172a;
   line-height: 1.2;
 }
+
 
 /* Details Section (Small sub-stats) */
 .details {
