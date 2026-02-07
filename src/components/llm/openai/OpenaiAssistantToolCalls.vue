@@ -52,6 +52,7 @@ function scrollTo(selector: string) {
             {{ req.id }}
           </a>
         </div>
+        
         <OpenaiToolCallArgs :arguments="req.function.arguments" />
       </div>
     </div>

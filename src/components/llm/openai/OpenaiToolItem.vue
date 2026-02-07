@@ -205,15 +205,18 @@ const toggleIcon = computed(() => isOpen.value ? '▼' : '▶');
 }
 
 .raw-content {
-  background: #1e293b;
-  color: #e2e8f0;
+  background: #f8fafc;
+  color: #1e293b;
   padding: 12px;
   border-radius: 6px;
+  border: 1px solid #e2e8f0;
   overflow-x: auto;
   margin: 0;
   font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
   font-size: 1.3rem;
   line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 /* Formatted mode styles */

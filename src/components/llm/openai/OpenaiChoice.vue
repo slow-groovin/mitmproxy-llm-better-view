@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import type { Choice, StreamChoice } from '@/types/openai/chat-response';
+import type { Choice } from '@/types/openai/chat-response';
 import ProseContent from '../shared/ProseContent.vue';
-import ToolCall from '../tools/ToolCall.vue';
+import OpenaiAssistantToolCalls from './OpenaiAssistantToolCalls.vue';
 
 interface Props {
-  choice: Choice | StreamChoice;
+  choice: Choice ;
   isStream?: boolean;
   finishReasonClass?: (reason: string | null) => string;
 }
@@ -24,30 +24,17 @@ const isStreamingChoice = computed(() => {
   return 'delta' in props.choice;
 });
 
-const message = computed(() => {
-  if (isStreamingChoice.value) {
-    return (props.choice as StreamChoice).delta;
-  }
-  return (props.choice as Choice).message;
-});
-
-const finishReason = computed(() => {
-  if (isStreamingChoice.value) {
-    return (props.choice as StreamChoice).finish_reason;
-  }
-  return (props.choice as Choice).finish_reason;
-});
 
 const toolCalls = computed(() => {
   if (isStreamingChoice.value) {
-    return (props.choice as StreamChoice).delta?.tool_calls || [];
+    return (props.choice).message?.tool_calls || [];
   }
   return (props.choice as Choice).message?.tool_calls || [];
 });
 
 const content = computed(() => {
   if (isStreamingChoice.value) {
-    return (props.choice as StreamChoice).delta?.content || '';
+    return (props.choice).message?.content || '';
   }
   return (props.choice as Choice).message?.content || '';
 });
@@ -56,21 +43,15 @@ const refusal = computed(() => {
   if (isStreamingChoice.value) return null;
   return (props.choice as Choice).message?.refusal || null;
 });
-
-const finishReasonClassValue = computed(() => {
-  return props.finishReasonClass ? props.finishReasonClass(finishReason.value) : '';
-});
 </script>
 
 <template>
   <div class="choice-item">
     <div class="choice-header" @click="isOpen = !isOpen">
       <div class="choice-meta">
-        <span class="choice-index">Choice #{{ choice.index + 1 }}</span>
+        <span class="choice-index">#{{ choice.index + 1 }}</span>
         <span v-if="isStream" class="choice-badge">streaming</span>
-        <span v-if="finishReason" class="finish-reason-badge" :class="finishReasonClassValue">
-          {{ finishReason }}
-        </span>
+        
       </div>
       <span class="toggle-icon">{{ toggleIcon }}</span>
     </div>
@@ -84,17 +65,7 @@ const finishReasonClassValue = computed(() => {
         <ProseContent :content="content" />
       </div>
 
-      <div v-if="toolCalls.length > 0" class="tool-calls-container">
-        <h4>Tool Calls</h4>
-        <ToolCall
-          v-for="(tool, idx) in toolCalls"
-          :key="tool.id || idx"
-          :id="tool.id"
-          :name="tool.function.name"
-          :arguments="tool.function.arguments"
-          :index="idx"
-        />
-      </div>
+      <OpenaiAssistantToolCalls v-if="toolCalls.length > 0" :tool-calls="toolCalls" variant="compact" />
     </div>
   </div>
 </template>
@@ -109,7 +80,7 @@ const finishReasonClassValue = computed(() => {
 
 .choice-header {
   background: #f8fafc;
-  padding: 12px 16px;
+  padding: 8px 6px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -152,7 +123,7 @@ const finishReasonClassValue = computed(() => {
 }
 
 .choice-content {
-  padding: 16px;
+  padding: 6px;
 }
 
 .refusal {
@@ -186,7 +157,7 @@ const finishReasonClassValue = computed(() => {
 }
 
 .tool-calls-container {
-  margin-top: 16px;
+  margin-top: 1px;
 }
 
 .tool-calls-container h4 {

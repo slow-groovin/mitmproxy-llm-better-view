@@ -10,31 +10,7 @@ export type ToolCall = {
   index?: number;
 };
 
-export type PromptTokensDetails = {
-  cached_tokens?: number;
-  text_tokens?: number;
-  audio_tokens?: number;
-  image_tokens?: number;
-};
 
-export type CompletionTokensDetails = {
-  text_tokens?: number;
-  audio_tokens?: number;
-  reasoning_tokens?: number;
-};
-
-export type Usage = {
-  prompt_tokens: number;
-  completion_tokens: number;
-  total_tokens: number;
-  prompt_tokens_details?: PromptTokensDetails;
-  completion_tokens_details?: CompletionTokensDetails;
-  input_tokens?: number;
-  output_tokens?: number;
-  input_tokens_details?: PromptTokensDetails|null;
-  claude_cache_creation_5_m_tokens?: number;
-  claude_cache_creation_1_h_tokens?: number;
-};
 
 export type LogProbs = {
   tokens: string[];

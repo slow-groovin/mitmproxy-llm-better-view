@@ -1,4 +1,4 @@
-import type { ToolCall, Usage, LogProbs } from './common';
+import type { ToolCall, OpenaiTokenUsage, LogProbs } from './common';
 
 export type OpenaiChatCompletionChunk = {
   id: string;
@@ -8,7 +8,7 @@ export type OpenaiChatCompletionChunk = {
   service_tier?: string;
   system_fingerprint?: string;
   choices: StreamChoice[];
-  usage?: Usage|null;
+  usage?: OpenaiTokenUsage|null;
 };
 
 export type Delta = {

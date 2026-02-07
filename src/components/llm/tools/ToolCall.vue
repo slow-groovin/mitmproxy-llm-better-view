@@ -42,7 +42,7 @@ const argsPreview = computed(() => {
       <span class="tool-call-badge">tool_call</span>
       <span class="tool-call-name">{{ name }}</span>
       <span v-if="index !== undefined" class="tool-call-index">#{{ index + 1 }}</span>
-      <span v-if="id" class="tool-call-id">{{ id.slice(0, 8) }}</span>
+      <span v-if="id" class="tool-call-id">{{ id }}</span>
       <span class="toggle-icon">{{ toggleIcon }}</span>
     </div>
     <div v-if="isOpen" class="tool-call-content">
