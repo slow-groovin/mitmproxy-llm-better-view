@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { OpenaiTokenUsage } from '@/types/openai/chat-response';
+import type { OpenaiTokenUsage } from '@/types/openai/common';
 
 interface Props {
   usage: OpenaiTokenUsage;

@@ -30,8 +30,10 @@ const tabs = shallowRef<TabItem[]>([
   { name: 'BrowserPermission', component: BrowserPermissionTest as Component },
   { name: 'LogTape', component: LogTapeTest as Component },
   { name: 'PageInjector', component: PageInjectorTest as Component },
-  { name: 'Render', component: RenderDebug as Component },
   { name: 'Pinia Store', component: DebugStorePage as Component },
+  { name: 'Transfer', component: TransferDebug as Component },
+  { name: 'Render', component: RenderDebug as Component },
+
 
   ]);
 </script>

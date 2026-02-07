@@ -29,10 +29,8 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 // Get parameter schema info
-const schemaType = computed(() => props.parameters?.type || 'unknown');
 const schemaProperties = computed(() => props.parameters?.properties || {});
 const schemaRequired = computed(() => props.parameters?.required || []);
-const additionalProperties = computed(() => props.parameters?.additionalProperties);
 
 // Get all property keys
 const propertyKeys = computed(() => Object.keys(schemaProperties.value));
@@ -59,13 +57,7 @@ function formatDefault(prop: Property): string | null {
   return JSON.stringify(prop.default);
 }
 
-// Check if property has nested structure
-function hasNestedStructure(prop: Property): boolean {
-  return (
-    (prop.type === 'object' && !!prop.properties) ||
-    (prop.type === 'array' && !!prop.items && typeof prop.items === 'object')
-  );
-}
+
 </script>
 
 <template>

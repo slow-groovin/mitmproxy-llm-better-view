@@ -18,7 +18,6 @@ const imageUrl = computed(() => {
   return '';
 });
 
-const isLoaded = ref(true);
 const hasError = ref(false);
 
 function onError() {

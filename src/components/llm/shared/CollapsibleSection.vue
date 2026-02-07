@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import { useStorage } from '@vueuse/core';
 import { ref } from 'vue';
 

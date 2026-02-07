@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { useLocalStorage } from '@vueuse/core';
-import { toast } from 'vue-sonner';
 import { useCurrentFlowStore } from '../../store/llm';
 import type { ApiStandard, DataType } from '../../types/flow'
 import ViewDashboardProxy from '@/components/llm/ViewDashboardProxy.vue';
@@ -32,14 +31,6 @@ watch(rawSSEExpanded, (newVal) => {
   }
 }, { immediate: true });
 
-async function copyToClipboard(text: string) {
-  try {
-    await navigator.clipboard.writeText(text);
-    toast.success('已复制到剪贴板');
-  } catch (error) {
-    toast.error('复制失败');
-  }
-}
 
 function refreshData(standard: ApiStandard, datatype: DataType) {
   userStandard.value = standard
