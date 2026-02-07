@@ -3,56 +3,11 @@ import { computed, ref } from 'vue';
 import RoleBadge from './RoleBadge.vue';
 import MessageContent from './MessageContent.vue';
 import { ApiStandard } from '@/types/flow';
-import { OpenaiChatMessage } from '@/types/openai/chat-request';
+import { OpenaiChatMessage, AssistantMessage, ToolMessage } from '@/types/openai/chat-request';
 import { ClaudeMessage } from '@/types/claude/claude-request';
 import { GeminiReqContent } from '@/types/gemini/request';
 
-
-// OpenAI message types
-
-// Claude message types
-// interface ClaudeContentBlock {
-//   type: string;
-//   text?: string;
-//   thinking?: string;
-//   signature?: string;
-//   id?: string;
-//   name?: string;
-//   input?: Record<string, unknown>;
-//   tool_use_id?: string;
-//   content?: string;
-//   is_error?: boolean;
-//   source?: {
-//     type: string;
-//     media_type: string;
-//     data: string;
-//   };
-// }
-
-
-// interface ClaudeMessage {
-//   role: 'user' | 'assistant';
-//   content: string | ClaudeContentBlock[];
-// }
-
-// Gemini message types
-// interface GeminiPart {
-//   text?: string;
-//   inlineData?: { mimeType: string; data: string };
-//   fileData?: { mimeType: string; fileUri: string };
-//   functionCall?: { name: string; args: Record<string, unknown> };
-//   functionResponse?: { name: string; response: Record<string, unknown> };
-//   executableCode?: { language: string; code: string };
-//   codeExecutionResult?: { outcome: string; output: string };
-//   thought?: boolean;
-//   thoughtSignature?: string;
-// }
-
-type GeminiMessage=GeminiReqContent
-// interface GeminiMessage {
-//   role: 'user' | 'model' | 'function';
-//   parts: GeminiPart[];
-// }
+type GeminiMessage = GeminiReqContent;
 
 interface Props {
   id?: string;
@@ -71,31 +26,23 @@ const isOpen = ref(props.defaultOpen);
 
 const toggleIcon = computed(() => isOpen.value ? '▼' : '▶');
 
-// Get role class for styling
-const roleClass = computed(() => {
-  const role = props.role.toLowerCase();
-  if (role === 'model') return 'role-model';
-  if (role === 'function') return 'role-function';
-  return `role-${role}`;
-});
-
 // Handle tool call display (OpenAI)
 const toolCalls = computed(() => {
   if (props.apiStandard !== 'openai') return [];
-  const msg = props.message as OpenaiChatMessage;
+  const msg = props.message as AssistantMessage;
   return msg.tool_calls || [];
 });
 
 // Handle tool result (OpenAI tool role)
 const toolCallId = computed(() => {
   if (props.apiStandard !== 'openai') return null;
-  const msg = props.message as OpenaiChatMessage;
+  const msg = props.message as ToolMessage;
   return msg.tool_call_id || null;
 });
 
 const toolName = computed(() => {
   if (props.apiStandard !== 'openai') return null;
-  const msg = props.message as OpenaiChatMessage;
+  const msg = props.message as ToolMessage;
   return msg.name || null;
 });
 </script>

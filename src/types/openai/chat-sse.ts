@@ -1,4 +1,4 @@
-import type { ToolCall, OpenaiTokenUsage, LogProbs } from './common';
+import type { ToolCall, LogProbs, OpenaiTokenUsage } from './common';
 
 export type OpenaiChatCompletionChunk = {
   id: string;

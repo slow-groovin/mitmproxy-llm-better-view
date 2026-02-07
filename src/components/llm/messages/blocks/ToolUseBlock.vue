@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
 interface Props {
   id?: string;
@@ -15,13 +15,6 @@ const toggleIcon = computed(() => isOpen.value ? '▼' : '▶');
 
 const inputJson = computed(() => {
   return JSON.stringify(props.input, null, 2);
-});
-
-const inputSummary = computed(() => {
-  const keys = Object.keys(props.input);
-  if (keys.length === 0) return '{}';
-  if (keys.length === 1) return `{ ${keys[0]}: ... }`;
-  return `{ ${keys.length} keys }`;
 });
 </script>
 
