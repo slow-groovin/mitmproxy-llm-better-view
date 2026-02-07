@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useSlots } from 'vue';
+
 interface Props {
   title?: string;
   defaultOpen?: boolean;
@@ -8,11 +10,19 @@ withDefaults(defineProps<Props>(), {
   title: 'Details',
   defaultOpen: false
 });
+
+const slots = useSlots();
 </script>
 
 <template>
   <details class="native-details" :open="defaultOpen">
-    <summary class="native-summary">{{ title }}</summary>
+    <summary class="native-summary">
+      <span class="summary-content">
+        <slot v-if="slots.summary" name="summary" />
+        <template v-else>{{ title }}</template>
+      </span>
+    </summary>
+    
     <div class="details-content">
       <slot />
     </div>
@@ -22,57 +32,46 @@ withDefaults(defineProps<Props>(), {
 <style scoped>
 .native-details {
   display: block;
-  /* 确保盒模型为 border-box，防止 padding 撑大容器 */
   box-sizing: border-box; 
-  background-color: transparent;
-  color: inherit;
-  border: none;
-  margin: 0;
-  padding: 0;
-  /* 限制宽度不超过父容器 */
-  max-width: 100%; 
+  width: 100%;
 }
 
 .native-summary {
   display: list-item;
-  box-sizing: border-box; /* 关键：确保 padding 和 border 不会增加宽度 */
+  list-style: disclosure-closed inside;
   cursor: pointer;
-  background-color: transparent;
-  color: inherit;
-  font-weight: normal;
   outline: none;
   padding: 4px 0;
   user-select: none;
-  width: 100%; /* 显式声明宽度 */
   
-  /* 
-   * 修复建议：
-   * 原生默认其实是 outside。使用 inside 虽然方便对齐，
-   * 但会把小三角算作文本的一部分，容易造成折行或宽度计算问题。
-   * 这里保留 inside 以维持你原有的设计意图，但依靠 box-sizing 修复溢出。
-   */
-  list-style: disclosure-closed inside;
+  /* 添加这行 */
+  align-items: center;
 }
 
-/* 
- * 【重要修复】
- * 删除了 display: list-item; 
- * 只需要保留颜色继承即可。给伪元素加 display: list-item 会破坏布局导致宽度溢出。
- */
+/* 解决换行的核心样式 */
+.summary-content {
+  /* 使用 inline-flex 可以让插槽内的 div 或其它组件强行保持在同一行 */
+  display: inline-flex;
+  align-items: center;
+  gap: 8px; /* 箭头和文字之间的间距 */
+  
+  /* 确保不换行 */
+  white-space: nowrap; 
+  /* vertical-align: middle; */
+}
+
+/* 展开状态 */
+.native-details[open] > .native-summary {
+  list-style-type: disclosure-open;
+}
+
+/* 兼容处理：隐藏部分浏览器可能出现的双箭头或默认样式 */
 .native-summary::-webkit-details-marker {
   color: inherit;
 }
 
-/* 展开状态样式 */
-.native-details[open] > .native-summary {
-  list-style-type: disclosure-open;
-  margin-bottom: 4px;
-}
-
 .details-content {
-  box-sizing: border-box;
-  max-width: 100%;
-  /* 防止内容溢出撑开父容器 */
-  overflow-wrap: break-word; 
+  padding-left: 1.2em; /* 与箭头对齐 */
+  margin-top: 4px;
 }
 </style>

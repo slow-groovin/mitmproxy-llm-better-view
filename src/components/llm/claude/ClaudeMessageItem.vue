@@ -6,6 +6,7 @@ import SmartViewer from '../../content/SmartViewer.vue';
 import ImageBlock from '../../content/ImageBlock.vue';
 import type { ClaudeMessage, ContentBlock, TextBlock, ImageBlock as ImageBlockType, ToolUseBlock, ToolResultBlock } from '../../../types/claude/claude-request';
 import { hashId } from '@/utils/id/hashId';
+import BetterDetails from '@/components/container/BetterDetails.vue';
 
 interface Props {
   message: ClaudeMessage;
@@ -36,7 +37,7 @@ const contentBlocks = computed(() => {
       if (typeof block === 'string') {
         return { type: 'text', text: block, id: `content-${idx}` };
       }
-      return { ...block, id: `content-${idx}` };
+      return { ...block, id: (block as any).id || `content'}-${idx}` };
     });
   }
 
@@ -71,19 +72,29 @@ const toolUseBlocks = computed(() => {
 });
 
 // 工具结果块（仅 user 消息作为 tool_result 可能有，但通常 user 不会发送这个）
+
 const toolResultBlocks = computed(() => {
-  const blocks = contentBlocks.value.filter(b => b.type === 'tool_result') as ToolResultBlock[];
-  blocks.forEach((block, idx) => {
-    if (typeof block.content !== 'string') {
-      console.error('[ClaudeMessageItem] Invalid tool_result content type:', {
-        index: idx,
-        block,
-        message: props.message
-      });
+  const blocks = contentBlocks.value.filter(b => b.type === 'tool_result') as (ToolResultBlock)[];
+
+  const resultBlocks = []
+  //将item content可能为多个元素的数组, flat化
+  for (const item of blocks) {
+    if (typeof item.content === 'string') {
+      resultBlocks.push(item)
+    } else if (Array.isArray(item.content)) {
+      const newItems = item.content.map(subItem => {
+        return {
+          ...item,
+          content: subItem.text
+        }
+      })
+      resultBlocks.push(...newItems)
     }
-  });
-  return blocks as (ToolResultBlock & { id: string })[];
+
+  }
+  return resultBlocks as (ToolResultBlock & { content: string })[]
 });
+
 
 const hasContent = computed(() => contentBlocks.value.length > 0);
 
@@ -105,25 +116,19 @@ function scrollTo(selector: string) {
     <div v-show="isOpen" class="content">
       <!-- 文本内容 -->
       <template v-if="textBlocks.length > 0">
-        <SmartViewer
-          v-for="block in textBlocks"
-          :key="block.id"
-          :text="block.text"
-        />
+        <SmartViewer v-for="block in textBlocks" :key="block.id" :text="block.text" />
       </template>
 
       <!-- 图片内容（仅用户消息） -->
       <template v-if="imageBlocks.length > 0">
         <div v-for="block in imageBlocks" :key="block.id" class="image-block">
-          <ImageBlock
-            :url="`data:${block.source.media_type};base64,${block.source.data}`"
-          />
+          <ImageBlock :url="`data:${block.source.media_type};base64,${block.source.data}`" />
         </div>
       </template>
 
       <!-- 工具使用（仅 assistant 消息） -->
       <template v-if="toolUseBlocks.length > 0">
-        <div v-for="block in toolUseBlocks" :key="block.id" class="tool-use-block">
+        <div v-for="block in toolUseBlocks" class="tool-use-block">
           <div class="tool-header">
             <span class="tool-badge">TOOL USE</span>
             <span class="tool-name-display">{{ block.name }}</span>
@@ -135,12 +140,18 @@ function scrollTo(selector: string) {
 
       <!-- 工具结果 -->
       <template v-if="toolResultBlocks.length > 0">
-        <div v-for="block in toolResultBlocks" :key="block.id" class="tool-result-block">
-          <div class="tool-header">
-            <span class="tool-badge" :class="{ 'is-error': block.is_error }">TOOL RESULT</span>
-            <span class="tool-id">{{ block.tool_use_id }}</span>
-          </div>
-          <SmartViewer :text="block.content" />
+        <div v-for="block in toolResultBlocks" class="tool-result-block">
+
+          <BetterDetails default-open>
+            <template #summary>
+              <div class="tool-header">
+                <span class="tool-badge" :class="{ 'is-error': block.is_error }">TOOL RESULT</span>
+                <span class="tool-id">{{ block.tool_use_id }}</span>
+              </div>
+            </template>
+            <SmartViewer :text="block.content" />
+
+          </BetterDetails>
         </div>
       </template>
 
@@ -161,8 +172,13 @@ function scrollTo(selector: string) {
   border-bottom: none;
 }
 
-.role-user { border-left: 3px solid var(--llm-border-user); }
-.role-assistant { border-left: 3px solid var(--llm-border-assistant); }
+.role-user {
+  border-left: 3px solid var(--llm-border-user);
+}
+
+.role-assistant {
+  border-left: 3px solid var(--llm-border-assistant);
+}
 
 .header {
   padding: 6px 0;
@@ -215,7 +231,7 @@ function scrollTo(selector: string) {
 
 .tool-use-block,
 .tool-result-block {
-  margin: var(--llm-spacing-md) 0;
+  /* margin: var(--llm-spacing-md) 0; */
   background: var(--llm-bg-tool);
   border-radius: var(--llm-radius-lg);
   padding: var(--llm-spacing-md);
@@ -225,7 +241,7 @@ function scrollTo(selector: string) {
   display: flex;
   align-items: center;
   gap: var(--llm-spacing-md);
-  margin-bottom: var(--llm-spacing-md);
+  /* margin-bottom: var(--llm-spacing-md); */
   padding-bottom: var(--llm-spacing-sm);
   border-bottom: 1px solid var(--llm-border-light);
 }
