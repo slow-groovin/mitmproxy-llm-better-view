@@ -19,6 +19,19 @@ const props = defineProps<Props>();
 const storageKey = computed(() => `claude-msg-${hashId(JSON.stringify(props.message))}-open`);
 const isOpen = useSessionStorage(storageKey, true);
 
+// Raw 视图切换状态
+const rawViewKey = computed(() => `claude-msg-${hashId(JSON.stringify(props.message))}-raw`);
+const isRawView = useSessionStorage(rawViewKey, false);
+
+// Content 条目数量
+const contentCount = computed(() => {
+  const content = props.message.content;
+  if (!content) return 0;
+  if (typeof content === 'string') return 1;
+  if (Array.isArray(content)) return content.length;
+  return 0;
+});
+
 // 判断是否是用户消息（可能包含图片）
 const isUserMessage = computed(() => props.message.role === 'user');
 
@@ -113,12 +126,27 @@ const hasContent = computed(() => contentBlocks.value.length > 0);
         <span class="toggle">{{ isOpen ? '▼' : '▶' }}</span>
         <span class="index">#{{ index + 1 }}</span>
         <RoleBadge :role="message.role" />
+        <span class="count-badge" title="content blocks">{{ contentCount }}</span>
+      </div>
+      <div class="header-right">
+        <button
+          class="raw-btn"
+          :class="{ active: isRawView }"
+          @click.stop="isRawView = !isRawView"
+        >
+          View Raw
+        </button>
       </div>
     </div>
 
     <div v-show="isOpen" class="content">
+      <!-- Raw JSON 视图 -->
+      <template v-if="isRawView">
+        <SmartViewer :text="JSON.stringify(message, null, 2)"/>
+      </template>
 
-
+      <!-- 格式化视图 -->
+      <template v-else>
       <!-- thinking 内容（仅 assistant 消息） -->
       <template v-if="thinkingBlocks.length > 0">
         <div v-for="block in thinkingBlocks" :key="block.id">
@@ -179,6 +207,7 @@ const hasContent = computed(() => contentBlocks.value.length > 0);
       <div v-if="!hasContent" class="empty">
         No content
       </div>
+      </template>
     </div>
   </div>
 </template>
@@ -220,6 +249,53 @@ const hasContent = computed(() => contentBlocks.value.length > 0);
   display: flex;
   align-items: center;
   gap: var(--llm-spacing-md);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+/* View Raw 按钮 - outline 风格 */
+.raw-btn {
+  padding: 4px 10px;
+  font-size: 1.1rem;
+  color: var(--llm-text-secondary);
+  background: transparent;
+  border: 1px solid var(--llm-border-color);
+  border-radius: var(--llm-radius-lg);
+  cursor: pointer;
+  transition: all var(--llm-transition-fast);
+}
+
+.raw-btn:hover {
+  color: var(--llm-text-primary);
+  border-color: var(--llm-border-dark, #999);
+}
+
+/* 激活状态：蓝色边框和文字 */
+.raw-btn.active {
+  color: #3b82f6;
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.05);
+}
+
+/* Content 条目数量标识 */
+.count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* 核心样式：浅蓝背景 + 深蓝文字 */
+  background-color: #7fcaff8b;
+  color: #1c3894f1;
+  
+  font-size: 1.1rem;
+  font-weight: 600;
+  font-family: var(--llm-font-mono);
+  padding: 2px 7px;
+  border-radius: 6px;
+  margin-left: 2px;
 }
 
 .toggle {
