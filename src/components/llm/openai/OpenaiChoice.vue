@@ -8,11 +8,13 @@ interface Props {
   choice: Choice ;
   isStream?: boolean;
   finishReasonClass?: (reason: string | null) => string;
+  showHeader?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   isStream: false,
-  finishReasonClass: () => ''
+  finishReasonClass: () => '',
+  showHeader: true
 });
 
 const isOpen = ref(true);
@@ -46,8 +48,8 @@ const refusal = computed(() => {
 </script>
 
 <template>
-  <div class="choice-item">
-    <div class="choice-header" @click="isOpen = !isOpen">
+  <div class="choice-item" :class="{ 'no-header': !showHeader }">
+    <div v-if="showHeader" class="choice-header" @click="isOpen = !isOpen">
       <div class="choice-meta">
         <span class="choice-index">#{{ choice.index + 1 }}</span>
         <span v-if="isStream" class="choice-badge">streaming</span>
@@ -55,7 +57,7 @@ const refusal = computed(() => {
       </div>
       <span class="toggle-icon">{{ toggleIcon }}</span>
     </div>
-    <div v-if="isOpen" class="choice-content">
+    <div v-if="!showHeader || isOpen" class="choice-content">
       <div v-if="refusal" class="refusal">
         <span class="refusal-badge">refusal</span>
         <span class="refusal-text">{{ refusal }}</span>
@@ -169,28 +171,28 @@ const refusal = computed(() => {
 
 .finish-reason-badge {
   padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 1.2000000000000002rem;
+  border-radius: var(--llm-radius-md);
+  font-size: 1.2rem;
   font-weight: 500;
 }
 
 .finish-stop {
-  background: #dcfce7;
-  color: #166534;
+  background: var(--llm-finish-stop-bg);
+  color: var(--llm-finish-stop-text);
 }
 
 .finish-length {
-  background: #fef3c7;
-  color: #92400e;
+  background: var(--llm-finish-length-bg);
+  color: var(--llm-finish-length-text);
 }
 
 .finish-tool-calls {
-  background: #dbeafe;
-  color: #1e40af;
+  background: var(--llm-finish-tool-bg);
+  color: var(--llm-finish-tool-text);
 }
 
 .finish-content-filter {
-  background: #fecaca;
-  color: #991b1b;
+  background: var(--llm-finish-filter-bg);
+  color: var(--llm-finish-filter-text);
 }
 </style>

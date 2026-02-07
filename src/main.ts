@@ -3,6 +3,7 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import { logger } from './lib/logtape';
 import './style.css';
+import './styles/llm-common.css';
 
 // Type guards for LLM request/response detection
 logger.debug`main.ts`;

@@ -103,44 +103,19 @@ function scrollTo(selector: string) {
 </template>
 
 <style scoped>
-:root {
-  --border-system: #f59e0b;
-  --border-user: #3b82f6;
-  --border-assistant: #10b981;
-  --border-tool: #8b5cf6;
-  --bg-hover: #f8fafc;
-  --bg-content: rgba(136, 188, 197, 0.08);
-  --bg-tool: #f8fafc;
-  --text-primary: #1e293b;
-  --text-secondary: #64748b;
-  --text-muted: #94a3b8;
-  --font-mono: 'Monaco', 'Menlo', monospace;
-}
-
 .message {
   border-bottom: 2px solid rgba(126, 180, 233, 0.31);
-  padding: 4px 8px;
+  padding: var(--llm-spacing-xs) var(--llm-spacing-md);
 }
 
 .message:last-child {
   border-bottom: none;
 }
 
-.role-system {
-  border-left: 3px solid var(--border-system);
-}
-
-.role-user {
-  border-left: 3px solid var(--border-user);
-}
-
-.role-assistant {
-  border-left: 3px solid var(--border-assistant);
-}
-
-.role-tool {
-  border-left: 3px solid var(--border-tool);
-}
+.role-system { border-left: 3px solid var(--llm-border-system); }
+.role-user { border-left: 3px solid var(--llm-border-user); }
+.role-assistant { border-left: 3px solid var(--llm-border-assistant); }
+.role-tool { border-left: 3px solid var(--llm-border-tool); }
 
 .header {
   padding: 6px 0;
@@ -151,55 +126,54 @@ function scrollTo(selector: string) {
 }
 
 .header:hover {
-  background: var(--bg-hover);
+  background: var(--llm-bg-hover);
   margin: 0 -12px;
   padding: 6px 12px;
-  border-radius: 4px;
+  border-radius: var(--llm-radius-md);
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--llm-spacing-md);
 }
 
 .toggle {
-  color: var(--text-secondary);
+  color: var(--llm-text-secondary);
   font-size: 1.2rem;
-  transition: transform 0.2s;
+  transition: transform var(--llm-transition-fast);
 }
 
 .index {
   font-size: 1.2rem;
-  color: var(--text-muted);
+  color: var(--llm-text-muted);
   font-weight: 500;
 }
 
 .msg-id,
 .tool-id {
   font-size: 1.1rem;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
+  color: var(--llm-text-muted);
+  font-family: var(--llm-font-mono);
 }
 
 .tool-name {
   padding: 3px 8px;
-  border-radius: 4px;
+  border-radius: var(--llm-radius-md);
   font-size: 1.2rem;
   font-weight: 700;
-  background: #f3e8ff;
-  color: #7c3aed;
-  font-family: var(--font-mono);
+  background: var(--llm-tool-name-bg);
+  color: var(--llm-tool-name-text);
+  font-family: var(--llm-font-mono);
 }
 
 .content {
-  padding: 0px 16px;
-  background: var(--bg-content);
-  /* overflow-y: auto; */
+  padding: 0px var(--llm-spacing-xl);
+  background: var(--llm-bg-content);
 }
 
 .empty {
-  color: var(--text-muted);
+  color: var(--llm-text-muted);
   font-style: italic;
   padding: 8px 0;
 }
@@ -209,34 +183,34 @@ function scrollTo(selector: string) {
 }
 
 .tool-request {
-  background: var(--bg-tool);
-  border-radius: 6px;
-  padding: 2px;
-  margin-bottom: 4px;
+  background: var(--llm-bg-tool);
+  border-radius: var(--llm-radius-lg);
+  padding: var(--llm-spacing-xs);
+  margin-bottom: var(--llm-spacing-xs);
 }
 
 .tool-request-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: var(--llm-spacing-md);
+  margin-bottom: var(--llm-spacing-md);
   font-weight: 600;
   font-size: 1.4rem;
-  color: var(--text-primary);
+  color: var(--llm-text-primary);
 }
 
 .badge {
   padding: 2px 6px;
-  border-radius: 3px;
+  border-radius: var(--llm-radius-sm);
   font-size: 1rem;
   font-weight: 600;
   text-transform: uppercase;
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: var(--llm-tool-badge-bg);
+  color: var(--llm-tool-badge-text);
 }
 
 .tool-idx {
-  color: var(--text-secondary);
+  color: var(--llm-text-secondary);
   font-size: 1.2rem;
 }
 
@@ -249,17 +223,17 @@ function scrollTo(selector: string) {
   text-decoration: none;
   cursor: pointer;
   border-bottom: 1px dotted transparent;
-  transition: all 0.2s;
+  transition: all var(--llm-transition-fast);
 }
 
 .clickable:hover {
-  color: #1d4ed8;
-  border-bottom-color: #1d4ed8;
+  color: var(--llm-text-link);
+  border-bottom-color: var(--llm-text-link);
 }
 
 .tool-args {
-  font-family: var(--font-mono);
-  border-radius: 4px;
+  font-family: var(--llm-font-mono);
+  border-radius: var(--llm-radius-md);
   font-size: 1.28rem;
   overflow-x: auto;
   margin: 0;

@@ -3,7 +3,6 @@ import { computed } from 'vue';
 import type { OpenaiChatRequest } from '../../../types/openai/chat-request';
 import CollapsibleSection from '../../container/CollapsibleSection.vue';
 import LabelValueRow from '../../content/LabelValueRow.vue';
-import JsonViewer from '../../content/JsonViewer.vue';
 import OpenaiToolItem from './OpenaiToolItem.vue';
 import OpenaiMessageItem from './OpenaiMessageItem.vue';
 import BetterDetails from '@/components/container/BetterDetails.vue';
@@ -99,16 +98,16 @@ const stopValue = computed(() => {
 
 <style scoped>
 .openai-request-view {
-  padding: 2px;
+  padding: var(--llm-spacing-sm);
 }
 
 .header {
-  margin-bottom: 24px;
+  margin-bottom: var(--llm-spacing-2xl);
 }
 
 .header h2 {
-  margin: 0 0 8px 0;
-  font-size: 20px;
+  margin: 0 0 var(--llm-spacing-md) 0;
+  font-size: 2rem;
   font-weight: 600;
   color: #1f2937;
 }
@@ -116,7 +115,7 @@ const stopValue = computed(() => {
 .meta {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--llm-spacing-md);
   font-size: 14px;
   color: #6b7280;
 }
@@ -124,9 +123,9 @@ const stopValue = computed(() => {
 .meta code {
   background: #f3f4f6;
   padding: 2px 6px;
-  border-radius: 3px;
+  border-radius: var(--llm-radius-sm);
   font-size: 13px;
-  font-family: 'SF Mono', Consolas, monospace;
+  font-family: var(--llm-font-mono);
   color: #374151;
 }
 
@@ -136,7 +135,7 @@ const stopValue = computed(() => {
 
 .empty-state {
   text-align: center;
-  color: #64748b;
+  color: var(--llm-text-secondary);
   font-style: italic;
   padding: 40px 20px;
 }

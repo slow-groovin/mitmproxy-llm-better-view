@@ -31,39 +31,39 @@ const displayRole = computed(() => {
 <style scoped>
 .role-badge {
   padding: 2px 6px;
-  border-radius: 3px;
+  border-radius: var(--llm-radius-sm);
   font-size: 1rem;
   font-weight: 600;
   text-transform: uppercase;
 }
 
 .role-user {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: var(--llm-badge-user-bg);
+  color: var(--llm-badge-user-text);
 }
 
 .role-assistant {
-  background: #dcfce7;
-  color: #166534;
+  background: var(--llm-badge-assistant-bg);
+  color: var(--llm-badge-assistant-text);
 }
 
 .role-system {
-  background: #fef3c7;
-  color: #92400e;
+  background: var(--llm-badge-system-bg);
+  color: var(--llm-badge-system-text);
 }
 
 .role-tool {
-  background: #f3e8ff;
-  color: #7c3aed;
+  background: var(--llm-badge-tool-bg);
+  color: var(--llm-badge-tool-text);
 }
 
 .role-model {
-  background: #dcfce7;
-  color: #166534;
+  background: var(--llm-badge-model-bg);
+  color: var(--llm-badge-model-text);
 }
 
 .role-function {
-  background: #f3e8ff;
-  color: #7c3aed;
+  background: var(--llm-badge-function-bg);
+  color: var(--llm-badge-function-text);
 }
 </style>

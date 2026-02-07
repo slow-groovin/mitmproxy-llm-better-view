@@ -3,7 +3,6 @@ import { computed } from 'vue';
 import type { OpenaiChatResponse } from '../../../types/openai/chat-response';
 import CollapsibleSection from '../../container/CollapsibleSection.vue';
 import LabelValueRow from '../../content/LabelValueRow.vue';
-import JsonViewer from '../../content/JsonViewer.vue';
 import OpenaiTokenUsage from './OpenaiTokenUsage.vue';
 import OpenaiChoice from './OpenaiChoice.vue';
 import BetterDetails from '@/components/container/BetterDetails.vue';
@@ -78,7 +77,7 @@ const getFinishReasonSummary = () => {
         No choices
       </div>
       <OpenaiChoice v-for="choice in choices" :key="choice.index" :choice="choice"
-        :finish-reason-class="finishReasonClass" />
+        :finish-reason-class="finishReasonClass" :show-header="choices.length > 1" />
     </CollapsibleSection>
 
     <BetterDetails title="Full Response">
@@ -90,15 +89,15 @@ const getFinishReasonSummary = () => {
 
 <style scoped>
 .openai-response-view {
-  padding: 2px;
+  padding: var(--llm-spacing-sm);
 }
 
 .header {
-  margin-bottom: 24px;
+  margin-bottom: var(--llm-spacing-2xl);
 }
 
 .header h2 {
-  margin: 0 0 8px 0;
+  margin: 0 0 var(--llm-spacing-md) 0;
   font-size: 20px;
   font-weight: 600;
   color: #1f2937;
@@ -107,7 +106,7 @@ const getFinishReasonSummary = () => {
 .meta {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--llm-spacing-md);
   font-size: 14px;
   color: #6b7280;
   flex-wrap: wrap;
@@ -116,9 +115,9 @@ const getFinishReasonSummary = () => {
 .meta code {
   background: #f3f4f6;
   padding: 2px 6px;
-  border-radius: 3px;
+  border-radius: var(--llm-radius-sm);
   font-size: 13px;
-  font-family: 'SF Mono', Consolas, monospace;
+  font-family: var(--llm-font-mono);
   color: #374151;
 }
 
@@ -128,35 +127,35 @@ const getFinishReasonSummary = () => {
 
 .empty-state {
   text-align: center;
-  color: #64748b;
+  color: var(--llm-text-secondary);
   font-style: italic;
   padding: 40px 20px;
 }
 
 .finish-summary {
   padding: 2px 8px;
-  border-radius: 4px;
+  border-radius: var(--llm-radius-md);
   font-size: 12px;
   font-weight: 500;
 }
 
 .finish-stop {
-  background: #dcfce7;
-  color: #166534;
+  background: var(--llm-finish-stop-bg);
+  color: var(--llm-finish-stop-text);
 }
 
 .finish-length {
-  background: #fef3c7;
-  color: #92400e;
+  background: var(--llm-finish-length-bg);
+  color: var(--llm-finish-length-text);
 }
 
 .finish-tool-calls {
-  background: #dbeafe;
-  color: #1e40af;
+  background: var(--llm-finish-tool-bg);
+  color: var(--llm-finish-tool-text);
 }
 
 .finish-content-filter {
-  background: #fecaca;
-  color: #991b1b;
+  background: var(--llm-finish-filter-bg);
+  color: var(--llm-finish-filter-text);
 }
 </style>
