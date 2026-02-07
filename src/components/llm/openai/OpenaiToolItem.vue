@@ -248,10 +248,12 @@ const toggleIcon = computed(() => isOpen.value ? '▼' : '▶');
   color: #334155;
 }
 
-/* Section styles */
+/* Section styles - 添加左侧padding以区分父子层级 */
 .description-section,
 .parameters-section {
   margin-bottom: 16px;
+  padding-left: 12px;
+  border-left: 2px solid #e2e8f0;
 }
 
 .description-section:last-child,

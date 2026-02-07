@@ -4,7 +4,8 @@ import { useStorage } from '@vueuse/core';
 import { hashId } from '../../../utils/id/hashId';
 import type { Tool } from '../../../types/claude/claude-request';
 import ClaudeToolParameters from './ClaudeToolParameters.vue';
-import ProseContent from '../../content/ProseContent.vue';
+import BetterDetails from '@/components/container/BetterDetails.vue';
+import SmartViewer from '@/components/content/SmartViewer.vue';
 
 interface Props {
   tool: Tool;
@@ -62,39 +63,35 @@ const toggleIcon = computed(() => isOpen.value ? '▼' : '▶');
         <span class="tool-name">{{ toolName }}</span>
         <span v-if="descriptionPreview" class="tool-desc-preview">{{ descriptionPreview }}</span>
       </div>
+      <!-- View Raw outline button - header 右侧 -->
+      <button
+        v-if="isOpen"
+        class="raw-btn header-right"
+        :class="{ active: showRaw }"
+        @click.stop="toggleRaw"
+      >
+        {{ 'View Raw' }}
+      </button>
     </div>
 
     <!-- Expandable Content -->
     <div v-if="isOpen" class="tool-content">
       <!-- Raw mode: show entire tool JSON -->
       <div v-if="showRaw" class="raw-mode">
-        <div class="raw-header">
-          <span class="raw-label">Raw Tool Definition</span>
-          <button class="view-formatted-btn" @click="toggleRaw">
-            ▶ View Formatted
-          </button>
-        </div>
-        <pre class="raw-content">{{ JSON.stringify(tool, null, 2) }}</pre>
+        <SmartViewer :text="JSON.stringify(tool, null, 2)"/>
       </div>
 
       <!-- Formatted mode -->
       <template v-else>
-        <div class="formatted-header">
-          <button class="view-raw-btn" @click="toggleRaw">
-            ▶ View Raw
-          </button>
-        </div>
-
         <!-- Description with markdown rendering (collapsible) -->
         <div v-if="toolDescription" class="description-section">
-          <details open class="description-details">
-            <summary class="description-summary">
-              <span class="section-label-inline">Description</span>
-            </summary>
-            <div class="description-content">
-              <ProseContent :content="toolDescription" />
-            </div>
-          </details>
+          <BetterDetails>
+            <template #summary>
+              <div class="section-label" style="margin-bottom: -2px;">DESCRIPTION</div>
+
+            </template>
+            <SmartViewer :text="toolDescription" />
+          </BetterDetails>
         </div>
 
         <!-- Parameters section with ClaudeToolParameters -->
@@ -132,9 +129,14 @@ const toggleIcon = computed(() => isOpen.value ? '▼' : '▶');
 
 .header-left {
   display: flex;
-  max-width: 100%;
+  flex: 1;          /* 占据剩余空间 */
+  min-width: 0;    /* 关键！允许内容收缩 */
   align-items: center;
   gap: 10px;
+}
+
+.header-right{
+  flex-shrink: 0;  /* 不被挤压 */
 }
 
 .toggle-icon {
@@ -169,7 +171,30 @@ const toggleIcon = computed(() => isOpen.value ? '▼' : '▶');
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 70%;
+  max-width: 80%;
+}
+
+/* View Raw outline button - header 右侧 */
+.raw-btn {
+  padding: 4px 10px;
+  font-size: 1.1rem;
+  color: #64748b;
+  background: transparent;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.raw-btn:hover {
+  color: #374151;
+  border-color: #9ca3af;
+}
+
+.raw-btn.active {
+  color: #3b82f6;
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.05);
 }
 
 .tool-content {
@@ -212,39 +237,12 @@ const toggleIcon = computed(() => isOpen.value ? '▼' : '▶');
   word-break: break-word;
 }
 
-/* Formatted mode styles */
-.formatted-header {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.view-raw-btn,
-.view-formatted-btn {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  border: none;
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(2px);
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  color: #64748b;
-  cursor: pointer;
-  pointer-events: auto;
-  transition: all 0.2s;
-}
-
-.view-raw-btn:hover,
-.view-formatted-btn:hover {
-  background: rgba(255, 255, 255, 0.9);
-  color: #334155;
-}
-
-/* Section styles */
+/* Section styles - 添加左侧padding以区分父子层级 */
 .description-section,
 .parameters-section {
   margin-bottom: 16px;
+  padding-left: 12px;
+  border-left: 2px solid #e2e8f0;
 }
 
 .description-section:last-child,
