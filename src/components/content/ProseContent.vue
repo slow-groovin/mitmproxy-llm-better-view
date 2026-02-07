@@ -8,6 +8,11 @@ interface Props {
 
 const props = defineProps<Props>();
 
+// Define emit for v-model support
+defineEmits<{
+  'update:content': [value: string];
+}>();
+
 // 响应式生成 HTML 内容
 const htmlContent = computed(() => {
   if (!props.content) return '';

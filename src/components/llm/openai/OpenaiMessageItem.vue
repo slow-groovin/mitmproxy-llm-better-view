@@ -89,7 +89,7 @@ function scrollTo(selector: string) {
       <!-- 内容块 -->
       <template v-if="hasContent">
         <template v-for="item in contentItems" :key="item.id">
-          <TextBlock v-if="item.type === 'text' && item.text" :id="item.id" :text="item.text" is-prose />
+          <TextBlock v-if="item.type === 'text' && item.text" :id="item.id" :text="item.text" />
           <ImageBlock v-else-if="item.type === 'image'" :id="item.id" :url="item.url!" />
         </template>
       </template>
@@ -195,7 +195,7 @@ function scrollTo(selector: string) {
 .content {
   padding: 0px 16px;
   background: var(--bg-content);
-  overflow-y: auto;
+  /* overflow-y: auto; */
 }
 
 .empty {
