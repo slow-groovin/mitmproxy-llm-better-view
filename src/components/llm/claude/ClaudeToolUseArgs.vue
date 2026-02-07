@@ -3,28 +3,16 @@ import { computed } from 'vue';
 import SmartViewer from '@/components/content/SmartViewer.vue';
 
 interface Props {
-  arguments: string | object;
+  input: Record<string, unknown>;
 }
 
 const props = defineProps<Props>();
 
-// Parse arguments to a flat object
+// Parse input to a flat object with string values
 const parsedArgs = computed<Record<string, string>>(() => {
-  let obj: Record<string, unknown> = {};
-
-  if (typeof props.arguments === 'string') {
-    try {
-      obj = JSON.parse(props.arguments);
-    } catch {
-      return { value: props.arguments };
-    }
-  } else if (props.arguments && typeof props.arguments === 'object') {
-    obj = props.arguments as Record<string, unknown>;
-  }
-
-  // Flatten to 1 level: convert all values to strings
   const result: Record<string, string> = {};
-  for (const [key, value] of Object.entries(obj)) {
+
+  for (const [key, value] of Object.entries(props.input)) {
     if (value === null) {
       result[key] = 'null';
     } else if (value === undefined) {
@@ -35,6 +23,7 @@ const parsedArgs = computed<Record<string, string>>(() => {
       result[key] = String(value);
     }
   }
+
   return result;
 });
 </script>
@@ -43,7 +32,6 @@ const parsedArgs = computed<Record<string, string>>(() => {
   <div class="tool-args">
     <div class="param-list">
       <div v-for="(value, key) in parsedArgs" :key="key" class="param-item">
-        
         <div class="param-name">{{ key }}</div>
         <div class="param-value">
           <SmartViewer :text="value" />

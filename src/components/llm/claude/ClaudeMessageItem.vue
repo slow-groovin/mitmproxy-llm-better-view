@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { computed, useId } from 'vue';
-import { useSessionStorage } from '@vueuse/core';
-import RoleBadge from '../RoleBadge.vue';
-import SmartViewer from '../../content/SmartViewer.vue';
-import ImageBlock from '../../content/ImageBlock.vue';
-import type { ClaudeMessage, ContentBlock, TextBlock, ImageBlock as ImageBlockType, ToolUseBlock, ToolResultBlock, ThinkingBlock } from '../../../types/claude/claude-request';
-import { hashId } from '@/utils/id/hashId';
 import BetterDetails from '@/components/container/BetterDetails.vue';
+import { hashId } from '@/utils/id/hashId';
+import { useSessionStorage } from '@vueuse/core';
+import { computed } from 'vue';
+import type { ClaudeMessage, ImageBlock as ImageBlockType, TextBlock, ThinkingBlock, ToolResultBlock, ToolUseBlock } from '../../../types/claude/claude-request';
+import ImageBlock from '@/components/content/ImageBlock.vue';
+import SmartViewer from '@/components/content/SmartViewer.vue';
+import RoleBadge from '../RoleBadge.vue';
+import ClaudeToolUseArgs from './ClaudeToolUseArgs.vue';
 
 interface Props {
   message: ClaudeMessage;
@@ -103,9 +104,6 @@ const toolResultBlocks = computed(() => {
 
 const hasContent = computed(() => contentBlocks.value.length > 0);
 
-function scrollTo(selector: string) {
-  document.querySelector(selector)?.scrollIntoView({ behavior: 'smooth' });
-}
 </script>
 
 <template>
@@ -156,7 +154,7 @@ function scrollTo(selector: string) {
                 <span class="tool-id">{{ block.id }}</span>
               </div>
             </template>
-             <SmartViewer :text="JSON.stringify(block.input, null, 2)" />
+             <ClaudeToolUseArgs :input="block.input" />
           </BetterDetails>
         </div>
       </template>
@@ -254,8 +252,8 @@ function scrollTo(selector: string) {
 
 .tool-use-block,
 .tool-result-block {
-  /* margin: var(--llm-spacing-md) 0; */
-  background: var(--llm-bg-tool);
+  margin: var(--llm-spacing-xl) 0;
+  border: 1px solid #75757542;
   border-radius: var(--llm-radius-lg);
 }
 
