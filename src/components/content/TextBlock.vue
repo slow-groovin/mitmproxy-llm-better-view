@@ -182,7 +182,7 @@ const handleFormatChange = (format: ContentFormat) => {
 }
 
 .text-content {
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   font-family: inherit;
   white-space: pre-wrap;
   word-wrap: break-word;

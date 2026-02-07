@@ -16,6 +16,7 @@ export type ChoiceMessage = {
   role: 'assistant';
   content: string | null;
   refusal?: string | null;
+  reasoning?: string;
   tool_calls?: ToolCall[] | null;
 };
 

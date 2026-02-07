@@ -13,6 +13,7 @@ interface AggregatedChoiceState {
   role: 'assistant';
   content: string;
   refusal: string;
+  reasoning: string;
   toolCalls: Map<number, AggregatedToolCallState>;
   finishReason: string | null;
 }
@@ -181,6 +182,7 @@ export class OpenaiTransferService implements ITransferService {
             role: 'assistant',
             content: '',
             refusal: '',
+            reasoning: '',
             toolCalls: new Map(),
             finishReason: null,
           });
@@ -192,6 +194,7 @@ export class OpenaiTransferService implements ITransferService {
         if (delta) {
           if (delta.role === 'assistant') agg.role = delta.role;
           if (delta.content) agg.content += delta.content;
+          if (delta.reasoning) agg.reasoning += delta.reasoning;
           if (delta.tool_calls) {
             this.aggregateToolCalls(agg.toolCalls, delta.tool_calls);
           }
@@ -255,6 +258,7 @@ export class OpenaiTransferService implements ITransferService {
     const message: ChoiceMessage = {
       role: agg.role,
       content: agg.content || null,
+      reasoning: agg.reasoning || undefined,
       tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
     };
 

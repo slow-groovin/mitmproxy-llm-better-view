@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import type { Choice } from '@/types/openai/chat-response';
-import ProseContent from '../../content/ProseContent.vue';
+import BetterDetails from '@/components/container/BetterDetails.vue';
+import TextBlock from '@/components/content/TextBlock.vue';
 import OpenaiAssistantToolCalls from './OpenaiAssistantToolCalls.vue';
 
 interface Props {
-  choice: Choice ;
+  choice: Choice;
   isStream?: boolean;
   finishReasonClass?: (reason: string | null) => string;
   showHeader?: boolean;
@@ -26,7 +27,6 @@ const isStreamingChoice = computed(() => {
   return 'delta' in props.choice;
 });
 
-
 const toolCalls = computed(() => {
   if (isStreamingChoice.value) {
     return (props.choice).message?.tool_calls || [];
@@ -41,32 +41,54 @@ const content = computed(() => {
   return (props.choice as Choice).message?.content || '';
 });
 
+const reasoning = computed(() => {
+  if (isStreamingChoice.value) {
+    return (props.choice).message?.reasoning || '';
+  }
+  return (props.choice as Choice).message?.reasoning || '';
+});
+
 const refusal = computed(() => {
   if (isStreamingChoice.value) return null;
   return (props.choice as Choice).message?.refusal || null;
+});
+
+const finishReason = computed(() => {
+  return props.choice.finish_reason;
 });
 </script>
 
 <template>
   <div class="choice-item" :class="{ 'no-header': !showHeader }">
+    <!-- Choice[i] 的 Header区, 因为99%情况是只有一个choice, 所以在仅单个choice的情况下不显示 -->
     <div v-if="showHeader" class="choice-header" @click="isOpen = !isOpen">
       <div class="choice-meta">
         <span class="choice-index">#{{ choice.index + 1 }}</span>
         <span v-if="isStream" class="choice-badge">streaming</span>
-        
+        <span v-if="finishReason" class="finish-reason-badge" :class="finishReasonClass(finishReason)">
+          {{ finishReason }}
+        </span>
       </div>
       <span class="toggle-icon">{{ toggleIcon }}</span>
     </div>
-    <div v-if="!showHeader || isOpen" class="choice-content">
+
+    <div v-if="isOpen" class="choice-content">
       <div v-if="refusal" class="refusal">
         <span class="refusal-badge">refusal</span>
         <span class="refusal-text">{{ refusal }}</span>
       </div>
 
-      <div v-if="content" class="choice-message">
-        <ProseContent :content="content" />
+      <div v-if="reasoning" class="">
+        <BetterDetails title="reasoning">
+          <div class="reasoning">
+            <TextBlock :text="reasoning" />
+          </div>
+        </BetterDetails>
       </div>
 
+      <div v-if="content" class="choice-message">
+        <TextBlock :text="content" />
+      </div>
       <OpenaiAssistantToolCalls v-if="toolCalls.length > 0" :tool-calls="toolCalls" variant="compact" />
     </div>
   </div>
@@ -118,6 +140,14 @@ const refusal = computed(() => {
   font-weight: 600;
 }
 
+.finish-reason-badge {
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  text-transform: lowercase;
+}
+
 .toggle-icon {
   transition: transform 0.2s;
   color: #64748b;
@@ -154,45 +184,45 @@ const refusal = computed(() => {
   font-size: 1.4rem;
 }
 
+.reasoning {
+  margin-bottom: 12px;
+  border-left: 3px solid #8b5cf6;
+  background: #f5f3ff;
+  border-radius: 0 6px 6px 0;
+}
+
+.reasoning-label {
+  padding: 4px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #7c3aed;
+  background: #ede9fe;
+  border-radius: 0 4px 0 0;
+  display: inline-block;
+}
+
+.reasoning-content {
+  padding: 8px 12px;
+  color: #5b21b6;
+}
+
+.reasoning-content :deep(p) {
+  margin: 0 0 8px 0;
+}
+
+.reasoning-content :deep(p:last-child) {
+  margin-bottom: 0;
+}
+
 .choice-message {
   margin-bottom: 12px;
 }
 
 .tool-calls-container {
-  margin-top: 1px;
-}
-
-.tool-calls-container h4 {
-  margin-bottom: 12px;
-  font-size: 1.4400000000000002rem;
-  color: #1e293b;
-  font-weight: 600;
-}
-
-.finish-reason-badge {
-  padding: 2px 6px;
-  border-radius: var(--llm-radius-md);
-  font-size: 1.2rem;
-  font-weight: 500;
-}
-
-.finish-stop {
-  background: var(--llm-finish-stop-bg);
-  color: var(--llm-finish-stop-text);
-}
-
-.finish-length {
-  background: var(--llm-finish-length-bg);
-  color: var(--llm-finish-length-text);
-}
-
-.finish-tool-calls {
-  background: var(--llm-finish-tool-bg);
-  color: var(--llm-finish-tool-text);
-}
-
-.finish-content-filter {
-  background: var(--llm-finish-filter-bg);
-  color: var(--llm-finish-filter-text);
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 </style>
