@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import TextBlock from '@/components/llm/messages/blocks/TextBlock.vue';
+import TextBlock from '@/components/content/TextBlock.vue';
 
 interface Props {
   arguments: string | object;

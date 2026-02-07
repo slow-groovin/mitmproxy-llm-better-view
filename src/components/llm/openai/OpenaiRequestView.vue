@@ -6,7 +6,7 @@ import LabelValueRow from '../../content/LabelValueRow.vue';
 import OpenaiToolItem from './OpenaiToolItem.vue';
 import OpenaiMessageItem from './OpenaiMessageItem.vue';
 import BetterDetails from '@/components/container/BetterDetails.vue';
-import TextBlock from '../messages/blocks/TextBlock.vue';
+import TextBlock from '../../content/TextBlock.vue';
 
 interface Props {
   data: OpenaiChatRequest;

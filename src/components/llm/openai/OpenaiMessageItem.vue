@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useSessionStorage } from '@vueuse/core';
-import RoleBadge from '../messages/RoleBadge.vue';
-import TextBlock from '../messages/blocks/TextBlock.vue';
-import ImageBlock from '../messages/blocks/ImageBlock.vue';
+import RoleBadge from '../RoleBadge.vue';
+import TextBlock from '../../content/TextBlock.vue';
+import ImageBlock from '../../content/ImageBlock.vue';
 import type {
   OpenaiChatMessage,
   MessageContent,
