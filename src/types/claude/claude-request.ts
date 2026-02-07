@@ -111,6 +111,7 @@ export interface JSONSchema {
 export interface JSONSchemaProperty {
   type: string;
   description?: string;
+  default?:unknown;
   enum?: unknown[];
   items?: JSONSchema;
   properties?: Record<string, JSONSchemaProperty>;

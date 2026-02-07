@@ -83,7 +83,7 @@ const hasSystemMessages = computed(() => {
 
     <CollapsibleSection
       v-if="hasSystemMessages"
-      title="System"
+      title="System Messages"
       :count="systemMessages.length"
       :default-open="true"
       storage-key="claude-system"

@@ -128,7 +128,7 @@ const hasContent = computed(() => contentBlocks.value.length > 0);
         <RoleBadge :role="message.role" />
         <span class="count-badge" title="content blocks">{{ contentCount }}</span>
       </div>
-      <div class="header-right">
+      <div v-if="isOpen" class="header-right">
         <button
           class="raw-btn"
           :class="{ active: isRawView }"

@@ -1,7 +1,10 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+import { useStorage } from '@vueuse/core';
+import { hashId } from '../../../utils/id/hashId';
 import type { Tool } from '../../../types/claude/claude-request';
-import SmartViewer from '../../content/SmartViewer.vue';
+import ClaudeToolParameters from './ClaudeToolParameters.vue';
+import ProseContent from '../../content/ProseContent.vue';
 
 interface Props {
   tool: Tool;
@@ -10,117 +13,296 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const inputSchemaJson = computed(() => {
-  return JSON.stringify(props.tool.input_schema, null, 2);
+const toolName = computed(() => props.tool.name);
+const toolDescription = computed(() => props.tool.description || '');
+const toolSchema = computed(() => props.tool.input_schema);
+
+// Description preview for header (first 160 chars)
+const descriptionPreview = computed(() => {
+  const desc = toolDescription.value;
+  if (!desc) return '';
+  if (desc.length <= 160) return desc;
+  return desc.slice(0, 160) + '...';
 });
 
-const requiredParams = computed(() => {
-  return props.tool.input_schema.required || [];
+// Generate unique ID for the tool
+const toolId = computed(() => `claude-tool-def-${toolName.value}`);
+
+// Generate storage key based on prefix + name + jsonHashId
+const storageKey = computed(() => {
+  const toolJson = JSON.stringify(props.tool);
+  const jsonHashId = hashId(toolJson);
+  return `claude-tool-${toolName.value}-${jsonHashId}-open`;
 });
 
-const hasRequired = computed(() => requiredParams.value.length > 0);
+// Use useStorage for persistent state
+const isOpen = useStorage(storageKey.value, true);
+
+// Toggle open/close
+const toggle = () => {
+  isOpen.value = !isOpen.value;
+};
+
+// View raw toggle - shows entire tool JSON
+const showRaw = ref(false);
+const toggleRaw = () => {
+  showRaw.value = !showRaw.value;
+};
+
+const toggleIcon = computed(() => isOpen.value ? '▼' : '▶');
 </script>
 
 <template>
-  <div class="claude-tool-item">
-    <div class="tool-header">
-      <span class="tool-idx">#{{ index + 1 }}</span>
-      <span class="tool-name">{{ tool.name }}</span>
-      <span v-if="hasRequired" class="required-badge">
-        {{ requiredParams.length }} required
-      </span>
-    </div>
-
-    <div v-if="tool.description" class="tool-description">
-      {{ tool.description }}
-    </div>
-
-    <div class="schema-section">
-      <div class="schema-header">
-        <span class="schema-title">Input Schema</span>
-        <span class="schema-type">{{ tool.input_schema.type }}</span>
+  <div :id="toolId" class="claude-tool-item">
+    <!-- Collapsible Header -->
+    <div class="tool-header" @click="toggle">
+      <div class="header-left">
+        <span class="toggle-icon">{{ toggleIcon }}</span>
+        <span class="tool-index">#{{ index + 1 }}</span>
+        <span class="tool-name">{{ toolName }}</span>
+        <span v-if="descriptionPreview" class="tool-desc-preview">{{ descriptionPreview }}</span>
       </div>
-      <SmartViewer :text="inputSchemaJson" />
+    </div>
+
+    <!-- Expandable Content -->
+    <div v-if="isOpen" class="tool-content">
+      <!-- Raw mode: show entire tool JSON -->
+      <div v-if="showRaw" class="raw-mode">
+        <div class="raw-header">
+          <span class="raw-label">Raw Tool Definition</span>
+          <button class="view-formatted-btn" @click="toggleRaw">
+            ▶ View Formatted
+          </button>
+        </div>
+        <pre class="raw-content">{{ JSON.stringify(tool, null, 2) }}</pre>
+      </div>
+
+      <!-- Formatted mode -->
+      <template v-else>
+        <div class="formatted-header">
+          <button class="view-raw-btn" @click="toggleRaw">
+            ▶ View Raw
+          </button>
+        </div>
+
+        <!-- Description with markdown rendering (collapsible) -->
+        <div v-if="toolDescription" class="description-section">
+          <details open class="description-details">
+            <summary class="description-summary">
+              <span class="section-label-inline">Description</span>
+            </summary>
+            <div class="description-content">
+              <ProseContent :content="toolDescription" />
+            </div>
+          </details>
+        </div>
+
+        <!-- Parameters section with ClaudeToolParameters -->
+        <div v-if="toolSchema" class="parameters-section">
+          <div class="section-label">Input Schema</div>
+          <ClaudeToolParameters :schema="toolSchema" />
+        </div>
+      </template>
     </div>
   </div>
 </template>
 
 <style scoped>
 .claude-tool-item {
-  background: var(--llm-bg-elevated);
-  border: 1px solid var(--llm-border-light);
-  border-radius: var(--llm-radius-lg);
-  padding: var(--llm-spacing-md);
-  margin-bottom: var(--llm-spacing-md);
-}
-
-.claude-tool-item:last-child {
-  margin-bottom: 0;
+  margin-bottom: 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+  overflow: hidden;
 }
 
 .tool-header {
   display: flex;
   align-items: center;
-  gap: var(--llm-spacing-md);
-  margin-bottom: var(--llm-spacing-sm);
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #f8fafc;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.tool-idx {
-  color: var(--llm-text-muted);
+.tool-header:hover {
+  background: #f1f5f9;
+}
+
+.header-left {
+  display: flex;
+  max-width: 100%;
+  align-items: center;
+  gap: 10px;
+}
+
+.toggle-icon {
+  color: #64748b;
   font-size: 1.2rem;
+  transition: transform 0.2s;
+}
+
+.tool-index {
+  font-size: 1.3rem;
+  color: #94a3b8;
   font-weight: 500;
+  min-width: 28px;
 }
 
 .tool-name {
-  font-weight: 600;
+  font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
   font-size: 1.4rem;
-  color: var(--llm-text-primary);
-  font-family: var(--llm-font-mono);
-}
-
-.required-badge {
-  padding: 2px 6px;
-  border-radius: var(--llm-radius-sm);
-  font-size: 1rem;
   font-weight: 600;
-  background: var(--llm-warning-bg, #fef3c7);
-  color: var(--llm-warning-text, #92400e);
+  color: #7c3aed;
+  background: #f3e8ff;
+  padding: 4px 10px;
+  border-radius: 4px;
+  flex-shrink: 0;
 }
 
-.tool-description {
-  color: var(--llm-text-secondary);
+.tool-desc-preview {
   font-size: 1.3rem;
-  margin-bottom: var(--llm-spacing-md);
-  line-height: 1.5;
+  color: #64748b;
+  font-style: italic;
+  margin-left: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 70%;
 }
 
-.schema-section {
-  background: var(--llm-bg-content);
-  border-radius: var(--llm-radius-md);
-  padding: var(--llm-spacing-sm);
+.tool-content {
+  padding: 6px 6px 6px 16px;
+  border-top: 1px solid #e2e8f0;
 }
 
-.schema-header {
+/* Raw mode styles */
+.raw-mode {
+  margin: 0;
+}
+
+.raw-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--llm-spacing-sm);
-  padding-bottom: var(--llm-spacing-xs);
-  border-bottom: 1px solid var(--llm-border-light);
+  justify-content: space-between;
+  margin-bottom: 8px;
 }
 
-.schema-title {
-  font-weight: 600;
+.raw-label {
   font-size: 1.2rem;
-  color: var(--llm-text-primary);
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.schema-type {
+.raw-content {
+  background: #f8fafc;
+  color: #1e293b;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  overflow-x: auto;
+  margin: 0;
+  font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+  font-size: 1.3rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Formatted mode styles */
+.formatted-header {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.view-raw-btn,
+.view-formatted-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(2px);
   padding: 2px 6px;
-  border-radius: var(--llm-radius-sm);
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #64748b;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: all 0.2s;
+}
+
+.view-raw-btn:hover,
+.view-formatted-btn:hover {
+  background: rgba(255, 255, 255, 0.9);
+  color: #334155;
+}
+
+/* Section styles */
+.description-section,
+.parameters-section {
+  margin-bottom: 16px;
+}
+
+.description-section:last-child,
+.parameters-section:last-child {
+  margin-bottom: 0;
+}
+
+.section-label {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+/* Collapsible Description Styles - Minimal, matches Parameters */
+.description-details {
+  border: none;
+  background: transparent;
+}
+
+.description-summary {
+  padding: 0 0 8px 0;
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  display: flex;
+  align-items: center;
+}
+
+.description-summary::-webkit-details-marker {
+  display: none;
+}
+
+.description-summary::before {
+  content: '▼';
   font-size: 1rem;
-  background: var(--llm-tag-bg);
-  color: var(--llm-tag-text);
-  font-family: var(--llm-font-mono);
+  color: #64748b;
+  margin-right: 8px;
+  transition: transform 0.2s;
+}
+
+.description-details:not([open]) .description-summary::before {
+  transform: rotate(-90deg);
+}
+
+.section-label-inline {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.description-content {
+  padding: 0;
+  background: transparent;
+  border: none;
 }
 </style>
