@@ -11,7 +11,7 @@ const props = defineProps<Props>();
 <template>
   <div class="tool-args">
     <JsonViewer 
-      :data="arguments" 
+      :content="arguments" 
       title="Tool Arguments"
       default-open
     />

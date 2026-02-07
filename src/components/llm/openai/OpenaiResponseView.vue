@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import type { OpenaiChatResponse } from '../../../types/openai/chat-response';
 import CollapsibleSection from '../../container/CollapsibleSection.vue';
-import InfoItem from '../../content/KVRowLine.vue';
+import LabelValueRow from '../../content/LabelValueRow.vue';
 import JsonViewer from '../../content/JsonViewer.vue';
 import OpenaiTokenUsage from './OpenaiTokenUsage.vue';
 import OpenaiChoice from './OpenaiChoice.vue';
@@ -61,10 +61,10 @@ const getFinishReasonSummary = () => {
     </div>
 
     <CollapsibleSection title="Basic Info" :default-open="true" storage-key="response-basic">
-      <InfoItem label="ID" :value="data.id" />
-      <InfoItem label="Object" :value="data.object" />
-      <InfoItem label="Model" :value="data.model" />
-      <InfoItem label="System Fingerprint" :value="data.system_fingerprint" />
+      <LabelValueRow label="ID" :value="data.id" />
+      <LabelValueRow label="Object" :value="data.object" />
+      <LabelValueRow label="Model" :value="data.model" />
+      <LabelValueRow label="System Fingerprint" :value="data.system_fingerprint" />
     </CollapsibleSection>
 
     <CollapsibleSection v-if="data.usage" title="Token Usage" :default-open="true" storage-key="response-usage">
@@ -81,7 +81,7 @@ const getFinishReasonSummary = () => {
     </CollapsibleSection>
 
     <BetterDetails title="Full Response">
-      <JsonViewer :data="data" />
+      <JsonViewer :content="data" />
     </BetterDetails>
 
   </div>

@@ -4,7 +4,7 @@ import { useClipboard } from '@vueuse/core';
 import { toast } from 'vue-sonner';
 
 interface Props {
-  data: any; // 允许 object, string, number 等
+  content: any; // 允许 object, string, number 等
 }
 
 const props = defineProps<Props>();
@@ -28,7 +28,7 @@ const tryParseJSON = (input: any): any => {
   }
 };
 
-const parsedData = computed(() => tryParseJSON(props.data));
+const parsedData = computed(() => tryParseJSON(props.content));
 
 const jsonString = computed(() => {
   return JSON.stringify(parsedData.value, null, 2);

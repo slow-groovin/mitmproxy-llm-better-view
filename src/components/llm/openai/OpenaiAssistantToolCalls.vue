@@ -34,7 +34,7 @@ function scrollTo(selector: string) {
 
     <!-- Raw 模式 -->
 
-    <JsonViewer v-if="showRaw"  :data="toolCalls"/>
+    <JsonViewer v-if="showRaw"  :content="toolCalls"/>
 
     <!-- 格式化显示 -->
     <div v-else class="tool-requests">

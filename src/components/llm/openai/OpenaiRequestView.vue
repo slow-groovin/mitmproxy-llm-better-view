@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import type { OpenaiChatRequest } from '../../../types/openai/chat-request';
 import CollapsibleSection from '../../container/CollapsibleSection.vue';
-import InfoItem from '../../content/KVRowLine.vue';
+import LabelValueRow from '../../content/LabelValueRow.vue';
 import JsonViewer from '../../content/JsonViewer.vue';
 import OpenaiToolItem from './OpenaiToolItem.vue';
 import OpenaiMessageItem from './OpenaiMessageItem.vue';
@@ -56,15 +56,15 @@ const stopValue = computed(() => {
     </div>
 
     <CollapsibleSection title="Parameters" :default-open="true" storage-key="parameters">
-      <InfoItem label="Temperature" :value="data.temperature" />
-      <InfoItem label="Top P" :value="data.top_p" />
-      <InfoItem label="Max Tokens" :value="data.max_tokens" />
-      <InfoItem label="Tool Choice" :value="toolChoice" />
-      <InfoItem label="Response Format" :value="responseFormat" />
-      <InfoItem label="Seed" :value="data.seed" />
-      <InfoItem label="Stop" :value="stopValue" />
-      <InfoItem label="Frequency Penalty" :value="data.frequency_penalty" />
-      <InfoItem label="Presence Penalty" :value="data.presence_penalty" />
+      <LabelValueRow label="Temperature" :value="data.temperature" />
+      <LabelValueRow label="Top P" :value="data.top_p" />
+      <LabelValueRow label="Max Tokens" :value="data.max_tokens" />
+      <LabelValueRow label="Tool Choice" :value="toolChoice" />
+      <LabelValueRow label="Response Format" :value="responseFormat" />
+      <LabelValueRow label="Seed" :value="data.seed" />
+      <LabelValueRow label="Stop" :value="stopValue" />
+      <LabelValueRow label="Frequency Penalty" :value="data.frequency_penalty" />
+      <LabelValueRow label="Presence Penalty" :value="data.presence_penalty" />
     </CollapsibleSection>
 
     <CollapsibleSection title="Messages" :count="messages.length" :default-open="true" storage-key="messages" variant="default">
@@ -90,7 +90,7 @@ const stopValue = computed(() => {
     </CollapsibleSection>
 
     
-    <JsonViewer :data="data" title="Full Request" :collapsible="true" />
+    <JsonViewer :content="data" title="Full Request" :collapsible="true" />
   </div>
 </template>
 

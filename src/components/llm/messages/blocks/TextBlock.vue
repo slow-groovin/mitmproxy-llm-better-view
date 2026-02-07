@@ -21,7 +21,9 @@
       <ProseContent v-if="format === 'markdown'" :content="text" />
       
       <!-- XML -->
-      <pre v-else-if="format === 'xml'" class="xml-content" v-html="highlightXml(text)" />
+      <XMLViewer v-else-if="format === 'xml'" :content="text" />
+
+      <JsonViewer v-else-if="format==='json'" :content="text"/>
       
       <!-- 纯文本 -->
       <div v-else class="text-content">{{ text }}</div>
@@ -31,8 +33,10 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import ProseContent from '../../../content/ProseContent.vue';
-import { detectContentFormat } from '../../../../utils/format/formatContent';
+import ProseContent from '@/components/content/ProseContent.vue';
+import { detectContentFormat } from '@/utils/format/formatContent';
+import XMLViewer from '@/components/content/XMLViewer.vue';
+import JsonViewer from '@/components/content/JsonViewer.vue';
 
 interface Props {
   id?: string;
@@ -48,16 +52,7 @@ const showRaw = ref(false);
 const format = computed(() => detectContentFormat(props.text));
 const canToggle = computed(() => format.value !== 'text' && props.isProse);
 
-// 简单的 XML 高亮(可选)
-function highlightXml(xml: string): string {
-  return xml
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/(&lt;\/?)([\w:-]+)/g, '$1<span class="xml-tag">$2</span>')
-    .replace(/(&lt;[\w:-]+\s+)([\w:-]+)=/g, '$1<span class="xml-attr">$2</span>=')
-    .replace(/=&quot;([^&]*)&quot;/g, '=<span class="xml-value">&quot;$1&quot;</span>');
-}
+
 </script>
 
 <style scoped>
