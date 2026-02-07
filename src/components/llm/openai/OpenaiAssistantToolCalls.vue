@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import OpenaiToolCallArgs from './OpenaiToolCallArgs.vue';
+import JsonViewer from '../../content/JsonViewer.vue';
 
 interface ToolCall {
   id: string;
@@ -32,7 +33,8 @@ function scrollTo(selector: string) {
     </div>
 
     <!-- Raw 模式 -->
-    <pre v-if="showRaw" class="raw-content">{{ JSON.stringify(toolCalls, null, 2) }}</pre>
+
+    <JsonViewer v-if="showRaw"  :data="toolCalls"/>
 
     <!-- 格式化显示 -->
     <div v-else class="tool-requests">
@@ -85,17 +87,6 @@ function scrollTo(selector: string) {
   color: #1d4ed8;
 }
 
-.raw-content {
-  margin: 24px 0 8px;
-  padding: 4px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 4px;
-  font-family: 'Monaco', 'Menlo', monospace;
-  font-size: 1.2rem;
-  overflow-x: auto;
-  color: #475569;
-}
 
 .tool-requests {
   display: flex;

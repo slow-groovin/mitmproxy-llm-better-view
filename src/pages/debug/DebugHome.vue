@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, shallowRef, type Component } from 'vue';
-import Tabs from '../../components/Tabs.vue';
+import Tabs from '@/components/container/Tabs.vue';
 import TestButton from '../../components/debug/TestButton.vue';
 import SonnerTest from './SonnerTest.vue';
 import BrowserPermissionTest from './BrowserPermissionTest.vue';

@@ -3,7 +3,7 @@ import { computed, ref } from 'vue';
 import { useStorage } from '@vueuse/core';
 import { hashId } from '../../../utils/id/hashId';
 import OpenaiToolParameters from './OpenaiToolParameters.vue';
-import ProseContent from '../shared/ProseContent.vue';
+import ProseContent from '../../content/ProseContent.vue';
 
 // OpenAI tool
 interface OpenaiTool {

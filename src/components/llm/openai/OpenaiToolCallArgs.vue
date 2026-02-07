@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import JsonViewer from '../shared/JsonViewer.vue';
+import JsonViewer from '../../content/JsonViewer.vue';
 
 interface Props {
   arguments: string | object;

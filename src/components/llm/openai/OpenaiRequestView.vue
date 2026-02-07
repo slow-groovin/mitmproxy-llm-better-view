@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { OpenaiChatRequest } from '../../../types/openai/chat-request';
-import CollapsibleSection from '../shared/CollapsibleSection.vue';
-import InfoItem from '../shared/InfoItem.vue';
-import JsonViewer from '../shared/JsonViewer.vue';
+import CollapsibleSection from '../../container/CollapsibleSection.vue';
+import InfoItem from '../../content/KVRowLine.vue';
+import JsonViewer from '../../content/JsonViewer.vue';
 import OpenaiToolItem from './OpenaiToolItem.vue';
 import OpenaiMessageItem from './OpenaiMessageItem.vue';
 

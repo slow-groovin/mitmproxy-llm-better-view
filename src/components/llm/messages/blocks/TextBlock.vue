@@ -31,7 +31,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import ProseContent from '../../shared/ProseContent.vue';
+import ProseContent from '../../../content/ProseContent.vue';
 import { detectContentFormat } from '../../../../utils/format/formatContent';
 
 interface Props {

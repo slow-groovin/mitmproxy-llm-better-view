@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { OpenaiChatResponse } from '../../../types/openai/chat-response';
-import CollapsibleSection from '../shared/CollapsibleSection.vue';
-import InfoItem from '../shared/InfoItem.vue';
-import JsonViewer from '../shared/JsonViewer.vue';
+import CollapsibleSection from '../../container/CollapsibleSection.vue';
+import InfoItem from '../../content/KVRowLine.vue';
+import JsonViewer from '../../content/JsonViewer.vue';
 import OpenaiTokenUsage from './OpenaiTokenUsage.vue';
 import OpenaiChoice from './OpenaiChoice.vue';
-import BetterDetails from '@/components/BetterDetails.vue';
+import BetterDetails from '@/components/container/BetterDetails.vue';
 
 interface Props {
   data: OpenaiChatResponse;

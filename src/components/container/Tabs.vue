@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { shallowRef, watch, type Component } from 'vue';
 import { useStorage } from '@vueuse/core';
-import { CONSTANTS } from '../lib/constant';
+import { CONSTANTS } from '@/lib/constant';
 
 interface TabItem {
   name: string;

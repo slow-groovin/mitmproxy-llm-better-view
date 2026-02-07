@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import type { Choice } from '@/types/openai/chat-response';
-import ProseContent from '../shared/ProseContent.vue';
+import ProseContent from '../../content/ProseContent.vue';
 import OpenaiAssistantToolCalls from './OpenaiAssistantToolCalls.vue';
 
 interface Props {
