@@ -3,9 +3,12 @@ import { computed } from 'vue';
 
 interface Props {
   content: any; // 允许 object, string, number 等
+  wrapLines?: boolean;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  wrapLines: true
+});
 
 // --- 逻辑: 深度递归解析 JSON ---
 const tryParseJSON = (input: any): any => {
@@ -77,9 +80,9 @@ const highlightedCode = computed(() => {
   padding: 12px;
   font-size: 12px;
   line-height: 1.5;
-  /* white-space: pre;*/
-  /* word-break: break-all; */
-  /* overflow-x: auto; */
+  white-space: v-bind('wrapLines ? "pre-wrap" : "pre"');
+  word-break: v-bind('wrapLines ? "break-all" : "normal"');
+  overflow-x: v-bind('wrapLines ? "auto" : "scroll"');
   color: #24292e;
 }
 

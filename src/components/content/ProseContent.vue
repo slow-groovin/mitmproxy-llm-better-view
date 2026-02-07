@@ -4,9 +4,12 @@ import { marked } from 'marked';
 
 interface Props {
   content: string;
+  wrapLines?: boolean;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  wrapLines: true
+});
 
 // Define emit for v-model support
 defineEmits<{
@@ -99,7 +102,8 @@ const htmlContent = computed(() => {
   color: #f8fafc;
   padding: 1rem;
   border-radius: 8px;
-  overflow-x: auto;
+  overflow-x: v-bind('wrapLines ? "auto" : "scroll"');
+  white-space: v-bind('wrapLines ? "pre-wrap" : "pre"');
   margin: 1.5em 0;
 }
 

@@ -7,6 +7,7 @@ import JsonViewer from '../../content/JsonViewer.vue';
 import OpenaiTokenUsage from './OpenaiTokenUsage.vue';
 import OpenaiChoice from './OpenaiChoice.vue';
 import BetterDetails from '@/components/container/BetterDetails.vue';
+import TextBlock from '../messages/blocks/TextBlock.vue';
 
 interface Props {
   data: OpenaiChatResponse;
@@ -81,7 +82,7 @@ const getFinishReasonSummary = () => {
     </CollapsibleSection>
 
     <BetterDetails title="Full Response">
-      <JsonViewer :content="data" />
+      <TextBlock :text="JSON.stringify(data,null,2)"/>
     </BetterDetails>
 
   </div>

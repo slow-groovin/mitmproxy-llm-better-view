@@ -22,7 +22,7 @@ const emit = defineEmits<{
     type="button"
     @click="emit('click')"
   >
-    <!-- Wrap Lines Icon -->
+    <!-- active=true: scroll mode (no wrap), active=false: wrap mode -->
     <svg
       v-if="active"
       width="14"
@@ -34,9 +34,9 @@ const emit = defineEmits<{
       stroke-linecap="round"
       stroke-linejoin="round"
     >
+      <!-- Scroll icon (x-scroll mode) -->
       <path d="M4 7h16" />
       <path d="M4 12h12a4 4 0 0 1 0 8H4" />
-      <path d="M9 17l-4-5 4-5" />
     </svg>
     <svg
       v-else
@@ -49,8 +49,10 @@ const emit = defineEmits<{
       stroke-linecap="round"
       stroke-linejoin="round"
     >
+      <!-- Wrap icon (pre-wrap mode) -->
       <path d="M4 7h16" />
       <path d="M4 12h12a4 4 0 0 1 0 8H4" />
+      <path d="M9 17l-4-5 4-5" />
     </svg>
   </button>
 </template>

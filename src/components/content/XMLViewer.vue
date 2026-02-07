@@ -3,9 +3,12 @@ import { computed } from 'vue';
 
 interface Props {
   content: string;
+  wrapLines?: boolean;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  wrapLines: true
+});
 
 // 语法高亮
 const highlightedXML = computed(() => {
@@ -46,9 +49,9 @@ const highlightedXML = computed(() => {
   padding: 12px;
   font-size: 12px;
   line-height: 1.5;
-  white-space: pre-wrap;
-  word-break: break-all;
-  overflow-x: auto;
+  white-space: v-bind('wrapLines ? "pre-wrap" : "pre"');
+  word-break: v-bind('wrapLines ? "break-all" : "normal"');
+  overflow-x: v-bind('wrapLines ? "auto" : "scroll"');
   color: #24292e;
 }
 
