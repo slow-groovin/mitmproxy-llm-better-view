@@ -1,27 +1,61 @@
 <template>
   <div class="text-block">
+    <!-- 格式选择器头部 -->
     <div v-if="canToggle" class="text-block-header">
       <FormatSelector :current-format="displayFormat" @select="handleFormatChange" />
 
       <div class="header-actions">
-        <button class="view-raw-btn" @click="showRaw = !showRaw">
+        <button v-if="showViewRawBtn" class="view-raw-btn" @click="showRaw = !showRaw">
           {{ showRaw ? '▼' : '▶' }} View Raw
         </button>
       </div>
     </div>
 
-    <div class="content-wrapper" @mouseenter="showButtons = true" @mouseleave="showButtons = false">
+    <!-- 内容区域 -->
+    <div 
+      class="content-wrapper" 
+      @mouseenter="showButtons = true" 
+      @mouseleave="showButtons = false"
+    >
       <!-- 右上角浮动按钮 -->
-      <div class="floating-buttons" :class="{ visible: showButtons }">
-        <WrapLineButton :active="!wrapLines" title="Toggle word wrap" @click="wrapLines = !wrapLines" />
+      <div v-if="showFloatingButtons" class="floating-buttons" :class="{ visible: showButtons }">
+        <WrapLineButton 
+          v-if="showWrapLineBtn"
+          :active="!wrapLines" 
+          title="Toggle word wrap" 
+          @click="wrapLines = !wrapLines" 
+        />
         <CopyButton :content="text" success-message="Copied" />
       </div>
 
-      <RawViewer v-if="showRaw" :content="text" :wrap-lines="wrapLines" />
-      <ProseContent v-else-if="displayFormat === 'markdown'" v-model:content="textModel" :wrap-lines="wrapLines" />
-      <XMLViewer v-else-if="displayFormat === 'xml'" v-model:content="textModel" :wrap-lines="wrapLines" />
-      <JsonViewer v-else-if="displayFormat === 'json'" v-model:content="textModel" :wrap-lines="wrapLines" />
-      <div v-else class="text-content" :style="{ whiteSpace: wrapLines ? 'pre-wrap' : 'pre' }">{{ text }}</div>
+      <!-- 不同格式的渲染组件 -->
+      <RawViewer 
+        v-if="showRaw" 
+        :content="text" 
+        :wrap-lines="wrapLines" 
+      />
+      <ProseContent 
+        v-else-if="displayFormat === 'markdown'" 
+        v-model:content="textModel" 
+        :wrap-lines="wrapLines" 
+      />
+      <XMLViewer 
+        v-else-if="displayFormat === 'xml'" 
+        v-model:content="textModel" 
+        :wrap-lines="wrapLines" 
+      />
+      <JsonViewer 
+        v-else-if="displayFormat === 'json'" 
+        v-model:content="textModel" 
+        :wrap-lines="wrapLines" 
+      />
+      <div 
+        v-else 
+        class="text-content" 
+        :style="{ whiteSpace: wrapLines ? 'pre-wrap' : 'pre' }"
+      >
+        {{ text }}
+      </div>
     </div>
   </div>
 </template>
@@ -44,21 +78,36 @@ interface Props {
 
 const props = defineProps<Props>();
 
+// ========== 状态管理 ==========
 const showRaw = ref(false);
-const wrapLines = ref(true); // true = pre-wrap, false = scroll
+const wrapLines = ref(true);
 const manualFormat = ref<ContentFormat | null>(null);
-const showButtons = ref(false); // 控制按钮显示
+const showButtons = ref(false);
 
+// ========== 格式计算 ==========
 const detectedFormat = computed(() => detectContentFormat(props.text));
 const displayFormat = computed(() => manualFormat.value ?? detectedFormat.value);
-// const canToggle = computed(() => detectedFormat.value !== 'text');
 const canToggle = computed(() => true);
 
+// ========== 按钮显示逻辑 ==========
+// markdown 不需要 WrapLineButton
+const showWrapLineBtn = computed(() => displayFormat.value !== 'markdown');
+
+// json 和 text 不需要 View Raw 按钮
+const showViewRawBtn = computed(() => 
+  !['json', 'text'].includes(displayFormat.value)
+);
+
+// 只有在需要显示任意按钮时才显示浮动容器
+const showFloatingButtons = computed(() => !showRaw.value);
+
+// ========== 双向绑定 ==========
 const textModel = computed({
   get: () => props.text,
   set: () => { }
 });
 
+// ========== 事件处理 ==========
 const handleFormatChange = (format: ContentFormat) => {
   manualFormat.value = format === detectedFormat.value ? null : format;
 };
@@ -105,11 +154,9 @@ const handleFormatChange = (format: ContentFormat) => {
   color: #334155;
 }
 
-/* 内容包装器 - 相对定位 */
 .content-wrapper {
   position: relative;
   border-radius: 6px;
-  /* 可选 */
   min-height: 32px;
 }
 
@@ -117,9 +164,6 @@ const handleFormatChange = (format: ContentFormat) => {
   box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.6);
 }
 
-
-
-/* 浮动按钮容器 - 绝对定位在右上角 */
 .floating-buttons {
   position: absolute;
   top: 2px;
