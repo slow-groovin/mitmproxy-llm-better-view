@@ -23,23 +23,15 @@ const generationConfig = computed(() => props.data.generationConfig);
 
 const toolConfig = computed(() => props.data.toolConfig);
 
-// 工具选择显示
-const toolChoiceDisplay = computed(() => {
-  if (!toolConfig.value?.functionCallingConfig) return 'default';
+// toolConfig显示 (作为Parameters中的一行)
+const toolConfigDisplay = computed(() => {
+  if (!toolConfig.value?.functionCallingConfig) return undefined;
   const mode = toolConfig.value.functionCallingConfig.mode;
   const allowed = toolConfig.value.functionCallingConfig.allowedFunctionNames;
   if (allowed && allowed.length > 0) {
     return `${mode} (${allowed.join(', ')})`;
   }
   return mode;
-});
-
-// safetySettings显示
-const safetySettingsDisplay = computed(() => {
-  if (!props.data.safetySettings || props.data.safetySettings.length === 0) {
-    return 'default';
-  }
-  return props.data.safetySettings.map(s => `${s.category}=${s.threshold}`).join(', ');
 });
 
 // 是否有系统指令
@@ -67,7 +59,6 @@ const systemInstructionText = computed(() => {
         <span v-if="tools.length > 0" class="divider">·</span>
         <span v-if="tools.length > 0">{{ tools.length }} tools</span>
         <span v-if="hasSystemInstruction" class="divider">·</span>
-        <span v-if="hasSystemInstruction">system instruction</span>
       </div>
     </div>
 
@@ -81,20 +72,7 @@ const systemInstructionText = computed(() => {
       <LabelValueRow label="Response MimeType" :value="generationConfig?.responseMimeType" />
       <LabelValueRow label="Presence Penalty" :value="generationConfig?.presencePenalty" />
       <LabelValueRow label="Frequency Penalty" :value="generationConfig?.frequencyPenalty" />
-    </CollapsibleSection>
-
-    <!-- Tool Config Section -->
-    <CollapsibleSection
-      v-if="toolConfig"
-      title="Tool Config"
-      :default-open="false"
-      storage-key="gemini-tool-config"
-    >
-      <LabelValueRow label="Mode" :value="toolConfig.functionCallingConfig?.mode" />
-      <LabelValueRow
-        label="Allowed Functions"
-        :value="toolConfig.functionCallingConfig?.allowedFunctionNames?.join(', ')"
-      />
+      <LabelValueRow label="Tool Config" :value="toolConfigDisplay" />
     </CollapsibleSection>
 
     <!-- Safety Settings Section -->
@@ -149,10 +127,11 @@ const systemInstructionText = computed(() => {
     </CollapsibleSection>
 
     <!-- Tools Section -->
+    <!-- Gemini 的 tools 是 [{ functionDeclarations: [...] }] 结构, 和 Claude 不同 -->
     <CollapsibleSection
       v-if="tools.length > 0"
       title="Tools"
-      :count="tools.length"
+      :count="tools.reduce((acc, t) => acc + (t.functionDeclarations?.length || 0), 0)"
       storage-key="gemini-tools"
       variant="tools"
     >
@@ -161,7 +140,7 @@ const systemInstructionText = computed(() => {
           v-for="(func, funcIdx) in tool.functionDeclarations"
           :key="`${toolIdx}-${funcIdx}`"
           :tool="func"
-          :index="toolIdx * 100 + funcIdx"
+          :index="tools.slice(0, toolIdx).reduce((acc, t) => acc + (t.functionDeclarations?.length || 0), 0) + funcIdx"
         />
       </template>
     </CollapsibleSection>

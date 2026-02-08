@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useSessionStorage } from '@vueuse/core';
+import { computed, ref } from 'vue';
+import { useStorage } from '@vueuse/core';
+import { hashId } from '@/utils/id/hashId';
 import type { FunctionDeclaration } from '@/types/gemini/request';
-import SmartViewer from '../../content/SmartViewer.vue';
+import SmartViewer from '@/components/content/SmartViewer.vue';
+import BetterDetails from '@/components/container/BetterDetails.vue';
 
 interface Props {
   tool: FunctionDeclaration;
@@ -11,151 +13,111 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const storageKey = computed(() => `gemini-tool-${props.tool.name}-open`);
-const isOpen = useSessionStorage(storageKey, false);
+const toolName = computed(() => props.tool.name);
+const toolDescription = computed(() => props.tool.description || '');
+const toolParameters = computed(() => props.tool.parameters);
 
-const parameters = computed(() => props.tool.parameters);
-const requiredParams = computed(() => parameters.value?.required || []);
-
-const hasParameters = computed(() => {
-  return parameters.value?.properties && Object.keys(parameters.value.properties).length > 0;
+// Description preview for header (first 160 chars)
+const descriptionPreview = computed(() => {
+  const desc = toolDescription.value;
+  if (!desc) return '';
+  if (desc.length <= 160) return desc;
+  return desc.slice(0, 160) + '...';
 });
 
-const paramEntries = computed(() => {
-  if (!parameters.value?.properties) return [];
-  return Object.entries(parameters.value.properties);
+// Generate unique ID for the tool
+const toolId = computed(() => `gemini-tool-def-${toolName.value}`);
+
+// Generate storage key based on prefix + name + jsonHashId
+const storageKey = computed(() => {
+  const toolJson = JSON.stringify(props.tool);
+  const jsonHashId = hashId(toolJson);
+  return `gemini-tool-${toolName.value}-${jsonHashId}-open`;
 });
 
-function isRequired(paramName: string): boolean {
-  return requiredParams.value.includes(paramName);
-}
+// Use useStorage for persistent state
+const isOpen = useStorage(storageKey.value, true);
 
-function getParamType(param: Record<string, unknown>): string {
-  if (param.type) return String(param.type);
-  if (param.enum) return 'enum';
-  return 'any';
-}
+// Toggle open/close
+const toggle = () => {
+  isOpen.value = !isOpen.value;
+};
 
-function getParamConstraints(param: Record<string, unknown>): string[] {
-  const constraints: string[] = [];
+// View raw toggle - shows entire tool JSON
+const showRaw = ref(false);
+const toggleRaw = () => {
+  showRaw.value = !showRaw.value;
+};
 
-  if (param.enum && Array.isArray(param.enum)) {
-    constraints.push(`enum: ${param.enum.join(', ')}`);
-  }
-  if (param.minimum !== undefined) {
-    constraints.push(`min: ${param.minimum}`);
-  }
-  if (param.maximum !== undefined) {
-    constraints.push(`max: ${param.maximum}`);
-  }
-  if (param.minLength !== undefined) {
-    constraints.push(`minLen: ${param.minLength}`);
-  }
-  if (param.maxLength !== undefined) {
-    constraints.push(`maxLen: ${param.maxLength}`);
-  }
-  if (param.pattern !== undefined) {
-    constraints.push(`pattern: ${param.pattern}`);
-  }
-
-  return constraints;
-}
-
-function formatDefault(value: unknown): string {
-  if (value === null) return 'null';
-  if (value === undefined) return 'undefined';
-  if (typeof value === 'string') return `"${value}"`;
-  if (typeof value === 'object') return JSON.stringify(value);
-  return String(value);
-}
+const toggleIcon = computed(() => isOpen.value ? '▼' : '▶');
 </script>
 
 <template>
-  <div class="tool-item" :class="{ 'is-open': isOpen }">
-    <div class="tool-header" @click="isOpen = !isOpen">
+  <div :id="toolId" class="gemini-tool-item">
+    <!-- Collapsible Header -->
+    <div class="tool-header" @click="toggle">
       <div class="header-left">
-        <span class="toggle">{{ isOpen ? '▼' : '▶' }}</span>
-        <span class="index">#{{ index + 1 }}</span>
-        <span class="tool-name">{{ tool.name }}</span>
+        <span class="toggle-icon">{{ toggleIcon }}</span>
+        <span class="tool-index">#{{ index + 1 }}</span>
+        <span class="tool-name">{{ toolName }}</span>
+        <span v-if="descriptionPreview" class="tool-desc-preview">{{ descriptionPreview }}</span>
       </div>
-      <div class="header-right" v-if="hasParameters">
-        <span class="param-count">{{ paramEntries.length }} param(s)</span>
-      </div>
+      <!-- View Raw outline button - header 右侧 -->
+      <button
+        v-if="isOpen"
+        class="raw-btn header-right"
+        :class="{ active: showRaw }"
+        @click.stop="toggleRaw"
+      >
+        {{ 'View Raw' }}
+      </button>
     </div>
 
-    <div v-show="isOpen" class="tool-content">
-      <!-- Description -->
-      <div v-if="tool.description" class="description">
-        {{ tool.description }}
+    <!-- Expandable Content -->
+    <div v-if="isOpen" class="tool-content">
+      <!-- Raw mode: show entire tool JSON -->
+      <div v-if="showRaw" class="raw-mode">
+        <SmartViewer :text="JSON.stringify(tool, null, 2)"/>
       </div>
 
-      <!-- Parameters Section -->
-      <div v-if="hasParameters" class="parameters-section">
-        <div class="section-title">Parameters</div>
-
-        <div class="params-list">
-          <div
-            v-for="[paramName, param] in paramEntries"
-            :key="paramName"
-            class="param-item"
-            :class="{ 'is-required': isRequired(paramName) }"
-          >
-            <div class="param-header">
-              <span class="param-name">{{ paramName }}</span>
-              <span class="param-type">{{ getParamType(param) }}</span>
-              <span v-if="isRequired(paramName)" class="required-badge">required</span>
-            </div>
-
-            <div v-if="param.description" class="param-description">
-              {{ param.description }}
-            </div>
-
-            <div v-if="getParamConstraints(param).length > 0" class="param-constraints">
-              <span
-                v-for="constraint in getParamConstraints(param)"
-                :key="constraint"
-                class="constraint-tag"
-              >
-                {{ constraint }}
-              </span>
-            </div>
-
-            <div v-if="param.default !== undefined" class="param-default">
-              default: <code>{{ formatDefault(param.default) }}</code>
-            </div>
-          </div>
+      <!-- Formatted mode -->
+      <template v-else>
+        <!-- Description with markdown rendering (collapsible) -->
+        <div v-if="toolDescription" class="description-section">
+          <BetterDetails default-open>
+            <template #summary>
+              <div class="section-label" style="margin-bottom: -2px;">DESCRIPTION</div>
+            </template>
+            <SmartViewer :text="toolDescription" />
+          </BetterDetails>
         </div>
-      </div>
 
-      <!-- Raw Schema -->
-      <div class="raw-schema">
-        <div class="section-title">Raw Schema</div>
-        <SmartViewer :text="JSON.stringify(tool, null, 2)" />
-      </div>
+        <!-- Parameters section -->
+        <div v-if="toolParameters" class="parameters-section">
+          <div class="section-label">Input Schema</div>
+          <SmartViewer :text="JSON.stringify(toolParameters, null, 2)" />
+        </div>
+      </template>
     </div>
   </div>
 </template>
 
 <style scoped>
-.tool-item {
-  background: #ffffff;
+.gemini-tool-item {
+  margin-bottom: 8px;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
-  margin-bottom: 8px;
+  background: #ffffff;
   overflow: hidden;
 }
 
-.tool-item:hover {
-  border-color: #cbd5e1;
-}
-
 .tool-header {
-  padding: 10px 12px;
-  cursor: pointer;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
   background: #f8fafc;
+  cursor: pointer;
   transition: background-color 0.2s;
 }
 
@@ -165,147 +127,103 @@ function formatDefault(value: unknown): string {
 
 .header-left {
   display: flex;
+  flex: 1;
+  min-width: 0;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
-.toggle {
+.header-right{
+  flex-shrink: 0;
+}
+
+.toggle-icon {
   color: #64748b;
-  font-size: 1rem;
+  font-size: 1.2rem;
+  transition: transform 0.2s;
 }
 
-.index {
-  font-size: 1rem;
+.tool-index {
+  font-size: 1.3rem;
   color: #94a3b8;
+  font-weight: 500;
+  min-width: 28px;
 }
 
 .tool-name {
+  font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+  font-size: 1.4rem;
   font-weight: 600;
-  color: #1e293b;
-  font-size: 1.1rem;
-  font-family: var(--llm-font-mono);
+  color: #7c3aed;
+  background: #f3e8ff;
+  padding: 4px 10px;
+  border-radius: 4px;
+  flex-shrink: 0;
 }
 
-.param-count {
-  font-size: 0.9rem;
+.tool-desc-preview {
+  font-size: 1.3rem;
   color: #64748b;
-  background: #e2e8f0;
-  padding: 2px 8px;
-  border-radius: 4px;
+  font-style: italic;
+  margin-left: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 80%;
+}
+
+/* View Raw outline button - header 右侧 */
+.raw-btn {
+  padding: 4px 10px;
+  font-size: 1.1rem;
+  color: #64748b;
+  background: transparent;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.raw-btn:hover {
+  color: #374151;
+  border-color: #9ca3af;
+}
+
+.raw-btn.active {
+  color: #3b82f6;
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.05);
 }
 
 .tool-content {
-  padding: 12px;
+  padding: 6px 6px 6px 16px;
   border-top: 1px solid #e2e8f0;
 }
 
-.description {
-  font-size: 1rem;
-  color: #475569;
-  margin-bottom: 12px;
-  line-height: 1.5;
+/* Raw mode styles */
+.raw-mode {
+  margin: 0;
 }
 
-.section-title {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #1e293b;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
+/* Section styles */
+.description-section,
 .parameters-section {
   margin-bottom: 16px;
+  padding-left: 12px;
+  border-left: 2px solid #e2e8f0;
 }
 
-.params-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.description-section:last-child,
+.parameters-section:last-child {
+  margin-bottom: 0;
 }
 
-.param-item {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  padding: 10px;
-}
-
-.param-item.is-required {
-  border-left: 3px solid #f59e0b;
-}
-
-.param-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
-}
-
-.param-name {
+.section-label {
+  font-size: 1.2rem;
   font-weight: 600;
-  color: #1e293b;
-  font-family: var(--llm-font-mono);
-}
-
-.param-type {
-  font-size: 0.85rem;
   color: #64748b;
-  background: #e2e8f0;
-  padding: 1px 6px;
-  border-radius: 3px;
-}
-
-.required-badge {
-  font-size: 0.75rem;
-  color: #92400e;
-  background: #fef3c7;
-  padding: 1px 6px;
-  border-radius: 3px;
-  font-weight: 600;
-}
-
-.param-description {
-  font-size: 0.95rem;
-  color: #475569;
-  margin-bottom: 6px;
-  line-height: 1.4;
-}
-
-.param-constraints {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin-bottom: 4px;
-}
-
-.constraint-tag {
-  font-size: 0.8rem;
-  color: #0369a1;
-  background: #e0f2fe;
-  padding: 2px 6px;
-  border-radius: 3px;
-}
-
-.param-default {
-  font-size: 0.9rem;
-  color: #64748b;
-}
-
-.param-default code {
-  background: #f1f5f9;
-  padding: 2px 4px;
-  border-radius: 3px;
-  font-family: var(--llm-font-mono);
-  font-size: 0.9em;
-}
-
-.raw-schema {
-  margin-top: 12px;
-}
-
-.raw-schema :deep(.smart-viewer) {
-  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
 }
 </style>
