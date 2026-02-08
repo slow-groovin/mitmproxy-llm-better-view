@@ -75,7 +75,6 @@ function scrollTo(selector: string) {
         <span class="toggle">{{ isOpen ? '▼' : '▶' }}</span>
         <span class="index">#{{ index + 1 }}</span>
         <RoleBadge :role="role" />
-        <span v-if="toolResponse?.name" class="tool-name">{{ toolResponse.name }}</span>
       </div>
 
       <span v-if="id" class="msg-id">{{ id.slice(0, 8) }}</span>
@@ -157,15 +156,6 @@ function scrollTo(selector: string) {
   font-family: var(--llm-font-mono);
 }
 
-.tool-name {
-  padding: 3px 8px;
-  border-radius: var(--llm-radius-md);
-  font-size: 1.2rem;
-  font-weight: 700;
-  background: var(--llm-tool-name-bg);
-  color: var(--llm-tool-name-text);
-  font-family: var(--llm-font-mono);
-}
 
 .content {
   padding: 0px var(--llm-spacing-xl);
@@ -199,15 +189,6 @@ function scrollTo(selector: string) {
   color: var(--llm-text-primary);
 }
 
-.badge {
-  padding: 2px 6px;
-  border-radius: var(--llm-radius-sm);
-  font-size: 1rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  background: var(--llm-tool-badge-bg);
-  color: var(--llm-tool-badge-text);
-}
 
 .tool-idx {
   color: var(--llm-text-secondary);

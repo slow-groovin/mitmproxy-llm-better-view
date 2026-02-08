@@ -13,6 +13,7 @@ vite-plugin-monkey@7.x + vue3 (making 外挂式辅助页面 for mitmweb(react sp
 - 严格遵循用户指令的任务要求!
 - ./src/old/ 下的文件仅供参考, 不要再进行更新!!!!
 - 不要运行 `npm run dev`, 那样会让你一直卡住!!!!
+- reasoning = thinking, 是不同standard中相同东西的不同name
 
 # 任务路线
 1. 三种api厂商标准, 的请求/响应的typescript类型声明(共计6种)  以及SSE响应时的wrapper类型声明(3种), 总共9种  (type创建在 ./src/types目录下) ✅Done

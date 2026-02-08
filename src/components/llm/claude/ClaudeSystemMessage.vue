@@ -90,8 +90,9 @@ const hasCacheControl = computed(() => {
   font-size: 1rem;
   font-weight: 600;
   text-transform: uppercase;
-  background: var(--llm-info-bg, #dbeafe);
-  color: var(--llm-info-text, #1e40af);
+  /* 使用 CSS 变量 */
+  background: var(--llm-info-bg);
+  color: var(--llm-info-text);
 }
 
 .content {

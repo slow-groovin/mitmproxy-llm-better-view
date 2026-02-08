@@ -115,8 +115,9 @@ function scrollTo(selector: string) {
   font-size: 1rem;
   font-weight: 600;
   text-transform: uppercase;
-  background: #dbeafe;
-  color: #1d4ed8;
+
+  background: var(--llm-badge-tool-bg);
+  color: var(--llm-badge-tool-text);
 }
 
 .tool-idx {

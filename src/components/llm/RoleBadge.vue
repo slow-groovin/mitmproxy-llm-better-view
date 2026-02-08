@@ -63,7 +63,7 @@ const displayRole = computed(() => {
 }
 
 .role-function {
-  background: var(--llm-badge-function-bg);
-  color: var(--llm-badge-function-text);
+  background: var(--llm-badge-tool-bg);
+  color: var(--llm-badge-tool-text);
 }
 </style>

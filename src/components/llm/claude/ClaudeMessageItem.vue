@@ -214,7 +214,7 @@ const hasContent = computed(() => contentBlocks.value.length > 0);
 
 <style scoped>
 .message {
-  border-bottom: 2px solid rgba(126, 180, 233, 0.31);
+  border-bottom: 2px solid var(--llm-message-border);
   padding: var(--llm-spacing-xs) var(--llm-spacing-md);
 }
 
@@ -270,14 +270,14 @@ const hasContent = computed(() => contentBlocks.value.length > 0);
 
 .raw-btn:hover {
   color: var(--llm-text-primary);
-  border-color: var(--llm-border-dark, #999);
+  border-color: var(--llm-border-dark);
 }
 
-/* 激活状态：蓝色边框和文字 */
+/* 激活状态 */
 .raw-btn.active {
-  color: #3b82f6;
-  border-color: #3b82f6;
-  background: rgba(59, 130, 246, 0.05);
+  color: var(--llm-btn-active-text);
+  border-color: var(--llm-btn-active-border);
+  background: var(--llm-btn-active-bg);
 }
 
 /* Content 条目数量标识 */
@@ -286,9 +286,9 @@ const hasContent = computed(() => contentBlocks.value.length > 0);
   align-items: center;
   justify-content: center;
   
-  /* 核心样式：浅蓝背景 + 深蓝文字 */
-  background-color: #7fcaff8b;
-  color: #1c3894f1;
+  /* 使用 CSS 变量 */
+  background-color: var(--llm-badge-assistant-bg);
+  color: var(--llm-badge-assistant-text);
   
   font-size: 1.1rem;
   font-weight: 600;
@@ -348,13 +348,13 @@ const hasContent = computed(() => contentBlocks.value.length > 0);
   font-size: 1rem;
   font-weight: 600;
   text-transform: uppercase;
-  background: var(--llm-tool-badge-bg);
-  color: var(--llm-tool-badge-text);
+  background: var(--llm-badge-tool-bg);
+  color: var(--llm-badge-tool-text);
 }
 
 .tool-badge.is-error {
-  background: var(--llm-error-bg, #fee2e2);
-  color: var(--llm-error-text, #dc2626);
+  background: var(--llm-error-bg);
+  color: var(--llm-error-text);
 }
 
 .tool-name-display {
@@ -372,8 +372,9 @@ const hasContent = computed(() => contentBlocks.value.length > 0);
 
 .reasoning {
   margin-bottom: 12px;
-  border-left: 3px solid #8b5cf6;
-  background: #f5f3ff;
+  padding-left: 3px;
+  border-left: 3px solid var(--llm-border-thinking);
   border-radius: 0 6px 6px 0;
+  font-style: italic;
 }
 </style>

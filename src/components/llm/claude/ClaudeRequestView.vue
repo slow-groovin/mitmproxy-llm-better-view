@@ -1,13 +1,13 @@
 <script setup lang="ts">
+import BetterDetails from '@/components/container/BetterDetails.vue';
 import { computed } from 'vue';
-import type { ClaudeRequest, ClaudeMessage, ContentBlock, Tool, SystemMessage } from '../../../types/claude/claude-request';
+import type { ClaudeRequest } from '../../../types/claude/claude-request';
 import CollapsibleSection from '../../container/CollapsibleSection.vue';
 import LabelValueRow from '../../content/LabelValueRow.vue';
-import BetterDetails from '@/components/container/BetterDetails.vue';
 import SmartViewer from '../../content/SmartViewer.vue';
 import ClaudeMessageItem from './ClaudeMessageItem.vue';
-import ClaudeToolItem from './ClaudeToolItem.vue';
 import ClaudeSystemMessage from './ClaudeSystemMessage.vue';
+import ClaudeToolItem from './ClaudeToolItem.vue';
 
 interface Props {
   data: ClaudeRequest;
