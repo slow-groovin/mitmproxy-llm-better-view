@@ -52,9 +52,17 @@ export interface ThinkingDelta {
 }
 
 /**
+ * Content block delta - input_json delta for tool_use
+ */
+export interface InputJsonDelta {
+  type: 'input_json_delta';
+  partial_json: string;
+}
+
+/**
  * Content block delta union
  */
-export type ContentBlockDelta = TextDelta | ThinkingDelta;
+export type ContentBlockDelta = TextDelta | ThinkingDelta | InputJsonDelta;
 
 /**
  * Content block delta event data

@@ -85,10 +85,9 @@ const toggleIcon = computed(() => isOpen.value ? '▼' : '▶');
       <template v-else>
         <!-- Description with markdown rendering (collapsible) -->
         <div v-if="toolDescription" class="description-section">
-          <BetterDetails>
+          <BetterDetails default-open>
             <template #summary>
               <div class="section-label" style="margin-bottom: -2px;">DESCRIPTION</div>
-
             </template>
             <SmartViewer :text="toolDescription" />
           </BetterDetails>

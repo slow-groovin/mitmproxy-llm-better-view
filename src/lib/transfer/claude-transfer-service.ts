@@ -22,6 +22,7 @@ interface AggregatedContentBlockState {
   id?: string;
   name?: string;
   input?: Record<string, unknown>;
+  partialJson?: string; // Accumulated partial JSON for tool_use input streaming
 }
 
 /**
@@ -147,6 +148,7 @@ export class ClaudeTransferService implements ITransferService {
   }
 
   /**
+   * entry: sse full text -> full response
    * Aggregate Claude SSE chunks into a complete response
    */
   private aggregateSSEToResponse(sseText: string): ClaudeResponse {
@@ -266,6 +268,19 @@ export class ClaudeTransferService implements ITransferService {
           const thinkingDelta = delta as ThinkingDelta;
           block.thinking = (block.thinking || '') + thinkingDelta.thinking;
           block.type = 'thinking';
+        } else if (delta.type === 'input_json_delta') {
+          // Handle tool_use input JSON streaming
+          const inputJsonDelta = delta as { partial_json: string };
+          block.type = 'tool_use';
+          // Accumulate partial JSON string
+          if (!block.input) {
+            block.input = {};
+          }
+          // Store raw partial JSON for later parsing
+          if (!block.partialJson) {
+            block.partialJson = '';
+          }
+          block.partialJson += inputJsonDelta.partial_json;
         }
         break;
       }
@@ -304,11 +319,21 @@ export class ClaudeTransferService implements ITransferService {
       }
 
       case 'tool_use': {
+        // Parse accumulated partial JSON if available
+        let parsedInput = state.input || {};
+        if (state.partialJson) {
+          try {
+            parsedInput = JSON.parse(state.partialJson);
+          } catch (e) {
+            // If parsing fails, use accumulated input or empty object
+            parsedInput = state.input || {};
+          }
+        }
         return {
           type: 'tool_use',
           id: state.id || '',
           name: state.name || '',
-          input: state.input || {},
+          input: parsedInput,
         };
       }
 

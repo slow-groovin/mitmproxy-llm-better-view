@@ -22,7 +22,8 @@ const componentMap = {
   claude: {
     request: defineAsyncComponent(() => import('./claude/ClaudeRequestView.vue')),
     response: defineAsyncComponent(() => import('./claude/ClaudeResponseView.vue')),
-    sse: defineAsyncComponent(() => import('./claude/ClaudeSSEView.vue')),
+    // SSE 数据会被转换成完整的 response 再渲染
+    sse: defineAsyncComponent(() => import('./claude/ClaudeResponseView.vue')),
   },
   gemini: {
     request: defineAsyncComponent(() => import('./gemini/GeminiRequestView.vue')),
