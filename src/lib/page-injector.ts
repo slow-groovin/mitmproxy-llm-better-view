@@ -35,7 +35,7 @@ function ensureContainer() {
   const container = document.createElement('div');
   container.id = CONTAINER_ID;
 
-  const secondChild = contentview.childNodes[1];
+  const secondChild = contentview.childNodes[0];
   contentview.insertBefore(container, secondChild);
 }
 
