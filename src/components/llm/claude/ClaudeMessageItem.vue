@@ -183,6 +183,7 @@ const toolResultBlocks = computed(() => {
 .message {
   border-bottom: 2px solid var(--llm-message-border);
   padding: var(--llm-spacing-xs) var(--llm-spacing-md);
+  margin: var(--llm-spacing-sm) 0;
 }
 
 .message:last-child {
@@ -190,11 +191,11 @@ const toolResultBlocks = computed(() => {
 }
 
 .role-user {
-  border-left: 3px solid var(--llm-border-user);
+  /* border-left: 3px solid var(--llm-border-user); */
 }
 
 .role-assistant {
-  border-left: 3px solid var(--llm-border-assistant);
+  /* border-left: 3px solid var(--llm-border-assistant); */
 }
 
 .header {

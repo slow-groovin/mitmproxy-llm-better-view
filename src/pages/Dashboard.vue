@@ -8,10 +8,12 @@ const { standard, dataType, dataAsText } = useCurrentFlowStore()
 <template>
   <details id="mitmproxy-llm-better-view-dash-container" class="llm-better-view" open>
     <summary class="summary">
+      <span class="arrow">▸</span>
+      <div style="width: 40%;"></div>
       <div class="title">
-        <span class="arrow">▸</span>
         <span class="text">LLM Better View</span>
       </div>
+      <div style="flex:1"></div>
       <a
         href="https://github.com/mitmproxy/mitmproxy"
         target="_blank"
@@ -39,11 +41,8 @@ const { standard, dataType, dataAsText } = useCurrentFlowStore()
 .llm-better-view {
   margin: 2rem 0;
   border-radius: 0.75rem;
-  overflow: hidden;
+  /* overflow: hidden; */
   background-color: #ffffff; /* 整体纯白，与页面背景一致 */
-
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-
 
   /* 默认阴影：下 + 左 + 右 */
   box-shadow:
@@ -66,13 +65,15 @@ const { standard, dataType, dataAsText } = useCurrentFlowStore()
 
 .summary {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 1rem 1.5rem;
+  position: sticky;
+  top: 0;
+  padding:  .5rem 4px;
   background-color: #f0f9ff; /* 极浅蓝，保持科技感 */
   cursor: pointer;
   user-select: none;
   transition: background-color 0.2s ease;
+  position: relative;
 }
 
 .summary:hover {
@@ -93,7 +94,6 @@ const { standard, dataType, dataAsText } = useCurrentFlowStore()
 }
 
 .arrow {
-  margin-right: 0.75rem;
   font-size: 1.1rem;
   transition: transform 0.3s ease;
   color: #0284c7;
@@ -105,11 +105,15 @@ const { standard, dataType, dataAsText } = useCurrentFlowStore()
 
 .github-link {
   color: #24292f;
+  margin: 0 .5rem;
+  opacity: 0.66;
   transition: opacity 0.2s ease;
 }
 
 .github-link:hover {
-  opacity: 0.8;
+  opacity: 1.0;
+  outline: 1px  solid rgba(0, 0, 0, 0.462);
+  border-radius: 5px;
 }
 
 .content {
