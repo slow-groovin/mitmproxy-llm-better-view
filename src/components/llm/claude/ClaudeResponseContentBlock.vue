@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { ResponseContentBlock, ResponseTextBlock, ResponseToolUseBlock, ResponseThinkingBlock } from '../../../types/claude/claude-response';
-import BetterDetails from '@/components/container/BetterDetails.vue';
-import SmartViewer from '../../content/SmartViewer.vue';
+import type { ResponseContentBlock, ResponseTextBlock, ResponseThinkingBlock, ResponseToolUseBlock } from '@/types/claude/claude-response';
+import SmartViewer from '@/components/content/SmartViewer.vue';
 import ClaudeToolUseArgs from './ClaudeToolUseArgs.vue';
 
 interface Props {
@@ -25,34 +24,46 @@ const isThinkingBlock = (block: ResponseContentBlock): block is ResponseThinking
   return block.type === 'thinking';
 };
 
-// Get block type label for display
+// Get block type label for badge display
 const blockTypeLabel = computed(() => {
   if (isTextBlock(props.block)) return 'TEXT';
-  if (isToolUseBlock(props.block)) return 'TOOL USE';
-  if (isThinkingBlock(props.block)) return 'THINKING';
+  if (isToolUseBlock(props.block)) return 'TOOL';
+  if (isThinkingBlock(props.block)) return 'THINK';
   return 'UNKNOWN';
 });
 
-// Get block type class for styling
+// Get block type class for container styling
 const blockTypeClass = computed(() => {
   if (isTextBlock(props.block)) return 'type-text';
   if (isToolUseBlock(props.block)) return 'type-tool-use';
   if (isThinkingBlock(props.block)) return 'type-thinking';
   return 'type-unknown';
 });
+
+// Get badge type class for badge background/text colors
+const badgeTypeClass = computed(() => {
+  if (isTextBlock(props.block)) return 'badge-text';
+  if (isToolUseBlock(props.block)) return 'badge-tool-use';
+  if (isThinkingBlock(props.block)) return 'badge-thinking';
+  return 'badge-unknown';
+});
+
+
 </script>
 
 <template>
   <div class="content-block" :class="blockTypeClass">
-    <!-- Block Header -->
-    <div class="block-header">
-      <span class="block-index">#{{ index + 1 }}</span>
-      <span class="block-type-badge" :class="blockTypeClass">{{ blockTypeLabel }}</span>
-      <span v-if="isToolUseBlock(block)" class="tool-name">{{ block.name }}</span>
+    <!-- Block Header - Compact style like OpenaiToolItem -->
+    <div class="block-header" >
+      <div class="header-left">
+        <span class="block-type-badge" :class="badgeTypeClass">{{ blockTypeLabel }}</span>
+        <span class="block-index">#{{ index + 1 }}</span>
+        <span class="block-name">{{ (props.block as any)?.name }}</span>
+      </div>
     </div>
 
-    <!-- Block Content -->
-    <div class="block-content">
+    <!-- Block Content (collapsible) -->
+    <div class="">
       <!-- Text Block -->
       <template v-if="isTextBlock(block)">
         <SmartViewer :text="block.text" />
@@ -67,14 +78,8 @@ const blockTypeClass = computed(() => {
 
       <!-- Tool Use Block -->
       <template v-else-if="isToolUseBlock(block)">
-        <BetterDetails default-open>
-          <template #summary>
-            <div class="tool-summary">
-              <span class="tool-id">ID: {{ block.id }}</span>
-            </div>
-          </template>
           <ClaudeToolUseArgs :input="block.input" />
-        </BetterDetails>
+        
       </template>
 
       <!-- Thinking Block -->
@@ -97,31 +102,36 @@ const blockTypeClass = computed(() => {
 <style scoped>
 .content-block {
   margin-bottom: 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  margin-left: 8px;
   overflow: hidden;
-  background: #ffffff;
 }
 
 .content-block:last-child {
   margin-bottom: 0;
 }
 
-/* Block Header */
+/* Block Header - Compact style like OpenaiToolItem */
 .block-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  background: #f8fafc;
-  border-bottom: 1px solid #e2e8f0;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
+
+
+.header-left {
+  display: flex;
+  max-width: 100%;
+  align-items: center;
+}
+
+
 .block-index {
-  font-size: 1.2rem;
-  color: #64748b;
+  font-size: 1.3rem;
+  color: #94a3b8;
   font-weight: 500;
-  min-width: 28px;
 }
 
 .block-type-badge {
@@ -133,38 +143,45 @@ const blockTypeClass = computed(() => {
   letter-spacing: 0.05em;
 }
 
-/* Type-specific badge colors */
-.type-text {
-  background: #dbeafe;
-  color: #1e40af;
+.block-name {
+  font-family: var(--llm-font-mono);
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--llm-badge-tool-use-text);
+  background: var(--llm-badge-tool-use-bg);
+  padding: 4px 10px;
+  border-radius: 4px;
+  flex-shrink: 0;
 }
 
-.type-tool-use {
-  background: #f3e8ff;
-  color: #7c3aed;
-}
 
-.type-thinking {
-  background: #f5f3ff;
-  color: #6d28d9;
-}
+
 
 .type-unknown {
+  border-left: 3px solid #9ca3af;
+}
+
+/* Badge-specific background and text colors */
+.badge-text {
+  background: var(--llm-badge-assistant-bg);
+  color: var(--llm-badge-assistant-text);
+}
+
+.badge-tool-use {
+  background: var(--llm-badge-tool-bg);
+  color: var(--llm-badge-tool-text);
+}
+
+.badge-thinking {
+  background: var(--llm-badge-thinking-bg);
+  color: var(--llm-badge-thinking-text);
+}
+
+.badge-unknown {
   background: #f3f4f6;
   color: #4b5563;
 }
 
-.tool-name {
-  font-family: 'Monaco', 'Menlo', monospace;
-  font-size: 1.3rem;
-  color: #7c3aed;
-  font-weight: 600;
-}
-
-/* Block Content */
-.block-content {
-  padding: 12px;
-}
 
 /* Tool Summary */
 .tool-summary {
@@ -181,10 +198,10 @@ const blockTypeClass = computed(() => {
 
 /* Thinking Content */
 .thinking-content {
-  border-left: 3px solid #8b5cf6;
-  background: #f5f3ff;
+  border-left: 3px solid var(--llm-border-thinking);
   border-radius: 0 6px 6px 0;
   padding: 8px 12px;
+  font-style: italic;
 }
 
 /* Citations Section */

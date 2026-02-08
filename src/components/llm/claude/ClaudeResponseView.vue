@@ -1,9 +1,9 @@
 <script setup lang="ts">
+import BetterDetails from '@/components/container/BetterDetails.vue';
 import { computed } from 'vue';
-import type { ClaudeResponse, ResponseContentBlock, ResponseTextBlock, ResponseToolUseBlock, ResponseThinkingBlock } from '../../../types/claude/claude-response';
+import type { ClaudeResponse } from '../../../types/claude/claude-response';
 import CollapsibleSection from '../../container/CollapsibleSection.vue';
 import LabelValueRow from '../../content/LabelValueRow.vue';
-import BetterDetails from '@/components/container/BetterDetails.vue';
 import SmartViewer from '../../content/SmartViewer.vue';
 import ClaudeResponseContentBlock from './ClaudeResponseContentBlock.vue';
 import ClaudeTokenUsage from './ClaudeTokenUsage.vue';

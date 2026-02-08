@@ -22,6 +22,7 @@
   --llm-border-tool: #8b5cf6;
   --llm-border-model: #10b981;
   --llm-border-function: #8b5cf6;
+  --llm-border-thinking: #afafafac;
 
   /* Background Colors */
   --llm-bg-hover: #f8fafc;
@@ -45,6 +46,8 @@
   --llm-badge-assistant-text: #166534;
   --llm-badge-system-bg: #fef3c7;
   --llm-badge-system-text: #92400e;
+  --llm-badge-thinking-bg: #d6d6d69a;
+  --llm-badge-thinking-text: #757575;
   --llm-badge-tool-bg: #f3e8ff;
   --llm-badge-tool-text: #7c3aed;
   --llm-badge-model-bg: #dcfce7;
@@ -67,6 +70,8 @@
   --llm-tool-name-text: #7c3aed;
   --llm-tool-badge-bg: #dbeafe;
   --llm-tool-badge-text: #1d4ed8;
+
+
 
   /* Border Colors */
   --llm-border-color: #e2e8f0;
