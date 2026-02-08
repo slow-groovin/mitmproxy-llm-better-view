@@ -7,9 +7,11 @@ import { HookFunc, initRouteListener } from './lib/pipeline';
 import { isOpenAIReq, isOpenAIRes, isSSE, isAnthropicReq, isAnthropicRes, isGeminiReq, isGeminiRes } from './llm/judge';
 import { useCurrentFlowStore } from './store/llm';
 import { ApiStandard, DataType } from './types/flow';
+import { initPageInjector } from './lib/page-injector';
+import Dashboard from './pages/Dashboard.vue';
 
 const showDebug = ref(false);
-const isDev=import.meta.env.DEV
+const isDev = import.meta.env.DEV
 const DebugHome = shallowRef<Component>();
 
 async function toggleDebug() {
@@ -24,10 +26,8 @@ async function toggleDebug() {
 const { setLLMData } = useCurrentFlowStore();
 
 onMounted(() => {
-
-
   // Hook function for processing LLM requests/responses
-  const handleLLMData: HookFunc = async (type, flowData, flow) => {
+  const handleLLMData: HookFunc = (type, flowData, flow) => {
     logger.debug`Detected request/response ${{ type, flowData, flow }}`;
     try {
       let standard: ApiStandard | null = null;
@@ -80,8 +80,12 @@ onMounted(() => {
 
       if (standard && dataAsText && dataType) {
         setLLMData(standard, dataType, dataAsText, flow);
-        await nextTick();
-        logger.info`Dashboard data updated  ${{ platform: standard, view: dataType }}`;
+
+        logger.info`Dashboard data updated  ${{ standard: standard, view: dataType }}`;
+
+        initPageInjector({
+          component: Dashboard,
+        });
       } else {
         logger.warn('Unknown type or no data', { type, hasData: !!dataAsText });
       }
@@ -105,13 +109,13 @@ onMounted(() => {
 <template>
   <!-- <div class="floating-panel">
   </div> -->
-  <Toaster  position="top-center" :duration="1000"/>
+  <Toaster position="top-center" :duration="1000" />
   <template v-if="isDev">
     <button class="debug-toggle-btn" @click="toggleDebug">
       {{ showDebug ? 'Hide Debug' : 'Show Debug' }}
     </button>
   </template>
-  
+
   <component :is="DebugHome" v-if="showDebug && DebugHome" />
 </template>
 
@@ -133,5 +137,3 @@ onMounted(() => {
   background: #5568d3;
 }
 </style>
-
-

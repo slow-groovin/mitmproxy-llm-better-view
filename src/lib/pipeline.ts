@@ -1,9 +1,10 @@
 import { unsafeWindow } from '$';
 import { CallAction, Flow } from '../types/flow';
+import { logger } from './logtape';
 
 
 
-export type HookFunc = (type: 'request' | 'response', text: any, flow: Flow) => Promise<DocumentFragment | HTMLElement | null | void>;
+export type HookFunc = (type: 'request' | 'response', text: any, flow: Flow) => DocumentFragment | HTMLElement | null | void;
 
 const originalFetch = unsafeWindow.fetch;
 
@@ -16,43 +17,8 @@ export function initRouteListener(hook: HookFunc) {
 
     const dataUrl = `http://${window.location.host}/flows/${uuid}/${action}/content/Auto.json`;
     const data = await getFlowData(dataUrl);
-    
-    const node = await hook(action, data, flow);
-    
-    if (node) {
-      insertNodeToPage(node);
-    }
+    hook(action, data, flow);
   });
-}
-
-function insertNodeToPage(node: DocumentFragment | HTMLElement) {
-  let container = document.getElementById('mitmproxy-llm-better-view-container') as HTMLElement | null;
-  
-  if (!container) {
-    const contentview = document.querySelector('.contentview');
-    if (!contentview) {
-      console.warn("no `.contentview` element found");
-      return;
-    }
-
-    const secondChild = contentview.childNodes[1];
-    container = document.createElement('details');
-    container.toggleAttribute('open');
-    container.id = 'mitmproxy-llm-better-view-container';
-    container.classList = 'llm-better-view';
-    
-    const summaryElement = document.createElement('summary');
-    summaryElement.textContent = 'LLM Better View';
-    container.prepend(summaryElement);
-    
-    contentview.insertBefore(container, secondChild);
-  }
-
-  while (container.childNodes.length > 1) {
-    container.removeChild(container.lastChild!);
-  }
-  
-  container.appendChild(node);
 }
 
 function extractFlowInfo(url: string): CallAction | null {
