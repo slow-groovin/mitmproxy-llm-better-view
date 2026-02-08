@@ -90,6 +90,7 @@ const toggle = () => {
 /* 头部样式 */
 .card-header {
   width: 100%;
+  box-sizing: border-box; /* padding 计入总宽度 */
   display: flex;
   justify-content: space-between;
   align-items: center;
