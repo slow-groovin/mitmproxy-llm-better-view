@@ -205,12 +205,10 @@ const toggleIcon = computed(() => isOpen.value ? '▼' : '▶');
   margin: 0;
 }
 
-/* Section styles */
+/* Section styles - 无左侧 border */
 .description-section,
 .parameters-section {
   margin-bottom: 16px;
-  padding-left: 12px;
-  border-left: 2px solid #e2e8f0;
 }
 
 .description-section:last-child,

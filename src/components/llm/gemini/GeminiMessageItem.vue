@@ -4,6 +4,8 @@ import { useSessionStorage } from '@vueuse/core';
 import RoleBadge from '../RoleBadge.vue';
 import SmartViewer from '../../content/SmartViewer.vue';
 import ImageBlock from '../../content/ImageBlock.vue';
+import GeminiFunctionCall from './GeminiFunctionCall.vue';
+import GeminiFunctionResponse from './GeminiFunctionResponse.vue';
 import type {
   GeminiReqContent,
   Part,
@@ -96,21 +98,13 @@ const getPartKey = (part: Part, idx: number): string => {
         </div>
 
         <!-- Function Call Part -->
-        <div v-else-if="isFunctionCallPart(part)" class="part function-call-part">
-          <div class="function-header">
-            <span class="function-icon">🔧</span>
-            <span class="function-name">{{ part.functionCall.name }}</span>
-          </div>
-          <pre class="function-args">{{ JSON.stringify(part.functionCall.args, null, 2) }}</pre>
+        <div v-else-if="isFunctionCallPart(part)" class="part">
+          <GeminiFunctionCall :data="part.functionCall" />
         </div>
 
         <!-- Function Response Part -->
-        <div v-else-if="isFunctionResponsePart(part)" class="part function-response-part">
-          <div class="function-header">
-            <span class="function-icon">📤</span>
-            <span class="function-name">{{ part.functionResponse.name }}</span>
-          </div>
-          <pre class="function-response">{{ JSON.stringify(part.functionResponse.response, null, 2) }}</pre>
+        <div v-else-if="isFunctionResponsePart(part)" class="part">
+          <GeminiFunctionResponse :data="part.functionResponse" />
         </div>
 
         <!-- Executable Code Part -->
