@@ -31,6 +31,7 @@ const subjectColor = computed(() => {
       <span class="arrow">▸</span>
       <div style="width: 40%;"></div>
       <div class="title">
+        <span style="width: 4px; height: 4px; display: inline-block;"></span>
         <span class="text">LLM Better View</span>
       </div>
       <div style="flex:1"></div>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, useId } from 'vue';
+import { computed } from 'vue';
 import { useSessionStorage } from '@vueuse/core';
 import RoleBadge from '../RoleBadge.vue';
 import SmartViewer from '../../content/SmartViewer.vue';

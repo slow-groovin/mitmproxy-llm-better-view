@@ -15,6 +15,7 @@ export type Delta = {
   role?: 'assistant';
   content?: string;
   reasoning?: string;
+  reasoning_content?: string; // 某些厂商使用此字段
   tool_calls?: ToolCall[];
   function_call?: { name?: string; arguments?: string };
 };
