@@ -10,9 +10,20 @@ import SmartViewer from '../../content/SmartViewer.vue';
 
 interface Props {
   data: GeminiRequest;
+  path?: string;
 }
 
 const props = defineProps<Props>();
+
+// 从 Flow 的 request path 中提取 modelName
+// Gemini API path: /v1beta/models/gemini-3-flash-preview:generateContent
+const modelName = computed(() => {
+  if (!props.path) return undefined;
+  const path = props.path;
+  // 匹配 /models/{model-name}: 后的任意方法
+  const match = path.match(/\/models\/([^/:?]+)/);
+  return match ? match[1] : undefined;
+});
 
 const contents = computed(() => props.data.contents || []);
 const tools = computed(() => props.data.tools || []);
@@ -54,7 +65,9 @@ const systemInstructionText = computed(() => {
     <div class="header">
       <h2>Gemini API Request</h2>
       <div class="meta">
-        <code v-if="data.cachedContent">cached: {{ data.cachedContent }}</code>
+        <span class="llm-label">model</span>
+        <code v-if="modelName">{{ modelName }}</code>
+        <span v-else-if="data.cachedContent">{{ data.cachedContent }}</span>
         <span v-else>{{ contents.length }} contents</span>
         <span v-if="tools.length > 0" class="divider">·</span>
         <span v-if="tools.length > 0">{{ tools.length }} tools</span>
@@ -158,6 +171,7 @@ const systemInstructionText = computed(() => {
 
 .header {
   margin-bottom: var(--llm-spacing-2xl);
+  text-align: center;
 }
 
 .header h2 {
@@ -170,6 +184,7 @@ const systemInstructionText = computed(() => {
 .meta {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--llm-spacing-md);
   font-size: 14px;
   color: #6b7280;

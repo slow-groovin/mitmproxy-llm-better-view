@@ -47,6 +47,7 @@ const getFinishReasonSummary = () => {
     <div class="header">
       <h2>OpenAI Chat Completions API Response</h2>
       <div class="meta">
+        <span class="llm-label">model</span>
         <code>{{ data.model }}</code>
         <span class="divider">·</span>
         <span>{{ choices.length }} choices</span>
@@ -94,6 +95,7 @@ const getFinishReasonSummary = () => {
 
 .header {
   margin-bottom: var(--llm-spacing-2xl);
+  text-align: center;
 }
 
 .header h2 {
@@ -106,6 +108,7 @@ const getFinishReasonSummary = () => {
 .meta {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--llm-spacing-md);
   font-size: 14px;
   color: #6b7280;

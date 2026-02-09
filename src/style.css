@@ -10,3 +10,7 @@
   padding: 16px;
   z-index: 9999;
 }
+.llm-label{
+  font-size: 1.5rem;
+  color: var(--llm-text-muted);
+}

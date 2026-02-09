@@ -59,6 +59,7 @@ const hasSystemMessages = computed(() => {
     <div class="header">
       <h2>Claude Messages API Request</h2>
       <div class="meta">
+        <span class="label">model</span>
         <code>{{ data.model }}</code>
         <span class="divider">·</span>
         <span>{{ messages.length }} messages</span>
@@ -143,6 +144,7 @@ const hasSystemMessages = computed(() => {
 
 .header {
   margin-bottom: var(--llm-spacing-2xl);
+  text-align: center;
 }
 
 .header h2 {
@@ -155,6 +157,7 @@ const hasSystemMessages = computed(() => {
 .meta {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--llm-spacing-md);
   font-size: 14px;
   color: #6b7280;

@@ -65,6 +65,7 @@ const hasSafetyBlock = computed(() => {
     <div class="header">
       <h2>Gemini API Response</h2>
       <div class="meta">
+        <span class="llm-label">model</span>
         <code v-if="data.modelVersion">{{ data.modelVersion }}</code>
         <span v-else>Unknown Model</span>
         <span class="divider">·</span>
@@ -179,6 +180,7 @@ const hasSafetyBlock = computed(() => {
 
 .header {
   margin-bottom: var(--llm-spacing-2xl);
+  text-align: center;
 }
 
 .header h2 {
@@ -191,6 +193,7 @@ const hasSafetyBlock = computed(() => {
 .meta {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--llm-spacing-md);
   font-size: 14px;
   color: #6b7280;

@@ -1,12 +1,32 @@
 <script setup lang="ts">
 import ViewDashboardProxy from '@/components/llm/ViewDashboardProxy.vue';
 import { useCurrentFlowStore } from '@/store/llm';
+import { computed } from 'vue';
 
-const { standard, dataType, dataAsText } = useCurrentFlowStore()
+const { standard, dataType, dataAsText, flow } = useCurrentFlowStore()
+
+// 根据 API 标准获取对应的主题颜色
+const subjectColor = computed(() => {
+  switch (standard) {
+    case 'openai':
+      return '#08080866'; // OpenAI 绿色
+    case 'claude':
+      return '#d97757'; // Claude 红色
+    case 'gemini':
+      return '#3185fe'; // Gemini 蓝色
+    default:
+      return '#e2e8f0'; // 默认灰色
+  }
+})
 </script>
 
 <template>
-  <details id="mitmproxy-llm-better-view-dash-container" class="llm-better-view" open>
+  <details 
+    id="mitmproxy-llm-better-view-dash-container" 
+    class="llm-better-view" 
+    open
+    :style="`--llm-subject-color: ${subjectColor}`"
+  >
     <summary class="summary">
       <span class="arrow">▸</span>
       <div style="width: 40%;"></div>
@@ -25,7 +45,7 @@ const { standard, dataType, dataAsText } = useCurrentFlowStore()
     </summary>
     <div class="content">
       <view-dashboard-proxy v-if="standard && dataType && dataAsText" :standard="standard" :data-type="dataType"
-        :data="dataAsText" />
+        :data="dataAsText" :path="flow?.request.path" />
     </div>
   </details>
 </template>
@@ -33,9 +53,9 @@ const { standard, dataType, dataAsText } = useCurrentFlowStore()
 <style scoped>
 .llm-better-view {
   margin: 2rem 0;
-  border-radius: 0.75rem;
+  border-radius: 0px 0px 6px 6px;
   /* overflow: hidden; */
-  background-color: #ffffff;
+  /* background-color: #ffffff; */
   /* 整体纯白，与页面背景一致 */
 
   /* 默认阴影：下 + 左 + 右 */
@@ -67,8 +87,7 @@ const { standard, dataType, dataAsText } = useCurrentFlowStore()
   position: sticky;
   top: 0;
   padding: .5rem 4px;
-  background-color: #95c1df63;
-  /* 极浅蓝，保持科技感 */
+  background: color-mix(in srgb, var(--llm-subject-color) 30%, white 70%);
   cursor: pointer;
   user-select: none;
   transition: background-color 0.2s ease;
@@ -76,7 +95,7 @@ const { standard, dataType, dataAsText } = useCurrentFlowStore()
 }
 
 .summary:hover {
-  background-color: #dbeafe;
+  background: color-mix(in srgb, var(--llm-subject-color) 35%, white 65%);
 }
 
 /* 隐藏默认三角 */
@@ -118,8 +137,10 @@ const { standard, dataType, dataAsText } = useCurrentFlowStore()
 .content {
   padding: 0;
   margin: 0;
-  background-color: #ffffff;
-  border-radius: 0px 0px 16px 16px;
+  padding-top: 1rem;
+  /* background-color: #ffffff;
+   */
+  /* border-radius: 0px 0px 16px 16px; */
 
 
 }

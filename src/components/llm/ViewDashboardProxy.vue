@@ -8,6 +8,7 @@ interface Props {
   standard: ApiStandard;
   dataType: DataType;
   data: string;
+  path?: string;
 }
 
 const props = defineProps<Props>();
@@ -105,7 +106,7 @@ const retry = () => {
     <!-- 正常渲染 -->
     <Suspense v-else>
       <!-- @vue-ignore -->
-      <component :is="currentComponent" :data="componentData" />
+      <component :is="currentComponent" :data="componentData" :path="path" />
       <template #fallback>
         <div class="loading-state">⏳ 加载中...</div>
       </template>

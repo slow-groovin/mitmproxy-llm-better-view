@@ -6,10 +6,6 @@ interface Props {
   title: string;
   defaultOpen?: boolean;
   count?: number | null;
-  /**
-   * 用于 LocalStorage 持久化的唯一键。
-   * 如果传入此值，展开状态将被保存。
-   */
   storageKey?: string;
 }
 
@@ -19,9 +15,6 @@ const props = withDefaults(defineProps<Props>(), {
   storageKey: undefined
 });
 
-// 状态管理逻辑
-// 如果提供了 storageKey，使用 useStorage (持久化)
-// 否则使用普通的 ref (非持久化)
 const isOpen = props.storageKey
   ? useStorage(`llm-better-view-collapse-state-${props.storageKey}`, props.defaultOpen)
   : ref(props.defaultOpen);
@@ -33,33 +26,28 @@ const toggle = () => {
 
 <template>
   <div class="collapse-card" :class="{ 'is-open': isOpen }">
-    <!-- 头部区域 -->
     <button class="card-header" @click="toggle" type="button">
       <div class="header-left">
         <span class="title">{{ title }}</span>
         <span v-if="count !== null" class="badge">{{ count }}</span>
       </div>
       
-      <div class="header-right">
-        <!-- 使用 SVG 替换原有字符图标，并添加旋转类 -->
-        <svg 
-          class="chevron-icon" 
-          xmlns="http://www.w3.org/2000/svg" 
-          width="20" 
-          height="20" 
-          viewBox="0 0 24 24" 
-          fill="none" 
-          stroke="currentColor" 
-          stroke-width="2" 
-          stroke-linecap="round" 
-          stroke-linejoin="round"
-        >
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </div>
+      <svg 
+        class="chevron-icon" 
+        xmlns="http://www.w3.org/2000/svg" 
+        width="20" 
+        height="20" 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        stroke-width="2" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"
+      >
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
     </button>
 
-    <!-- 内容区域：使用 CSS Grid 技巧实现高度平滑过渡 -->
     <div class="card-content-wrapper">
       <div class="card-content-inner">
         <div class="content-padding">
@@ -71,7 +59,6 @@ const toggle = () => {
 </template>
 
 <style scoped>
-/* 容器基础样式 */
 .collapse-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
@@ -87,16 +74,17 @@ const toggle = () => {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-/* 头部样式 */
 .card-header {
   width: 100%;
-  box-sizing: border-box; /* padding 计入总宽度 */
+  box-sizing: border-box;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 6px 12px;
-  background: transparent;
+  padding: 12px 16px;
+  /* 使用CSS变量: 50%透明度的主色 */
+  background: color-mix(in srgb, var(--llm-subject-color, #e2e8f0) 20%, transparent);
   border: none;
+  border-bottom: 1px solid #cbd5e1;
   cursor: pointer;
   text-align: left;
   transition: background-color 0.2s;
@@ -104,7 +92,8 @@ const toggle = () => {
 }
 
 .card-header:hover {
-  background-color: #f8fafc;
+  /* hover时: 70%透明度的主色 */
+  background: color-mix(in srgb, var(--llm-subject-color, #ffffff) 30%, transparent);
 }
 
 .header-left {
@@ -113,34 +102,26 @@ const toggle = () => {
   gap: 8px;
 }
 
-/* 标题样式 - 更加现代和适中的字号 */
 .title {
-  font-size: 2rem;
+  font-size: 2rem; /* 保持原尺寸 */
   font-weight: 600;
   color: #1e293b;
-  letter-spacing: -0.01em;
 }
-
 
 .badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  
-  /* 核心样式：浅蓝背景 + 深蓝文字 */
   background-color: #dbeafe; 
   color: #1e40af;
-  
-  font-size: 1.5rem;
+  font-size: 1.5rem; /* 保持原尺寸 */
   font-weight: 600;
   padding: 4px 8px;
-  border-radius: 6px; /*稍微方一点的圆角，更数字化 */
-  margin-left: 8px;
+  border-radius: 6px;
 }
 
-/* 图标样式与旋转动画 */
 .chevron-icon {
-  color: #94a3b8;
+  color: #64748b;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s;
 }
 
@@ -149,11 +130,6 @@ const toggle = () => {
   color: #475569;
 }
 
-/* 
-  内容区域动画核心技巧 
-  使用 grid-template-rows 从 0fr 到 1fr 过渡，
-  这是目前纯 CSS 实现 height: auto 动画的最佳方案。
-*/
 .card-content-wrapper {
   display: grid;
   grid-template-rows: 0fr;
@@ -162,7 +138,6 @@ const toggle = () => {
 
 .collapse-card.is-open .card-content-wrapper {
   grid-template-rows: 1fr;
-  border-top: 1px solid #f1f5f9; /* 展开时添加一条极细的分隔线 */
 }
 
 .card-content-inner {
@@ -170,8 +145,9 @@ const toggle = () => {
 }
 
 .content-padding {
-  padding: 0.5rem;
+  padding: 16px;
   color: #334155;
   font-size: 1rem;
+  line-height: 1.6;
 }
 </style>
