@@ -8,6 +8,7 @@ import SmartViewer from '../../content/SmartViewer.vue';
 import ClaudeMessageItem from './ClaudeMessageItem.vue';
 import ClaudeSystemMessage from './ClaudeSystemMessage.vue';
 import ClaudeToolItem from './ClaudeToolItem.vue';
+import ClaudeIcon from '@/assets/claude.svg';
 
 interface Props {
   data: ClaudeRequest;
@@ -57,10 +58,12 @@ const hasSystemMessages = computed(() => {
 <template>
   <div class="claude-request-view">
     <div class="header">
-      <h2>Claude Messages API Request</h2>
+      <h2><img :src="ClaudeIcon" class="header-icon" alt="Claude" /> Claude Messages API Request</h2>
       <div class="meta">
-        <span class="label">model</span>
-        <code>{{ data.model }}</code>
+        <span>
+          <span class="llm-label">model</span>
+          <code>{{ data.model }}</code>
+        </span>
         <span class="divider">·</span>
         <span>{{ messages.length }} messages</span>
         <span v-if="tools.length > 0" class="divider">·</span>
@@ -82,57 +85,26 @@ const hasSystemMessages = computed(() => {
       <LabelValueRow label="Stop Sequences" :value="stopSequences" />
     </CollapsibleSection>
 
-    <CollapsibleSection
-      v-if="hasSystemMessages"
-      title="System Messages"
-      :count="systemMessages.length"
-      :default-open="true"
-      storage-key="claude-system"
-      variant="system"
-    >
-      <ClaudeSystemMessage
-        v-for="(msg, index) in systemMessages"
-        :key="index"
-        :message="msg"
-        :index="index"
-      />
+    <CollapsibleSection v-if="hasSystemMessages" title="System Messages" :count="systemMessages.length"
+      :default-open="true" storage-key="claude-system" variant="system">
+      <ClaudeSystemMessage v-for="(msg, index) in systemMessages" :key="index" :message="msg" :index="index" />
     </CollapsibleSection>
 
-    <CollapsibleSection
-      title="Messages"
-      :count="messages.length"
-      :default-open="true"
-      storage-key="claude-messages"
-      variant="default"
-    >
+    <CollapsibleSection title="Messages" :count="messages.length" :default-open="true" storage-key="claude-messages"
+      variant="default">
       <div v-if="messages.length === 0" class="empty-state">
         No messages
       </div>
-      <ClaudeMessageItem
-        v-for="(message, index) in messages"
-        :key="index"
-        :message="message"
-        :index="index"
-      />
+      <ClaudeMessageItem v-for="(message, index) in messages" :key="index" :message="message" :index="index" />
     </CollapsibleSection>
 
-    <CollapsibleSection
-      v-if="tools.length > 0"
-      title="Tools"
-      :count="tools.length"
-      storage-key="claude-tools"
-      variant="tools"
-    >
-      <ClaudeToolItem
-        v-for="(tool, index) in tools"
-        :key="index"
-        :tool="tool"
-        :index="index"
-      />
+    <CollapsibleSection v-if="tools.length > 0" title="Tools" :count="tools.length" storage-key="claude-tools"
+      variant="tools">
+      <ClaudeToolItem v-for="(tool, index) in tools" :key="index" :tool="tool" :index="index" />
     </CollapsibleSection>
 
     <BetterDetails title="Full Request">
-      <SmartViewer :text="JSON.stringify(data, null, 2)"/>
+      <SmartViewer :text="JSON.stringify(data, null, 2)" />
     </BetterDetails>
   </div>
 </template>
@@ -152,6 +124,16 @@ const hasSystemMessages = computed(() => {
   font-size: 2rem;
   font-weight: 600;
   color: #1f2937;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--llm-spacing-sm);
+}
+
+.header-icon {
+  width: 32px;
+  height: 32px;
+  vertical-align: middle;
 }
 
 .meta {

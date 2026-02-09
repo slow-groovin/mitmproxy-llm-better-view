@@ -7,6 +7,7 @@ import GeminiToolItem from './GeminiToolItem.vue';
 import GeminiMessageItem from './GeminiMessageItem.vue';
 import BetterDetails from '@/components/container/BetterDetails.vue';
 import SmartViewer from '../../content/SmartViewer.vue';
+import GeminiIcon from '@/assets/gemini.svg';
 
 interface Props {
   data: GeminiRequest;
@@ -63,12 +64,17 @@ const systemInstructionText = computed(() => {
 <template>
   <div class="gemini-request-view">
     <div class="header">
-      <h2>Gemini API Request</h2>
+      <h2><img :src="GeminiIcon" class="header-icon" alt="Gemini" /> Gemini API Request</h2>
       <div class="meta">
-        <span class="llm-label">model</span>
-        <code v-if="modelName">{{ modelName }}</code>
-        <span v-else-if="data.cachedContent">{{ data.cachedContent }}</span>
-        <span v-else>{{ contents.length }} contents</span>
+        <span>
+          <span class="llm-label">model</span>
+          <code v-if="modelName">{{ modelName }}</code>
+          
+
+          <span v-else-if="data.cachedContent">{{ data.cachedContent }}</span>
+          <span v-else>{{ contents.length }} contents</span>
+        </span>
+
         <span v-if="tools.length > 0" class="divider">·</span>
         <span v-if="tools.length > 0">{{ tools.length }} tools</span>
         <span v-if="hasSystemInstruction" class="divider">·</span>
@@ -89,19 +95,10 @@ const systemInstructionText = computed(() => {
     </CollapsibleSection>
 
     <!-- Safety Settings Section -->
-    <CollapsibleSection
-      v-if="data.safetySettings && data.safetySettings.length > 0"
-      title="Safety Settings"
-      :count="data.safetySettings.length"
-      :default-open="false"
-      storage-key="gemini-safety-settings"
-    >
+    <CollapsibleSection v-if="data.safetySettings && data.safetySettings.length > 0" title="Safety Settings"
+      :count="data.safetySettings.length" :default-open="false" storage-key="gemini-safety-settings">
       <div class="safety-settings-list">
-        <div
-          v-for="(setting, idx) in data.safetySettings"
-          :key="idx"
-          class="safety-setting-item"
-        >
+        <div v-for="(setting, idx) in data.safetySettings" :key="idx" class="safety-setting-item">
           <span class="setting-category">{{ setting.category }}</span>
           <span class="setting-arrow">→</span>
           <span class="setting-threshold">{{ setting.threshold }}</span>
@@ -110,51 +107,28 @@ const systemInstructionText = computed(() => {
     </CollapsibleSection>
 
     <!-- System Instruction Section -->
-    <CollapsibleSection
-      v-if="hasSystemInstruction"
-      title="System Instruction"
-      :default-open="true"
-      storage-key="gemini-system-instruction"
-      variant="system"
-    >
+    <CollapsibleSection v-if="hasSystemInstruction" title="System Instruction" :default-open="true"
+      storage-key="gemini-system-instruction" variant="system">
       <SmartViewer :text="systemInstructionText" />
     </CollapsibleSection>
 
     <!-- Contents Section -->
-    <CollapsibleSection
-      title="Contents"
-      :count="contents.length"
-      :default-open="true"
-      storage-key="gemini-contents"
-      variant="default"
-    >
+    <CollapsibleSection title="Contents" :count="contents.length" :default-open="true" storage-key="gemini-contents"
+      variant="default">
       <div v-if="contents.length === 0" class="empty-state">
         No contents
       </div>
-      <GeminiMessageItem
-        v-for="(content, index) in contents"
-        :key="index"
-        :content="content"
-        :index="index"
-      />
+      <GeminiMessageItem v-for="(content, index) in contents" :key="index" :content="content" :index="index" />
     </CollapsibleSection>
 
     <!-- Tools Section -->
     <!-- Gemini 的 tools 是 [{ functionDeclarations: [...] }] 结构, 和 Claude 不同 -->
-    <CollapsibleSection
-      v-if="tools.length > 0"
-      title="Tools"
-      :count="tools.reduce((acc, t) => acc + (t.functionDeclarations?.length || 0), 0)"
-      storage-key="gemini-tools"
-      variant="tools"
-    >
+    <CollapsibleSection v-if="tools.length > 0" title="Tools"
+      :count="tools.reduce((acc, t) => acc + (t.functionDeclarations?.length || 0), 0)" storage-key="gemini-tools"
+      variant="tools">
       <template v-for="(tool, toolIdx) in tools" :key="toolIdx">
-        <GeminiToolItem
-          v-for="(func, funcIdx) in tool.functionDeclarations"
-          :key="`${toolIdx}-${funcIdx}`"
-          :tool="func"
-          :index="tools.slice(0, toolIdx).reduce((acc, t) => acc + (t.functionDeclarations?.length || 0), 0) + funcIdx"
-        />
+        <GeminiToolItem v-for="(func, funcIdx) in tool.functionDeclarations" :key="`${toolIdx}-${funcIdx}`" :tool="func"
+          :index="tools.slice(0, toolIdx).reduce((acc, t) => acc + (t.functionDeclarations?.length || 0), 0) + funcIdx" />
       </template>
     </CollapsibleSection>
 
@@ -179,6 +153,16 @@ const systemInstructionText = computed(() => {
   font-size: 2rem;
   font-weight: 600;
   color: #1f2937;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--llm-spacing-sm);
+}
+
+.header-icon {
+  width: 32px;
+  height: 32px;
+  vertical-align: middle;
 }
 
 .meta {

@@ -7,6 +7,7 @@ import LabelValueRow from '../../content/LabelValueRow.vue';
 import SmartViewer from '../../content/SmartViewer.vue';
 import ClaudeResponseContentBlock from './ClaudeResponseContentBlock.vue';
 import ClaudeTokenUsage from './ClaudeTokenUsage.vue';
+import ClaudeIcon from '@/assets/claude.svg';
 
 interface Props {
   data: ClaudeResponse;
@@ -46,27 +47,25 @@ const hasError = computed(() => {
 <template>
   <div class="claude-response-view">
     <div class="header">
-      <h2>Claude Messages API Response</h2>
+      <h2><img :src="ClaudeIcon" class="header-icon" alt="Claude" /> Claude Messages API Response</h2>
       <div class="meta">
-        <span class="llm-label">model</span>
-        <code>{{ data.model }}</code>
+        <span>
+          <span class="llm-label">model</span>
+          <code>{{ data.model }}</code>
+        </span>
         <span class="divider">·</span>
         <span>{{ contentBlocks.length }} content blocks</span>
         <span class="divider">·</span>
         <span>stop: <span class="stop-reason" :class="stopReasonClass">{{ stopReasonDisplay }}</span></span>
         <span v-if="data.usage" class="divider">·</span>
-        <span v-if="data.usage">{{ (data.usage.input_tokens + data.usage.output_tokens).toLocaleString() }} tokens</span>
+        <span v-if="data.usage">{{ (data.usage.input_tokens + data.usage.output_tokens).toLocaleString() }}
+          tokens</span>
       </div>
     </div>
 
     <!-- Error Section -->
-    <CollapsibleSection
-      v-if="hasError"
-      title="Error"
-      :default-open="true"
-      storage-key="claude-response-error"
-      variant="error"
-    >
+    <CollapsibleSection v-if="hasError" title="Error" :default-open="true" storage-key="claude-response-error"
+      variant="error">
       <div class="error-content">
         <div class="error-type">{{ data.error?.type }}</div>
         <div class="error-message">{{ data.error?.message }}</div>
@@ -84,37 +83,22 @@ const hasError = computed(() => {
     </CollapsibleSection>
 
     <!-- Token Usage Section -->
-    <CollapsibleSection
-      v-if="data.usage"
-      title="Token Usage"
-      :default-open="true"
-      storage-key="claude-response-usage"
-    >
+    <CollapsibleSection v-if="data.usage" title="Token Usage" :default-open="true" storage-key="claude-response-usage">
       <ClaudeTokenUsage :usage="data.usage" />
     </CollapsibleSection>
 
     <!-- Content Blocks Section -->
-    <CollapsibleSection
-      title="Content Blocks"
-      :count="contentBlocks.length"
-      :default-open="true"
-      storage-key="claude-response-content"
-      variant="default"
-    >
+    <CollapsibleSection title="Content Blocks" :count="contentBlocks.length" :default-open="true"
+      storage-key="claude-response-content" variant="default">
       <div v-if="contentBlocks.length === 0" class="empty-state">
         No content blocks
       </div>
-      <ClaudeResponseContentBlock
-        v-for="(block, index) in contentBlocks"
-        :key="index"
-        :block="block"
-        :index="index"
-      />
+      <ClaudeResponseContentBlock v-for="(block, index) in contentBlocks" :key="index" :block="block" :index="index" />
     </CollapsibleSection>
 
     <!-- Full Response -->
     <BetterDetails title="Full Response">
-      <SmartViewer :text="JSON.stringify(data, null, 2)"/>
+      <SmartViewer :text="JSON.stringify(data, null, 2)" />
     </BetterDetails>
   </div>
 </template>
@@ -134,6 +118,16 @@ const hasError = computed(() => {
   font-size: 2rem;
   font-weight: 600;
   color: #1f2937;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--llm-spacing-sm);
+}
+
+.header-icon {
+  width: 32px;
+  height: 32px;
+  vertical-align: middle;
 }
 
 .meta {

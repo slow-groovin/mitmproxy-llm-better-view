@@ -7,6 +7,7 @@ import GeminiTokenUsage from './GeminiTokenUsage.vue';
 import GeminiCandidate from './GeminiCandidate.vue';
 import BetterDetails from '@/components/container/BetterDetails.vue';
 import SmartViewer from '../../content/SmartViewer.vue';
+import GeminiIcon from '@/assets/gemini.svg';
 
 interface Props {
   data: GeminiResponse;
@@ -63,28 +64,26 @@ const hasSafetyBlock = computed(() => {
 <template>
   <div class="gemini-response-view">
     <div class="header">
-      <h2>Gemini API Response</h2>
+      <h2><img :src="GeminiIcon" class="header-icon" alt="Gemini" /> Gemini API Response</h2>
       <div class="meta">
-        <span class="llm-label">model</span>
-        <code v-if="data.modelVersion">{{ data.modelVersion }}</code>
-        <span v-else>Unknown Model</span>
+        <span>
+          <span class="llm-label">model</span>
+          <code v-if="data.modelVersion">{{ data.modelVersion }}</code>
+          <span v-else>Unknown Model</span>
+        </span>
         <span class="divider">·</span>
         <span>{{ totalTokens.toLocaleString() }} tokens</span>
         <span v-if="getFinishReasonSummary()" class="divider">·</span>
         <span v-if="getFinishReasonSummary()">
-          finish: <span class="finish-summary" :class="finishReasonClass(getFinishReasonSummary())">{{ getFinishReasonSummary() }}</span>
+          finish: <span class="finish-summary" :class="finishReasonClass(getFinishReasonSummary())">{{
+            getFinishReasonSummary() }}</span>
         </span>
       </div>
     </div>
 
     <!-- Safety Block Warning -->
-    <CollapsibleSection
-      v-if="hasSafetyBlock"
-      title="Safety Block Detected"
-      :default-open="true"
-      storage-key="gemini-safety-block"
-      variant="error"
-    >
+    <CollapsibleSection v-if="hasSafetyBlock" title="Safety Block Detected" :default-open="true"
+      storage-key="gemini-safety-block" variant="error">
       <div class="safety-warning">
         <div class="warning-title">Content generation was blocked</div>
         <div class="warning-text">
@@ -95,30 +94,15 @@ const hasSafetyBlock = computed(() => {
     </CollapsibleSection>
 
     <!-- Prompt Feedback Section -->
-    <CollapsibleSection
-      v-if="promptFeedbackInfo"
-      title="Prompt Feedback"
-      :default-open="true"
-      storage-key="gemini-prompt-feedback"
-      variant="system"
-    >
-      <LabelValueRow
-        label="Block Reason"
-        :value="promptFeedbackInfo.blockReason || 'None'"
-        :formatter="(v) => v === 'None' ? 'Not blocked' : String(v)"
-      />
+    <CollapsibleSection v-if="promptFeedbackInfo" title="Prompt Feedback" :default-open="true"
+      storage-key="gemini-prompt-feedback" variant="system">
+      <LabelValueRow label="Block Reason" :value="promptFeedbackInfo.blockReason || 'None'"
+        :formatter="(v) => v === 'None' ? 'Not blocked' : String(v)" />
       <div v-if="data.promptFeedback?.safetyRatings?.length" class="safety-list">
-        <div
-          v-for="(rating, idx) in data.promptFeedback.safetyRatings"
-          :key="idx"
-          class="safety-item"
-          :class="{ 'is-blocked': rating.blocked }"
-        >
+        <div v-for="(rating, idx) in data.promptFeedback.safetyRatings" :key="idx" class="safety-item"
+          :class="{ 'is-blocked': rating.blocked }">
           <span class="safety-category">{{ rating.category }}</span>
-          <span
-            class="safety-probability"
-            :class="`prob-${rating.probability.toLowerCase()}`"
-          >
+          <span class="safety-probability" :class="`prob-${rating.probability.toLowerCase()}`">
             {{ rating.probability }}
           </span>
           <span v-if="rating.blocked" class="blocked-badge">BLOCKED</span>
@@ -127,42 +111,23 @@ const hasSafetyBlock = computed(() => {
     </CollapsibleSection>
 
     <!-- Token Usage Section -->
-    <CollapsibleSection
-      v-if="data.usageMetadata"
-      title="Token Usage"
-      :default-open="true"
-      storage-key="gemini-token-usage"
-    >
+    <CollapsibleSection v-if="data.usageMetadata" title="Token Usage" :default-open="true"
+      storage-key="gemini-token-usage">
       <GeminiTokenUsage :usage="data.usageMetadata" />
     </CollapsibleSection>
 
     <!-- Candidates Section -->
-    <CollapsibleSection
-      title="Candidates"
-      :count="candidates.length"
-      :default-open="true"
-      storage-key="gemini-candidates"
-      variant="default"
-    >
+    <CollapsibleSection title="Candidates" :count="candidates.length" :default-open="true"
+      storage-key="gemini-candidates" variant="default">
       <div v-if="candidates.length === 0" class="empty-state">
         No candidates
       </div>
-      <GeminiCandidate
-        v-for="candidate in candidates"
-        :key="candidate.index"
-        :candidate="candidate"
-        :index="candidate.index"
-        :finish-reason-class="finishReasonClass"
-        :show-header="candidates.length > 1"
-      />
+      <GeminiCandidate v-for="candidate in candidates" :key="candidate.index" :candidate="candidate"
+        :index="candidate.index" :finish-reason-class="finishReasonClass" :show-header="candidates.length > 1" />
     </CollapsibleSection>
 
     <!-- Response Info -->
-    <CollapsibleSection
-      title="Response Info"
-      :default-open="false"
-      storage-key="gemini-response-info"
-    >
+    <CollapsibleSection title="Response Info" :default-open="false" storage-key="gemini-response-info">
       <LabelValueRow label="Model Version" :value="data.modelVersion" />
       <LabelValueRow label="Response ID" :value="data.responseId" />
     </CollapsibleSection>
@@ -188,6 +153,16 @@ const hasSafetyBlock = computed(() => {
   font-size: 2rem;
   font-weight: 600;
   color: #1f2937;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--llm-spacing-sm);
+}
+
+.header-icon {
+  width: 32px;
+  height: 32px;
+  vertical-align: middle;
 }
 
 .meta {

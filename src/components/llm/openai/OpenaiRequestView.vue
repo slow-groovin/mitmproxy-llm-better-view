@@ -7,6 +7,7 @@ import OpenaiToolItem from './OpenaiToolItem.vue';
 import OpenaiMessageItem from './OpenaiMessageItem.vue';
 import BetterDetails from '@/components/container/BetterDetails.vue';
 import SmartViewer from '../../content/SmartViewer.vue';
+import OpenaiIcon from '@/assets/openai.svg';
 
 interface Props {
   data: OpenaiChatRequest;
@@ -44,10 +45,12 @@ const stopValue = computed(() => {
 <template>
   <div class="openai-request-view">
     <div class="header">
-      <h2>OpenAI Chat Completions API Request</h2>
+      <h2><img :src="OpenaiIcon" class="header-icon" alt="OpenAI" /> OpenAI Chat Completions API Request</h2>
       <div class="meta">
-        <span class="llm-label">model</span>
-        <code>{{ data.model }}</code>
+        <span>
+          <span class="llm-label">model</span>
+          <code>{{ data.model }}</code>
+        </span>
         <span class="divider">·</span>
         <span>{{ messages.length }} messages</span>
         <span v-if="tools.length > 0" class="divider">·</span>
@@ -69,30 +72,21 @@ const stopValue = computed(() => {
       <LabelValueRow label="Presence Penalty" :value="data.presence_penalty" />
     </CollapsibleSection>
 
-    <CollapsibleSection title="Messages" :count="messages.length" :default-open="true" storage-key="messages" variant="default">
+    <CollapsibleSection title="Messages" :count="messages.length" :default-open="true" storage-key="messages"
+      variant="default">
       <div v-if="messages.length === 0" class="empty-state">
         No messages
       </div>
-      <OpenaiMessageItem
-        v-for="(message, index) in messages"
-        :key="index"
-        :role="message.role"
-        :index="index"
-        :message="message"
-      />
+      <OpenaiMessageItem v-for="(message, index) in messages" :key="index" :role="message.role" :index="index"
+        :message="message" />
     </CollapsibleSection>
 
     <CollapsibleSection v-if="tools.length > 0" title="Tools" storage-key="tools" :count="tools.length" variant="tools">
-      <OpenaiToolItem
-        v-for="(tool, index) in tools"
-        :key="index"
-        :tool="tool"
-        :index="index"
-      />
+      <OpenaiToolItem v-for="(tool, index) in tools" :key="index" :tool="tool" :index="index" />
     </CollapsibleSection>
 
     <BetterDetails title="Full Request">
-      <SmartViewer :text="JSON.stringify(data,null,2)"/>
+      <SmartViewer :text="JSON.stringify(data, null, 2)" />
     </BetterDetails>
   </div>
 </template>
@@ -112,6 +106,16 @@ const stopValue = computed(() => {
   font-size: 2rem;
   font-weight: 600;
   color: #1f2937;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--llm-spacing-sm);
+}
+
+.header-icon {
+  width: 32px;
+  height: 32px;
+  vertical-align: middle;
 }
 
 .meta {

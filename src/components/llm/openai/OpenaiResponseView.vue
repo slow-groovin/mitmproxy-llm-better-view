@@ -7,6 +7,7 @@ import OpenaiTokenUsage from './OpenaiTokenUsage.vue';
 import OpenaiChoice from './OpenaiChoice.vue';
 import BetterDetails from '@/components/container/BetterDetails.vue';
 import SmartViewer from '../../content/SmartViewer.vue';
+import OpenaiIcon from '@/assets/openai.svg';
 
 interface Props {
   data: OpenaiChatResponse;
@@ -45,10 +46,12 @@ const getFinishReasonSummary = () => {
 <template>
   <div class="openai-response-view">
     <div class="header">
-      <h2>OpenAI Chat Completions API Response</h2>
+      <h2><img :src="OpenaiIcon" class="header-icon" alt="OpenAI" /> OpenAI Chat Completions API Response</h2>
       <div class="meta">
-        <span class="llm-label">model</span>
-        <code>{{ data.model }}</code>
+        <span>
+          <span class="llm-label">model</span>
+          <code>{{ data.model }}</code>
+        </span>
         <span class="divider">·</span>
         <span>{{ choices.length }} choices</span>
         <span class="divider">·</span>
@@ -82,7 +85,7 @@ const getFinishReasonSummary = () => {
     </CollapsibleSection>
 
     <BetterDetails title="Full Response">
-      <SmartViewer :text="JSON.stringify(data,null,2)"/>
+      <SmartViewer :text="JSON.stringify(data, null, 2)" />
     </BetterDetails>
 
   </div>
@@ -103,6 +106,16 @@ const getFinishReasonSummary = () => {
   font-size: 20px;
   font-weight: 600;
   color: #1f2937;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--llm-spacing-sm);
+}
+
+.header-icon {
+  width: 28px;
+  height: 28px;
+  vertical-align: middle;
 }
 
 .meta {
