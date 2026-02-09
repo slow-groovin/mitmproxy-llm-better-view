@@ -16,23 +16,47 @@ const props = defineProps<Props>();
 
 const candidates = computed(() => props.data.candidates || []);
 
-// finish reason统计
-const finishReasonSummary = computed(() => {
+const totalTokens = computed(() => {
+  return props.data.usageMetadata?.totalTokenCount || 0;
+});
+
+// Finish reason class for styling
+const finishReasonClass = (reason: string | null | undefined) => {
+  if (!reason) return '';
+  const r = reason.toLowerCase();
+  if (r === 'stop') return 'finish-stop';
+  if (r === 'max_tokens') return 'finish-length';
+  if (r === 'safety') return 'finish-safety';
+  if (r === 'recitation') return 'finish-recitation';
+  if (r === 'other') return 'finish-other';
+  return '';
+};
+
+// Get finish reason summary
+const getFinishReasonSummary = () => {
   const reasons = candidates.value
     .map(c => c.finishReason)
     .filter((r): r is string => !!r);
   if (reasons.length === 0) return '';
   const unique = [...new Set(reasons)];
   return unique.join(', ');
-});
+};
 
-// prompt feedback信息
+// Check if has prompt feedback
 const promptFeedbackInfo = computed(() => {
   if (!props.data.promptFeedback) return null;
   return {
     blockReason: props.data.promptFeedback.blockReason,
     safetyRatingsCount: props.data.promptFeedback.safetyRatings?.length || 0,
   };
+});
+
+// Check if has error-like block reason
+const hasSafetyBlock = computed(() => {
+  return candidates.value.some(c =>
+    c.finishReason?.toLowerCase() === 'safety' ||
+    c.finishReason?.toLowerCase() === 'recitation'
+  );
 });
 </script>
 
@@ -42,16 +66,32 @@ const promptFeedbackInfo = computed(() => {
       <h2>Gemini API Response</h2>
       <div class="meta">
         <code v-if="data.modelVersion">{{ data.modelVersion }}</code>
+        <span v-else>Unknown Model</span>
         <span class="divider">·</span>
-        <span>{{ candidates.length }} candidate(s)</span>
-        <span class="divider">·</span>
-        <span v-if="data.usageMetadata">{{ data.usageMetadata.totalTokenCount.toLocaleString() }} tokens</span>
-        <span v-if="finishReasonSummary" class="divider">·</span>
-        <span v-if="finishReasonSummary">
-          finish: {{ finishReasonSummary }}
+        <span>{{ totalTokens.toLocaleString() }} tokens</span>
+        <span v-if="getFinishReasonSummary()" class="divider">·</span>
+        <span v-if="getFinishReasonSummary()">
+          finish: <span class="finish-summary" :class="finishReasonClass(getFinishReasonSummary())">{{ getFinishReasonSummary() }}</span>
         </span>
       </div>
     </div>
+
+    <!-- Safety Block Warning -->
+    <CollapsibleSection
+      v-if="hasSafetyBlock"
+      title="Safety Block Detected"
+      :default-open="true"
+      storage-key="gemini-safety-block"
+      variant="error"
+    >
+      <div class="safety-warning">
+        <div class="warning-title">Content generation was blocked</div>
+        <div class="warning-text">
+          One or more candidates were blocked due to safety settings or recitation policy.
+          Check individual candidate details for more information.
+        </div>
+      </div>
+    </CollapsibleSection>
 
     <!-- Prompt Feedback Section -->
     <CollapsibleSection
@@ -64,7 +104,7 @@ const promptFeedbackInfo = computed(() => {
       <LabelValueRow
         label="Block Reason"
         :value="promptFeedbackInfo.blockReason || 'None'"
-        :formatter="(v: string) => v === 'None' ? 'Not blocked' : v"
+        :formatter="(v) => v === 'None' ? 'Not blocked' : String(v)"
       />
       <div v-if="data.promptFeedback?.safetyRatings?.length" class="safety-list">
         <div
@@ -111,6 +151,8 @@ const promptFeedbackInfo = computed(() => {
         :key="candidate.index"
         :candidate="candidate"
         :index="candidate.index"
+        :finish-reason-class="finishReasonClass"
+        :show-header="candidates.length > 1"
       />
     </CollapsibleSection>
 
@@ -173,6 +215,58 @@ const promptFeedbackInfo = computed(() => {
   color: var(--llm-text-secondary);
   font-style: italic;
   padding: 40px 20px;
+}
+
+.finish-summary {
+  padding: 2px 8px;
+  border-radius: var(--llm-radius-md);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.finish-stop {
+  background: var(--llm-finish-stop-bg);
+  color: var(--llm-finish-stop-text);
+}
+
+.finish-length {
+  background: var(--llm-finish-length-bg);
+  color: var(--llm-finish-length-text);
+}
+
+.finish-safety {
+  background: var(--llm-finish-filter-bg);
+  color: var(--llm-finish-filter-text);
+}
+
+.finish-recitation {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.finish-other {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+/* Safety Block Warning Styles */
+.safety-warning {
+  padding: 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+}
+
+.warning-title {
+  font-weight: 600;
+  color: #dc2626;
+  margin-bottom: 8px;
+}
+
+.warning-text {
+  color: #7f1d1d;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 /* Safety list styles */

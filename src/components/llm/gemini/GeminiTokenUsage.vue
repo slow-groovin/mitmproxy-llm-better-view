@@ -1,91 +1,89 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import type { UsageMetadata } from '@/types/gemini/common';
 
 interface Props {
   usage: UsageMetadata;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
+
+const stats = computed(() => {
+  const u = props.usage;
+
+  // Input tokens (prompt)
+  const inputTokens = u.promptTokenCount || 0;
+  const cachedTokens = u.cachedContentTokenCount || 0;
+
+  // Calculate cached percentage
+  const cachedPercent = inputTokens > 0 ? Math.round((cachedTokens / inputTokens) * 100) : 0;
+
+  // Output tokens (candidates)
+  const outputTokens = u.candidatesTokenCount || 0;
+
+  // Reasoning/thinking tokens
+  const reasoningTokens = u.thoughtsTokenCount || 0;
+
+  // Total tokens
+  const totalTokens = u.totalTokenCount || (inputTokens + outputTokens);
+
+  return {
+    input: {
+      count: inputTokens,
+      cached: cachedTokens,
+      cachedPercent
+    },
+    output: {
+      count: outputTokens,
+      reasoning: reasoningTokens
+    },
+    total: totalTokens
+  };
+});
+
+const formatNum = (num: number) => num.toLocaleString();
+const formatPercent = (percent: number) => `${percent}%`;
 </script>
 
 <template>
   <div class="token-usage">
-    <!-- Main token counts -->
-    <div class="token-grid">
-      <div class="token-box">
-        <div class="token-label">Prompt Tokens</div>
-        <div class="token-value">{{ usage.promptTokenCount.toLocaleString() }}</div>
+    <!-- Input Section -->
+    <div class="card input">
+      <div class="header">
+        <span class="label">Input</span>
+        <span class="value">{{ formatNum(stats.input.count) }}</span>
       </div>
-      <div class="token-box">
-        <div class="token-label">Candidate Tokens</div>
-        <div class="token-value">{{ (usage.candidatesTokenCount || 0).toLocaleString() }}</div>
-      </div>
-      <div class="token-box total">
-        <div class="token-label">Total Tokens</div>
-        <div class="token-value">{{ usage.totalTokenCount.toLocaleString() }}</div>
-      </div>
-    </div>
 
-    <!-- Cached content tokens -->
-    <div v-if="usage.cachedContentTokenCount" class="cached-section">
-      <div class="section-title">Cached Content</div>
-      <div class="cached-box">
-        <span class="cached-label">Cached Tokens:</span>
-        <span class="cached-value">{{ usage.cachedContentTokenCount.toLocaleString() }}</span>
-      </div>
-    </div>
-
-    <!-- Prompt token details -->
-    <div v-if="usage.promptTokensDetails && usage.promptTokensDetails.length > 0" class="details-section">
-      <div class="section-title">Prompt Token Details</div>
-      <div class="details-grid">
-        <div
-          v-for="(detail, idx) in usage.promptTokensDetails"
-          :key="idx"
-          class="detail-item"
-        >
-          <span class="detail-modality">{{ detail.modality }}</span>
-          <span class="detail-count">{{ detail.tokenCount.toLocaleString() }}</span>
+      <!-- Input Details -->
+      <div class="details">
+        <div v-if="stats.input.cached > 0" class="detail-item cache-hit">
+          <span class="dot"></span>
+          <span>Cached: {{ formatNum(stats.input.cached) }} ({{ formatPercent(stats.input.cachedPercent) }})</span>
         </div>
       </div>
     </div>
 
-    <!-- Candidate token details -->
-    <div v-if="usage.candidatesTokensDetails && usage.candidatesTokensDetails.length > 0" class="details-section">
-      <div class="section-title">Candidate Token Details</div>
-      <div class="details-grid">
-        <div
-          v-for="(detail, idx) in usage.candidatesTokensDetails"
-          :key="idx"
-          class="detail-item"
-        >
-          <span class="detail-modality">{{ detail.modality }}</span>
-          <span class="detail-count">{{ detail.tokenCount.toLocaleString() }}</span>
+    <!-- Output Section -->
+    <div class="card output">
+      <div class="header">
+        <span class="label">Output</span>
+        <span class="value">{{ formatNum(stats.output.count) }}</span>
+      </div>
+
+      <!-- Output Details -->
+      <div class="details">
+        <div v-if="stats.output.reasoning > 0" class="detail-item reasoning">
+          <span class="dot"></span>
+          <span>Reasoning: {{ formatNum(stats.output.reasoning) }}</span>
         </div>
       </div>
     </div>
 
-    <!-- Cache token details -->
-    <div v-if="usage.cacheTokensDetails && usage.cacheTokensDetails.length > 0" class="details-section">
-      <div class="section-title">Cache Token Details</div>
-      <div class="details-grid">
-        <div
-          v-for="(detail, idx) in usage.cacheTokensDetails"
-          :key="idx"
-          class="detail-item"
-        >
-          <span class="detail-modality">{{ detail.modality }}</span>
-          <span class="detail-count">{{ detail.tokenCount.toLocaleString() }}</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Thoughts token count -->
-    <div v-if="usage.thoughtsTokenCount" class="details-section">
-      <div class="section-title">Thinking Tokens</div>
-      <div class="thoughts-box">
-        <span class="thoughts-label">Thoughts Token Count:</span>
-        <span class="thoughts-value">{{ usage.thoughtsTokenCount.toLocaleString() }}</span>
+    <!-- Total Section -->
+    <div class="card total">
+      <div class="header">
+        <span class="label">Total</span>
+        <span class="value">{{ formatNum(stats.total) }}</span>
       </div>
     </div>
   </div>
@@ -93,130 +91,88 @@ defineProps<Props>();
 
 <style scoped>
 .token-usage {
-  padding: 16px;
-}
-
-.token-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-bottom: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
-.token-box {
-  background: #f8fafc;
+.card {
+  background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
-  padding: 16px;
-  text-align: center;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
 }
 
-.token-box.total {
-  background: #eff6ff;
-  border-color: #3b82f6;
+/* Header (Label + Big Number) */
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 4px;
 }
 
-.token-label {
-  font-size: 0.85rem;
+.label {
+  padding: 0;
+  font-size: 1.2rem;
   color: #64748b;
-  margin-bottom: 8px;
   text-transform: uppercase;
+  font-weight: 900;
   letter-spacing: 0.05em;
+  margin-bottom: 2px;
 }
 
-.token-value {
-  font-size: 1.5rem;
+.value {
+  font-size: 2.25rem;
   font-weight: 700;
-  color: #1e293b;
+  color: #0f172a;
+  line-height: 1.2;
 }
 
-.token-box.total .token-value {
-  color: #1d4ed8;
-}
 
-/* Section styles */
-.details-section,
-.cached-section {
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid #e2e8f0;
-}
-
-.section-title {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #1e293b;
-  margin-bottom: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-/* Details grid */
-.details-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 8px;
+/* Details Section (Small sub-stats) */
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+  border-top: 1px dashed #f1f5f9;
+  padding-top: 6px;
 }
 
 .detail-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 12px;
-  background: #f8fafc;
-  border-radius: 6px;
-}
-
-.detail-modality {
-  font-weight: 500;
-  color: #374151;
-  text-transform: uppercase;
-  font-size: 0.85rem;
-}
-
-.detail-count {
-  font-family: var(--llm-font-mono);
-  font-weight: 600;
-  color: #1e293b;
-}
-
-/* Cached section */
-.cached-box,
-.thoughts-box {
+  font-size: 1.75rem;
+  color: #475569;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px;
-  background: #f0fdf4;
-  border: 1px solid #86efac;
-  border-radius: 6px;
+  gap: 6px;
 }
 
-.cached-label,
-.thoughts-label {
-  font-weight: 500;
-  color: #166534;
+/* Status Dots */
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #94a3b8;
+  flex-shrink: 0;
 }
 
-.cached-value,
-.thoughts-value {
-  font-family: var(--llm-font-mono);
-  font-weight: 700;
-  color: #15803d;
-  margin-left: auto;
-}
+/* --- Specific Styling --- */
 
-/* Thoughts box specific */
-.thoughts-box {
-  background: #fef3c7;
-  border-color: #fcd34d;
-}
+/* Input / Cached */
+.card.input { background: #f8fafc; }
+.detail-item.cache-hit { color: #166534; font-weight: 500; }
+.detail-item.cache-hit .dot { background-color: #22c55e; }
 
-.thoughts-label {
-  color: #92400e;
-}
+/* Output / Reasoning */
+.card.output { background: #fffcf8; border-color: #fed7aa; }
+.detail-item.reasoning { color: #7c3aed; font-weight: 500; }
+.detail-item.reasoning .dot { background-color: #8b5cf6; }
 
-.thoughts-value {
-  color: #b45309;
-}
+/* Total */
+.card.total { background: #eff6ff; border-color: #bfdbfe; }
+.card.total .value { color: #1d4ed8; }
 </style>

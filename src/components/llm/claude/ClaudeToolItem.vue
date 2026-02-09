@@ -240,8 +240,7 @@ const toggleIcon = computed(() => isOpen.value ? '▼' : '▶');
 .description-section,
 .parameters-section {
   margin-bottom: 16px;
-  padding-left: 12px;
-  border-left: 2px solid #e2e8f0;
+  padding-left: 1rem;
 }
 
 .description-section:last-child,

@@ -28,7 +28,7 @@ const componentMap = {
   gemini: {
     request: defineAsyncComponent(() => import('./gemini/GeminiRequestView.vue')),
     response: defineAsyncComponent(() => import('./gemini/GeminiResponseView.vue')),
-    sse: defineAsyncComponent(() => import('./gemini/GeminiSSEView.vue')),
+    sse: defineAsyncComponent(() => import('./gemini/GeminiResponseView.vue')),
   },
 } as const;
 
@@ -114,5 +114,5 @@ const retry = () => {
 </template>
 
 <style scoped>
-/* ... 样式保持不变 ... */
+
 </style>
