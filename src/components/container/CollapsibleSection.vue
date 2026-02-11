@@ -144,10 +144,8 @@ const toggle = () => {
   overflow: hidden;
 }
 
+
 .content-padding {
-  padding: 16px;
-  color: #334155;
-  font-size: 1rem;
-  line-height: 1.6;
+  padding: 2px;
 }
 </style>
