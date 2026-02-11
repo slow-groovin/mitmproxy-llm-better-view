@@ -64,12 +64,7 @@ const toggleIcon = computed(() => isOpen.value ? '▼' : '▶');
         <span v-if="descriptionPreview" class="tool-desc-preview">{{ descriptionPreview }}</span>
       </div>
       <!-- View Raw outline button - header 右侧 -->
-      <button
-        v-if="isOpen"
-        class="raw-btn header-right"
-        :class="{ active: showRaw }"
-        @click.stop="toggleRaw"
-      >
+      <button v-if="isOpen" class="raw-btn header-right" :class="{ active: showRaw }" @click.stop="toggleRaw">
         {{ 'View Raw' }}
       </button>
     </div>
@@ -78,19 +73,15 @@ const toggleIcon = computed(() => isOpen.value ? '▼' : '▶');
     <div v-if="isOpen" class="tool-content">
       <!-- Raw mode: show entire tool JSON -->
       <div v-if="showRaw" class="raw-mode">
-        <SmartViewer :text="JSON.stringify(tool, null, 2)"/>
+        <SmartViewer :text="JSON.stringify(tool, null, 2)" />
       </div>
 
       <!-- Formatted mode -->
       <template v-else>
         <!-- Description with markdown rendering (collapsible) -->
         <div v-if="toolDescription" class="description-section">
-          <BetterDetails default-open>
-            <template #summary>
-              <div class="section-label" style="margin-bottom: -2px;">DESCRIPTION</div>
-            </template>
-            <SmartViewer :text="toolDescription" />
-          </BetterDetails>
+          <div class="section-label" style="margin-bottom: -2px;">DESCRIPTION</div>
+          <SmartViewer :text="toolDescription" />
         </div>
 
         <!-- Parameters section with ClaudeToolParameters -->
@@ -128,14 +119,16 @@ const toggleIcon = computed(() => isOpen.value ? '▼' : '▶');
 
 .header-left {
   display: flex;
-  flex: 1;          /* 占据剩余空间 */
-  min-width: 0;    /* 关键！允许内容收缩 */
+  flex: 1;
+  /* 占据剩余空间 */
+  min-width: 0;
+  /* 关键！允许内容收缩 */
   align-items: center;
-  gap: 10px;
 }
 
-.header-right{
-  flex-shrink: 0;  /* 不被挤压 */
+.header-right {
+  flex-shrink: 0;
+  /* 不被挤压 */
 }
 
 .toggle-icon {
@@ -148,18 +141,19 @@ const toggleIcon = computed(() => isOpen.value ? '▼' : '▶');
   font-size: 1.3rem;
   color: #94a3b8;
   font-weight: 500;
-  min-width: 28px;
 }
 
 .tool-name {
   font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
   font-size: 1.4rem;
   font-weight: 600;
-  color: #7c3aed;
-  background: #f3e8ff;
+  color: var(--llm-badge-tool-text);
+  background: var(--llm-badge-tool-bg);
   padding: 4px 10px;
   border-radius: 4px;
   flex-shrink: 0;
+  margin-left: 2px;
+  margin-right: 1rem;
 }
 
 .tool-desc-preview {

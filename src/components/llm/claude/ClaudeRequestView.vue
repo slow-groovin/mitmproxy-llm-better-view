@@ -95,7 +95,7 @@ const hasSystemMessages = computed(() => {
       <div v-if="messages.length === 0" class="empty-state">
         No messages
       </div>
-      <ClaudeMessageItem v-for="(message, index) in messages" :key="index" :message="message" :index="index" />
+      <ClaudeMessageItem v-for="(message, index) in messages" :message="message" :index="index+1" />
     </CollapsibleSection>
 
     <CollapsibleSection v-if="tools.length > 0" title="Tools" :count="tools.length" storage-key="claude-tools"

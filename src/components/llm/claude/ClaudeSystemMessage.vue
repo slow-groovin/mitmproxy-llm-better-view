@@ -44,7 +44,7 @@ const hasCacheControl = computed(() => {
 .system-message {
   border-bottom: 1px solid var(--llm-border-light);
   padding: var(--llm-spacing-xs) var(--llm-spacing-md);
-  border-left: 3px solid var(--llm-border-system);
+  /* border-left: 3px solid var(--llm-border-system); */
 }
 
 .system-message:last-child {
