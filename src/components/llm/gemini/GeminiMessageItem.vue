@@ -1,11 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useSessionStorage } from '@vueuse/core';
-import RoleBadge from '../RoleBadge.vue';
+import { hashId } from '@/utils/id/hashId';
 import SmartViewer from '../../content/SmartViewer.vue';
 import ImageBlock from '../../content/ImageBlock.vue';
-import GeminiFunctionCall from './GeminiFunctionCall.vue';
-import GeminiFunctionResponse from './GeminiFunctionResponse.vue';
 import type {
   GeminiReqContent,
   Part,
@@ -17,7 +14,10 @@ import type {
   ExecutableCodePart,
   CodeExecutionResultPart,
 } from '@/types/gemini/request';
-import { hashId } from '@/utils/id/hashId';
+import GeminiFunctionCall from './GeminiFunctionCall.vue';
+import GeminiFunctionResponse from './GeminiFunctionResponse.vue';
+import MessageItem from '../MessageItem.vue';
+import SubMessageItem from '../SubMessageItem.vue';
 
 interface Props {
   id?: string;
@@ -27,8 +27,8 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const storageKey = computed(() => `gemini-msg-${props.id || hashId(JSON.stringify(props.content))}-open`);
-const isOpen = useSessionStorage(storageKey, true);
+// 生成消息唯一的 Hash ID
+const msgHashId = hashId(JSON.stringify(props.content));
 
 const role = computed(() => props.content.role);
 const parts = computed(() => props.content.parts || []);
@@ -47,149 +47,177 @@ const getInlineDataUrl = (part: InlineDataPart): string => {
   return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
 };
 
-// 获取part的key用于v-for
-const getPartKey = (part: Part, idx: number): string => {
-  if (isTextPart(part)) return `text-${idx}`;
-  if (isInlineDataPart(part)) return `inline-${idx}`;
-  if (isFileDataPart(part)) return `file-${idx}`;
-  if (isFunctionCallPart(part)) return `call-${idx}`;
-  if (isFunctionResponsePart(part)) return `response-${idx}`;
-  if (isExecutableCodePart(part)) return `code-${idx}`;
-  if (isCodeExecutionResultPart(part)) return `result-${idx}`;
-  return `part-${idx}`;
+// 获取badge类型和文本
+const getBadgeInfo = (part: Part): { type: 'text' | 'image' | 'tool' | 'thinking' | 'system'; text: string } => {
+  if (isTextPart(part)) return { type: 'text', text: 'TEXT' };
+  if (isInlineDataPart(part)) return { type: 'image', text: 'IMAGE' };
+  if (isFileDataPart(part)) return { type: 'system', text: 'FILE' };
+  if (isFunctionCallPart(part)) return { type: 'tool', text: 'FUNCTION_CALL' };
+  if (isFunctionResponsePart(part)) return { type: 'tool', text: 'FUNCTION_RESPONSE' };
+  if (isExecutableCodePart(part)) return { type: 'thinking', text: 'CODE' };
+  if (isCodeExecutionResultPart(part)) return { type: 'thinking', text: 'RESULT' };
+  return { type: 'text', text: 'UNKNOWN' };
 };
+
+// 是否有多个parts
+const hasMultipleParts = computed(() => parts.value.length > 1);
 </script>
 
 <template>
-  <div class="message" :class="`role-${role.toLowerCase()}`">
-    <div class="header" @click="isOpen = !isOpen">
-      <div class="header-left">
-        <span class="toggle">{{ isOpen ? '▼' : '▶' }}</span>
-        <span class="index">#{{ index + 1 }}</span>
-        <RoleBadge :role="role === 'model' ? 'model' : role" />
-      </div>
-      <span class="part-count">{{ parts.length }} part(s)</span>
-    </div>
-
-    <div v-show="isOpen" class="content">
+  <MessageItem
+    :count="parts.length"
+    :data-as-text="JSON.stringify(content, null, 2)"
+    :id="id"
+    :index="String(index)"
+    :role="role === 'model' ? 'model' : role"
+    storage-prefix="gemini-msg"
+  >
+    <div class="message-content-flow">
+      <!-- 空内容 -->
       <div v-if="parts.length === 0" class="empty-state">
         No parts in this message
       </div>
 
-      <template v-for="(part, idx) in parts" :key="getPartKey(part, idx)">
-        <!-- Text Part -->
-        <div v-if="isTextPart(part)" class="part text-part">
-          <SmartViewer :text="part.text" />
-        </div>
+      <!-- 单条内容：直接显示 -->
+      <template v-if="!hasMultipleParts">
+        <template v-for="(part, idx) in parts" :key="idx">
+          <!-- Text Part -->
+          <SmartViewer v-if="isTextPart(part)" :text="part.text" />
 
-        <!-- Inline Data Part (Image) -->
-        <div v-else-if="isInlineDataPart(part)" class="part media-part">
-          <div class="media-label">Inline Data ({{ part.inlineData.mimeType }})</div>
-          <ImageBlock :url="getInlineDataUrl(part)" />
-        </div>
+          <!-- Inline Data Part (Image) -->
+          <ImageBlock
+            v-else-if="isInlineDataPart(part)"
+            :url="getInlineDataUrl(part)"
+          />
 
-        <!-- File Data Part -->
-        <div v-else-if="isFileDataPart(part)" class="part file-part">
-          <div class="file-info">
-            <span class="file-icon">📎</span>
-            <span class="file-uri">{{ part.fileData.fileUri }}</span>
-            <span class="file-mime">({{ part.fileData.mimeType }})</span>
+          <!-- File Data Part -->
+          <div v-else-if="isFileDataPart(part)" class="file-part">
+            <div class="file-info">
+              <span class="file-icon">📎</span>
+              <span class="file-uri">{{ part.fileData.fileUri }}</span>
+              <span class="file-mime">({{ part.fileData.mimeType }})</span>
+            </div>
           </div>
-        </div>
 
-        <!-- Function Call Part -->
-        <div v-else-if="isFunctionCallPart(part)" class="part">
-          <GeminiFunctionCall :data="part.functionCall" />
-        </div>
+          <!-- Function Call Part -->
+          <GeminiFunctionCall
+            v-else-if="isFunctionCallPart(part)"
+            :data="part.functionCall"
+          />
 
-        <!-- Function Response Part -->
-        <div v-else-if="isFunctionResponsePart(part)" class="part">
-          <GeminiFunctionResponse :data="part.functionResponse" />
-        </div>
+          <!-- Function Response Part -->
+          <GeminiFunctionResponse
+            v-else-if="isFunctionResponsePart(part)"
+            :data="part.functionResponse"
+          />
 
-        <!-- Executable Code Part -->
-        <div v-else-if="isExecutableCodePart(part)" class="part code-part">
-          <div class="code-header">
-            <span class="code-icon">💻</span>
-            <span class="code-lang">{{ part.executableCode.language }}</span>
+          <!-- Executable Code Part -->
+          <div v-else-if="isExecutableCodePart(part)" class="code-part">
+            <div class="code-header">
+              <span class="code-icon">💻</span>
+              <span class="code-lang">{{ part.executableCode.language }}</span>
+            </div>
+            <pre class="code-content">{{ part.executableCode.code }}</pre>
           </div>
-          <pre class="code-content">{{ part.executableCode.code }}</pre>
-        </div>
 
-        <!-- Code Execution Result Part -->
-        <div v-else-if="isCodeExecutionResultPart(part)" class="part result-part">
-          <div class="result-header">
-            <span class="result-icon">📊</span>
-            <span class="result-outcome" :class="`outcome-${part.codeExecutionResult.outcome.toLowerCase()}`">
-              {{ part.codeExecutionResult.outcome }}
-            </span>
+          <!-- Code Execution Result Part -->
+          <div v-else-if="isCodeExecutionResultPart(part)" class="result-part">
+            <div class="result-header">
+              <span class="result-icon">📊</span>
+              <span
+                class="result-outcome"
+                :class="`outcome-${part.codeExecutionResult.outcome.toLowerCase()}`"
+              >
+                {{ part.codeExecutionResult.outcome }}
+              </span>
+            </div>
+            <pre class="result-output">{{ part.codeExecutionResult.output }}</pre>
           </div>
-          <pre class="result-output">{{ part.codeExecutionResult.output }}</pre>
-        </div>
 
-        <!-- Unknown Part -->
-        <div v-else class="part unknown-part">
-          <pre>{{ JSON.stringify(part, null, 2) }}</pre>
-        </div>
+          <!-- Unknown Part -->
+          <div v-else class="part unknown-part">
+            <pre>{{ JSON.stringify(part, null, 2) }}</pre>
+          </div>
+        </template>
+      </template>
+
+      <!-- 多条内容：使用 SubMessageItem -->
+      <template v-else>
+        <SubMessageItem
+          v-for="(part, subIndex) in parts"
+          :key="subIndex"
+          :badge-type="getBadgeInfo(part).type"
+          :badge-text="getBadgeInfo(part).text"
+          :id="`${msgHashId}-part-${subIndex}`"
+          :index="`${index}-${subIndex + 1}`"
+          storage-prefix="gemini-sub"
+        >
+          <!-- Text Part -->
+          <SmartViewer v-if="isTextPart(part)" :text="part.text" />
+
+          <!-- Inline Data Part (Image) -->
+          <ImageBlock
+            v-else-if="isInlineDataPart(part)"
+            :url="getInlineDataUrl(part)"
+          />
+
+          <!-- File Data Part -->
+          <div v-else-if="isFileDataPart(part)" class="file-part">
+            <div class="file-info">
+              <span class="file-icon">📎</span>
+              <span class="file-uri">{{ part.fileData.fileUri }}</span>
+              <span class="file-mime">({{ part.fileData.mimeType }})</span>
+            </div>
+          </div>
+
+          <!-- Function Call Part -->
+          <GeminiFunctionCall
+            v-else-if="isFunctionCallPart(part)"
+            :data="part.functionCall"
+          />
+
+          <!-- Function Response Part -->
+          <GeminiFunctionResponse
+            v-else-if="isFunctionResponsePart(part)"
+            :data="part.functionResponse"
+          />
+
+          <!-- Executable Code Part -->
+          <div v-else-if="isExecutableCodePart(part)" class="code-part">
+            <div class="code-header">
+              <span class="code-icon">💻</span>
+              <span class="code-lang">{{ part.executableCode.language }}</span>
+            </div>
+            <pre class="code-content">{{ part.executableCode.code }}</pre>
+          </div>
+
+          <!-- Code Execution Result Part -->
+          <div v-else-if="isCodeExecutionResultPart(part)" class="result-part">
+            <div class="result-header">
+              <span class="result-icon">📊</span>
+              <span
+                class="result-outcome"
+                :class="`outcome-${part.codeExecutionResult.outcome.toLowerCase()}`"
+              >
+                {{ part.codeExecutionResult.outcome }}
+              </span>
+            </div>
+            <pre class="result-output">{{ part.codeExecutionResult.output }}</pre>
+          </div>
+
+          <!-- Unknown Part -->
+          <div v-else class="part unknown-part">
+            <pre>{{ JSON.stringify(part, null, 2) }}</pre>
+          </div>
+        </SubMessageItem>
       </template>
     </div>
-  </div>
+  </MessageItem>
 </template>
 
 <style scoped>
-.message {
-  border-bottom: 2px solid rgba(126, 180, 233, 0.31);
-  padding: var(--llm-spacing-xs) var(--llm-spacing-md);
-}
-
-.message:last-child {
-  border-bottom: none;
-}
-
-.role-user { border-left: 3px solid var(--llm-border-user); }
-.role-model { border-left: 3px solid var(--llm-border-assistant); }
-.role-system { border-left: 3px solid var(--llm-border-system); }
-.role-function { border-left: 3px solid var(--llm-border-tool); }
-
-.header {
-  padding: 6px 0;
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.header:hover {
-  background: var(--llm-bg-hover);
-  margin: 0 -12px;
-  padding: 6px 12px;
-  border-radius: var(--llm-radius-md);
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: var(--llm-spacing-md);
-}
-
-.toggle {
-  color: var(--llm-text-secondary);
-  font-size: 1.2rem;
-}
-
-.index {
-  font-size: 1.2rem;
-  color: var(--llm-text-muted);
-  font-weight: 500;
-}
-
-.part-count {
-  font-size: 1.1rem;
-  color: var(--llm-text-muted);
-}
-
-.content {
-  padding: var(--llm-spacing-xs) var(--llm-spacing-xl);
+.message-content-flow {
+  padding: var(--llm-spacing-xs) 0;
 }
 
 .empty-state {
@@ -209,13 +237,6 @@ const getPartKey = (part: Part, idx: number): string => {
 
 .part:last-child {
   margin-bottom: 0;
-}
-
-/* Media part */
-.media-label {
-  font-size: 1.1rem;
-  color: var(--llm-text-muted);
-  margin-bottom: var(--llm-spacing-xs);
 }
 
 /* File part */
@@ -241,40 +262,6 @@ const getPartKey = (part: Part, idx: number): string => {
 
 .file-mime {
   color: var(--llm-text-muted);
-}
-
-/* Function call/response parts */
-.function-call-part,
-.function-response-part {
-  background: #fef3c7;
-  border-left: 3px solid #f59e0b;
-}
-
-.function-header {
-  display: flex;
-  align-items: center;
-  gap: var(--llm-spacing-sm);
-  margin-bottom: var(--llm-spacing-xs);
-  font-weight: 600;
-}
-
-.function-icon {
-  font-size: 1.2rem;
-}
-
-.function-name {
-  color: #92400e;
-}
-
-.function-args,
-.function-response {
-  margin: 0;
-  padding: var(--llm-spacing-sm);
-  background: rgba(255, 255, 255, 0.7);
-  border-radius: var(--llm-radius-sm);
-  font-family: var(--llm-font-mono);
-  font-size: 1.1rem;
-  overflow-x: auto;
 }
 
 /* Code part */

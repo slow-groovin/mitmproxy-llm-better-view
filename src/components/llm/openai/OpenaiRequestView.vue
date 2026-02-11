@@ -77,7 +77,7 @@ const stopValue = computed(() => {
       <div v-if="messages.length === 0" class="empty-state">
         No messages
       </div>
-      <OpenaiMessageItem v-for="(message, index) in messages" :key="index" :role="message.role" :index="index"
+      <OpenaiMessageItem v-for="(message, index) in messages" :key="index" :role="message.role" :index="index + 1"
         :message="message" />
     </CollapsibleSection>
 

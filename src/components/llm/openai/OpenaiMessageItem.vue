@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useSessionStorage } from '@vueuse/core';
-import RoleBadge from '../RoleBadge.vue';
+import { hashId } from '@/utils/id/hashId';
 import SmartViewer from '../../content/SmartViewer.vue';
 import ImageBlock from '../../content/ImageBlock.vue';
 import type {
@@ -13,7 +12,8 @@ import type {
   ImageContentItem,
 } from '@/types/openai/chat-request';
 import OpenaiAssistantToolCalls from './OpenaiAssistantToolCalls.vue';
-import { hashId } from '@/utils/id/hashId';
+import MessageItem from '../MessageItem.vue';
+import SubMessageItem from '../SubMessageItem.vue';
 
 interface Props {
   id?: string;
@@ -24,29 +24,44 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const storageKey = computed(() => `openai-msg-${props.id || hashId(JSON.stringify(props.message))}-open`);
-const isOpen = useSessionStorage(storageKey, true);
+// 生成消息唯一的 Hash ID
+const msgHashId = hashId(JSON.stringify(props.message));
 
-// 内容项解析
+// 内容项解析 - 标准化为统一格式
 const contentItems = computed(() => {
   const content = props.message.content as MessageContent;
   if (!content) return [];
 
+  // 纯字符串 - 单文本内容
   if (typeof content === 'string') {
-    return [{ type: 'text', text: content, id: 'content-0', url: undefined }];
+    return [{ type: 'text' as const, text: content, id: 'content-0' }];
   }
 
+  // 数组 - 多内容项
   if (Array.isArray(content)) {
-    return content.map((item, idx) => ({
-      type: item.type,
-      text: item.type === 'text' ? (item as TextContentItem).text : undefined,
-      url: item.type === 'image_url' ? (item as ImageContentItem).image_url.url : undefined,
-      id: `content-${idx}`,
-    }));
+    return content.map((item, idx) => {
+      if (item.type === 'text') {
+        return {
+          type: 'text' as const,
+          text: (item as TextContentItem).text,
+          id: `content-${idx}`,
+        };
+      } else if (item.type === 'image_url') {
+        return {
+          type: 'image' as const,
+          url: (item as ImageContentItem).image_url.url,
+          id: `content-${idx}`,
+        };
+      }
+      return { type: 'unknown' as const, id: `content-${idx}` };
+    });
   }
 
   return [];
 });
+
+// 是否有多个内容项
+const hasMultipleContent = computed(() => contentItems.value.length > 1);
 
 // 工具调用请求 (来自assistant)
 const toolRequests = computed(() => {
@@ -69,154 +84,58 @@ function scrollTo(selector: string) {
 </script>
 
 <template>
-  <div class="message" :class="`role-${role.toLowerCase()}`">
-    <div class="header" @click="isOpen = !isOpen" :title="id">
-      <div class="header-left">
-        <span class="toggle">{{ isOpen ? '▼' : '▶' }}</span>
-        <span class="index">#{{ index + 1 }}</span>
-        <RoleBadge :role="role" />
-      </div>
-
-      <span v-if="id" class="msg-id">{{ id.slice(0, 8) }}</span>
-      <span v-if="toolResponse?.id" :id="`tool-response-${toolResponse.id}`" class="tool-id clickable"
-        @click.stop="scrollTo(`#tool-request-${toolResponse.id}`)">
-        {{ toolResponse.id }}
-      </span>
-    </div>
-
-    <div v-show="isOpen" class="content">
-      <!-- 内容块 -->
+  <MessageItem
+    :count="contentItems.length + toolRequests.length"
+    :data-as-text="JSON.stringify(message, null, 2)"
+    :id="id"
+    :index="String(index)"
+    :role="role"
+    storage-prefix="openai-msg"
+  >
+    <div class="message-content-flow">
+      <!-- 内容区域 -->
       <template v-if="hasContent">
-        <template v-for="item in contentItems" :key="item.id">
-          <SmartViewer v-if="item.type === 'text' && item.text" :id="item.id" :text="item.text" />
-          <ImageBlock v-else-if="item.type === 'image'" :id="item.id" :url="item.url!" />
+        <!-- 单内容项：直接显示，不使用 SubMessageItem -->
+        <template v-if="!hasMultipleContent">
+          <template v-for="item in contentItems" :key="item.id">
+            <SmartViewer v-if="item.type === 'text' && item.text" :text="item.text" />
+            <ImageBlock v-else-if="item.type === 'image' && item.url" :url="item.url" />
+          </template>
+        </template>
+
+        <!-- 多内容项：使用 SubMessageItem 分别包裹 -->
+        <template v-else>
+          <SubMessageItem
+            v-for="(item, subIndex) in contentItems"
+            :key="item.id"
+            :badge-type="item.type === 'image' ? 'image' : 'text'"
+            :badge-text="item.type === 'image' ? 'IMAGE' : 'TEXT'"
+            :id="`${msgHashId}-${item.id}`"
+            :index="`${index}-${subIndex + 1}`"
+            storage-prefix="openai-sub"
+          >
+            <SmartViewer v-if="item.type === 'text' && item.text" :text="item.text" />
+            <ImageBlock v-else-if="item.type === 'image' && item.url" :url="item.url" />
+          </SubMessageItem>
         </template>
       </template>
+
       <div v-else class="empty" hidden></div>
 
       <!-- 工具调用 -->
       <OpenaiAssistantToolCalls v-if="toolRequests.length" :tool-calls="toolRequests" />
-
     </div>
-  </div>
+  </MessageItem>
 </template>
 
 <style scoped>
-.message {
-  border-bottom: 2px solid rgba(126, 180, 233, 0.31);
-  padding: var(--llm-spacing-xs) var(--llm-spacing-md);
-}
-
-.message:last-child {
-  border-bottom: none;
-}
-
-.role-system { border-left: 3px solid var(--llm-border-system); }
-.role-user { border-left: 3px solid var(--llm-border-user); }
-.role-assistant { border-left: 3px solid var(--llm-border-assistant); }
-.role-tool { border-left: 3px solid var(--llm-border-tool); }
-
-.header {
-  padding: 6px 0;
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.header:hover {
-  background: var(--llm-bg-hover);
-  margin: 0 -12px;
-  padding: 6px 12px;
-  border-radius: var(--llm-radius-md);
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: var(--llm-spacing-md);
-}
-
-.toggle {
-  color: var(--llm-text-secondary);
-  font-size: 1.2rem;
-  transition: transform var(--llm-transition-fast);
-}
-
-.index {
-  font-size: 1.2rem;
-  color: var(--llm-text-muted);
-  font-weight: 500;
-}
-
-.msg-id,
-.tool-id {
-  font-size: 1.1rem;
-  color: var(--llm-text-muted);
-  font-family: var(--llm-font-mono);
-}
-
-
-.content {
-  padding: 0px var(--llm-spacing-xl);
-  background: var(--llm-bg-content);
+.message-content-flow {
+  padding: var(--llm-spacing-xs) 0;
 }
 
 .empty {
   color: var(--llm-text-muted);
   font-style: italic;
   padding: 8px 0;
-}
-
-.tool-requests {
-  margin-top: 0;
-}
-
-.tool-request {
-  background: var(--llm-bg-tool);
-  border-radius: var(--llm-radius-lg);
-  padding: var(--llm-spacing-xs);
-  margin-bottom: var(--llm-spacing-xs);
-}
-
-.tool-request-header {
-  display: flex;
-  align-items: center;
-  gap: var(--llm-spacing-md);
-  margin-bottom: var(--llm-spacing-md);
-  font-weight: 600;
-  font-size: 1.4rem;
-  color: var(--llm-text-primary);
-}
-
-
-.tool-idx {
-  color: var(--llm-text-secondary);
-  font-size: 1.2rem;
-}
-
-.tool-id {
-  margin-left: auto;
-}
-
-.clickable {
-  color: inherit;
-  text-decoration: none;
-  cursor: pointer;
-  border-bottom: 1px dotted transparent;
-  transition: all var(--llm-transition-fast);
-}
-
-.clickable:hover {
-  color: var(--llm-text-link);
-  border-bottom-color: var(--llm-text-link);
-}
-
-.tool-args {
-  font-family: var(--llm-font-mono);
-  border-radius: var(--llm-radius-md);
-  font-size: 1.28rem;
-  overflow-x: auto;
-  margin: 0;
 }
 </style>

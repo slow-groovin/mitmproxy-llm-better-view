@@ -118,7 +118,7 @@ const systemInstructionText = computed(() => {
       <div v-if="contents.length === 0" class="empty-state">
         No contents
       </div>
-      <GeminiMessageItem v-for="(content, index) in contents" :key="index" :content="content" :index="index" />
+      <GeminiMessageItem v-for="(content, index) in contents" :key="index" :content="content" :index="index + 1" />
     </CollapsibleSection>
 
     <!-- Tools Section -->
