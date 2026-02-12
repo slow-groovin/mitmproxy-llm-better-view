@@ -3,7 +3,7 @@ import { computed } from 'vue';
 import type { OpenaiChatRequest } from '../../../types/openai/chat-request';
 import CollapsibleSection from '../../container/CollapsibleSection.vue';
 import LabelValueRow from '../../content/LabelValueRow.vue';
-import OpenaiToolItem from './OpenaiToolItem.vue';
+import ToolItem from '../ToolItem.vue';
 import OpenaiMessageItem from './OpenaiMessageItem.vue';
 import BetterDetails from '@/components/container/BetterDetails.vue';
 import SmartViewer from '../../content/SmartViewer.vue';
@@ -82,7 +82,15 @@ const stopValue = computed(() => {
     </CollapsibleSection>
 
     <CollapsibleSection v-if="tools.length > 0" title="Tools" storage-key="tools" :count="tools.length" variant="tools">
-      <OpenaiToolItem v-for="(tool, index) in tools" :key="index" :tool="tool" :index="index" />
+      <ToolItem
+        v-for="(tool, index) in tools"
+        :key="index"
+        :name="tool.function.name"
+        :description="tool.function.description"
+        :params="tool.function.parameters"
+        :index="index"
+        standard="openai"
+      />
     </CollapsibleSection>
 
     <BetterDetails title="Full Request">

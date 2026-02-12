@@ -5,9 +5,9 @@ import type { ClaudeRequest } from '../../../types/claude/claude-request';
 import CollapsibleSection from '../../container/CollapsibleSection.vue';
 import LabelValueRow from '../../content/LabelValueRow.vue';
 import SmartViewer from '../../content/SmartViewer.vue';
+import ToolItem from '../ToolItem.vue';
 import ClaudeMessageItem from './ClaudeMessageItem.vue';
 import ClaudeSystemMessage from './ClaudeSystemMessage.vue';
-import ClaudeToolItem from './ClaudeToolItem.vue';
 import ClaudeIcon from '@/assets/claude.svg';
 
 interface Props {
@@ -100,7 +100,15 @@ const hasSystemMessages = computed(() => {
 
     <CollapsibleSection v-if="tools.length > 0" title="Tools" :count="tools.length" storage-key="claude-tools"
       variant="tools">
-      <ClaudeToolItem v-for="(tool, index) in tools" :key="index" :tool="tool" :index="index" />
+      <ToolItem
+        v-for="(tool, index) in tools"
+        :key="index"
+        :name="tool.name"
+        :description="tool.description"
+        :params="tool.input_schema"
+        :index="index"
+        standard="claude"
+      />
     </CollapsibleSection>
 
     <BetterDetails title="Full Request">

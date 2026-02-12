@@ -3,7 +3,7 @@ import { computed } from 'vue';
 import type { GeminiRequest } from '../../../types/gemini/request';
 import CollapsibleSection from '../../container/CollapsibleSection.vue';
 import LabelValueRow from '../../content/LabelValueRow.vue';
-import GeminiToolItem from './GeminiToolItem.vue';
+import ToolItem from '../ToolItem.vue';
 import GeminiMessageItem from './GeminiMessageItem.vue';
 import BetterDetails from '@/components/container/BetterDetails.vue';
 import SmartViewer from '../../content/SmartViewer.vue';
@@ -127,8 +127,15 @@ const systemInstructionText = computed(() => {
       :count="tools.reduce((acc, t) => acc + (t.functionDeclarations?.length || 0), 0)" storage-key="gemini-tools"
       variant="tools">
       <template v-for="(tool, toolIdx) in tools" :key="toolIdx">
-        <GeminiToolItem v-for="(func, funcIdx) in tool.functionDeclarations" :key="`${toolIdx}-${funcIdx}`" :tool="func"
-          :index="tools.slice(0, toolIdx).reduce((acc, t) => acc + (t.functionDeclarations?.length || 0), 0) + funcIdx" />
+        <ToolItem
+          v-for="(func, funcIdx) in tool.functionDeclarations"
+          :key="`${toolIdx}-${funcIdx}`"
+          :name="func.name"
+          :description="func.description"
+          :params="func.parameters"
+          :index="tools.slice(0, toolIdx).reduce((acc, t) => acc + (t.functionDeclarations?.length || 0), 0) + funcIdx"
+          standard="gemini"
+        />
       </template>
     </CollapsibleSection>
 
