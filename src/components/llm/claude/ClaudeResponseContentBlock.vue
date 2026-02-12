@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import type { ResponseContentBlock, ResponseTextBlock, ResponseThinkingBlock, ResponseToolUseBlock } from '@/types/claude/claude-response';
 import SmartViewer from '@/components/content/SmartViewer.vue';
-import ClaudeToolUseArgs from './ClaudeToolUseArgs.vue';
+import ToolArgs from '@/components/llm/ToolArgs.vue';
 
 interface Props {
   block: ResponseContentBlock;
@@ -78,7 +78,7 @@ const badgeTypeClass = computed(() => {
 
       <!-- Tool Use Block -->
       <template v-else-if="isToolUseBlock(block)">
-          <ClaudeToolUseArgs :input="block.input" />
+          <ToolArgs :input="block.input" />
         
       </template>
 

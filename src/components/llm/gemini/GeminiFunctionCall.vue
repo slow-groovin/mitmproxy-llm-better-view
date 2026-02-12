@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import JsonViewer from '../../content/JsonViewer.vue';
-import SmartViewer from '../../content/SmartViewer.vue';
 import type { FunctionCall } from '@/types/gemini/request';
+import ToolArgs from '../ToolArgs.vue';
 
 interface Props {
   data: FunctionCall;
@@ -10,9 +8,6 @@ interface Props {
 
 const props = defineProps<Props>();
 
-
-// 将 args 对象格式化为 JSON 字符串用于 SmartViewer
-const argsText = computed(() => JSON.stringify(props.data.args, null, 2));
 </script>
 
 <template>
@@ -24,7 +19,7 @@ const argsText = computed(() => JSON.stringify(props.data.args, null, 2));
       <div class="call-header">
         <span class="call-name">{{ data.name }}</span>
       </div>
-      <SmartViewer :text="argsText" class="call-args" />
+      <ToolArgs :input="data.args"/>
     </div>
   </div>
 </template>

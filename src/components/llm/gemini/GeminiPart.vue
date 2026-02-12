@@ -12,7 +12,7 @@ import type {
 } from '@/types/gemini/request';
 import SmartViewer from '@/components/content/SmartViewer.vue';
 import ImageBlock from '@/components/content/ImageBlock.vue';
-import GeminiToolUseArgs from './GeminiToolUseArgs.vue';
+import ToolArgs from '@/components/llm/ToolArgs.vue';
 
 interface Props {
   part: Part;
@@ -121,9 +121,9 @@ const toolArgs = computed(() => {
         </div>
       </template>
 
-      <!-- Function Call Part - Using GeminiToolUseArgs like ClaudeToolUseArgs -->
+      <!-- Function Call Part - Using unified ToolArgs component -->
       <template v-else-if="isFunctionCallPart(part)">
-        <GeminiToolUseArgs v-if="toolArgs" :input="toolArgs" />
+        <ToolArgs v-if="toolArgs" :input="toolArgs" />
       </template>
 
       <!-- Function Response Part -->

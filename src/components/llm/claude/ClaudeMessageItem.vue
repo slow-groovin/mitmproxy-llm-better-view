@@ -4,7 +4,7 @@ import { computed } from 'vue';
 import { type ContentBlock, type ClaudeMessage } from '../../../types/claude/claude-request';
 import ImageBlock from '@/components/content/ImageBlock.vue';
 import SmartViewer from '@/components/content/SmartViewer.vue';
-import ClaudeToolUseArgs from './ClaudeToolUseArgs.vue';
+import ToolArgs from '@/components/llm/ToolArgs.vue';
 import MessageItem from '../MessageItem.vue';
 import SubMessageItem from '../SubMessageItem.vue';
 
@@ -109,7 +109,7 @@ const hasContent = computed(() => contentBlocks.value.length > 0);
             <template #header>
               <span class="tool-name">{{ block.name }}</span>
             </template>
-            <ClaudeToolUseArgs :input="block.input" />
+            <ToolArgs :input="block.input" />
           </SubMessageItem>
         </div>
 

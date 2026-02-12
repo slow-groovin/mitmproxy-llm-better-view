@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import OpenaiToolCallArgs from './OpenaiToolCallArgs.vue';
+import ToolArgs from '@/components/llm/ToolArgs.vue';
 import JsonViewer from '../../content/JsonViewer.vue';
 
 interface ToolCall {
@@ -55,7 +55,7 @@ function scrollTo(selector: string) {
           </a>
         </div>
         
-        <OpenaiToolCallArgs :arguments="req.function.arguments" />
+        <ToolArgs :arguments="req.function.arguments" />
       </div>
     </div>
   </div>

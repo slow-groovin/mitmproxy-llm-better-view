@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import SmartViewer from '@/components/content/SmartViewer.vue';
 import type { FunctionResponse } from '@/types/gemini/request';
 
 interface Props {
@@ -19,7 +20,8 @@ defineProps<Props>();
       <div class="response-header">
         <span class="response-name">{{ data.name }}</span>
       </div>
-      <pre class="response-data">{{ JSON.stringify(data.response, null, 2) }}</pre>
+      <SmartViewer v-if="data.response['content']" :text="data.response['content'] as string">
+      </SmartViewer>
     </div>
   </div>
 </template>

@@ -107,7 +107,8 @@ const getBadgeInfo = (part: Part): { type: 'text' | 'image' | 'tool' | 'thinking
           <GeminiFunctionCall
             v-else-if="isFunctionCallPart(part)"
             :data="part.functionCall"
-          />
+          >
+          </GeminiFunctionCall>
 
           <!-- Function Response Part -->
           <GeminiFunctionResponse
