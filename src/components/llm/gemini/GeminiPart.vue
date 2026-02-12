@@ -13,12 +13,13 @@ interface Props {
 const props = defineProps<Props>();
 
 // --- 1. 配置定义 (将类型与元数据解耦) ---
+// 这里的 class 对应 CSS 中的 .badge-xxx
 const PART_CONFIG: Record<string, { label: string; class: string }> = {
   text: { label: 'TEXT', class: 'text' },
   inlineData: { label: 'MEDIA', class: 'media' },
   fileData: { label: 'FILE', class: 'file' },
-  functionCall: { label: 'TOOL', class: 'tool' },
-  functionResponse: { label: 'RESPONSE', class: 'response' },
+  functionCall: { label: 'TOOL', class: 'tool-use' }, // 对应 reference 的 badge-tool-use
+  functionResponse: { label: 'RESP', class: 'response' },
   executableCode: { label: 'CODE', class: 'code' },
   codeExecutionResult: { label: 'RESULT', class: 'result' },
   unknown: { label: 'UNKNOWN', class: 'unknown' },
@@ -27,16 +28,13 @@ const PART_CONFIG: Record<string, { label: string; class: string }> = {
 // --- 2. 核心逻辑：一次性计算当前类型 ---
 const activeTypeKey = computed(() => {
   const keys = Object.keys(props.part);
-  // 找到 Part 中存在的已知 key (text, inlineData, etc.)
   const foundKey = keys.find((k) => k in PART_CONFIG);
   return foundKey || 'unknown';
 });
 
-// 获取当前类型的配置信息
 const activeConfig = computed(() => PART_CONFIG[activeTypeKey.value]);
 
 // --- 3. 辅助数据处理 ---
-// 针对特定类型的快捷访问器 (Helpers)
 const mediaUrl = computed(() => {
   if ('inlineData' in props.part) {
     return `data:${props.part.inlineData.mimeType};base64,${props.part.inlineData.data}`;
@@ -54,25 +52,30 @@ const toolInfo = computed(() => {
   return null;
 });
 
-// 格式化 JSON 用于展示 (避免在 template 中直接调用 JSON.stringify)
 const prettyJson = (data: unknown) => JSON.stringify(data, null, 2);
 </script>
 
 <template>
-  <!-- 动态绑定类名：type-text, type-tool 等 -->
-  <div class="content-part" :class="`type-${activeConfig.class}`">
+  <div class="content-block" :class="`type-${activeConfig.class}`">
     
-    <!-- Header -->
-    <div class="part-header">
+    <!-- Header: 样式严格参考 Reference -->
+    <div class="block-header">
       <div class="header-left">
-        <span class="part-type-badge">{{ activeConfig.label }}</span>
-        <span class="part-index">#{{ index + 1 }}</span>
-        <span v-if="toolInfo?.name" class="part-name">{{ toolInfo.name }}</span>
+        <span class="block-type-badge" :class="`badge-${activeConfig.class}`">{{ activeConfig.label }}</span>
+        <span class="block-index">#{{ index + 1 }}</span>
+        
+        <!-- Tool Name (Reference 风格) -->
+        <span v-if="toolInfo?.name" class="block-name">{{ toolInfo.name }}</span>
+        
+        <!-- Function Response Name (复用 Reference 风格) -->
+        <span v-if="activeTypeKey === 'functionResponse'" class="block-name name-response">
+          {{ (part as any).functionResponse.name }}
+        </span>
       </div>
     </div>
 
-    <!-- Content: 使用 v-if 匹配 activeTypeKey，更加直观 -->
-    <div class="part-content">
+    <!-- Content Area -->
+    <div class="block-content">
       
       <!-- TEXT -->
       <SmartViewer 
@@ -101,7 +104,6 @@ const prettyJson = (data: unknown) => JSON.stringify(data, null, 2);
 
       <!-- RESPONSE -->
       <template v-else-if="activeTypeKey === 'functionResponse'">
-        <div class="sub-header text-cyan">{{ (part as any).functionResponse.name }}</div>
         <pre class="code-block bg-light">{{ prettyJson((part as any).functionResponse.response) }}</pre>
       </template>
 
@@ -125,87 +127,139 @@ const prettyJson = (data: unknown) => JSON.stringify(data, null, 2);
       </template>
 
       <!-- FALLBACK -->
-      <pre v-else class="code-block bg-gray">{{ prettyJson(part) }}</pre>
+      <div v-else class="unknown-block">
+        <SmartViewer :text="prettyJson(part)" />
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-/* 定义 CSS 变量：将颜色逻辑与结构分离，便于维护 */
-.content-part {
-  --bg-header: #f8fafc;
-  --border-color: #e2e8f0;
-  
-  /* 默认颜色 (Unknown) */
-  --badge-bg: #f1f5f9;
-  --badge-text: #64748b;
+/* 
+  核心样式复刻区 
+  严格保持与 Reference 一致的边距、字体大小和布局逻辑
+*/
 
+.content-block {
   margin-bottom: 12px;
-  background: #ffffff;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  overflow: hidden;
+  margin-left: 8px;
+  /* overflow: hidden; */
+  /* 移除原有的白色背景和边框，保持 Reference 的清爽风格 */
 }
 
-/* 类型特定的颜色覆盖 */
-.type-text     { --badge-bg: #dbeafe; --badge-text: #1e40af; }
-.type-media    { --badge-bg: #d1fae5; --badge-text: #065f46; }
-.type-file     { --badge-bg: #fef3c7; --badge-text: #92400e; }
-.type-tool     { --badge-bg: var(--llm-badge-tool-bg, #e0e7ff); --badge-text: var(--llm-badge-tool-text, #3730a3); }
-.type-response { --badge-bg: #cffafe; --badge-text: #155e75; }
-.type-code     { --badge-bg: #e2e8f0; --badge-text: #1e293b; }
-.type-result   { --badge-bg: #dcfce7; --badge-text: #166534; }
+.content-block:last-child {
+  margin-bottom: 0;
+}
 
-/* 布局与通用样式 */
-.part-header {
+/* Block Header - Compact style */
+.block-header {
   display: flex;
   align-items: center;
-  padding: 8px 12px;
-  background: var(--bg-header);
-  border-bottom: 1px solid var(--border-color);
+  justify-content: space-between;
+  /* 移除原有的背景色和下边框，Reference 是没有的 */
+  padding-bottom: 4px; 
 }
 
 .header-left {
   display: flex;
+  max-width: 100%;
   align-items: center;
-  gap: 8px;
+  gap: 8px; /* 增加一点间距，参考代码看似紧凑但有 flex */
 }
 
-.part-type-badge {
-  padding: 4px 6px;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  background: var(--badge-bg);
-  color: var(--badge-text);
-}
-
-.part-index {
+.block-index {
+  font-size: 1.3rem; /* Reference Size */
   color: #94a3b8;
-  font-size: 0.85rem;
   font-weight: 500;
 }
 
-.part-name {
-  font-family: var(--llm-font-mono, monospace);
-  font-size: 0.9rem;
+.block-type-badge {
+  font-size: 1rem; /* Reference Size (visual estimation approx 0.8-1rem based on look) */
   font-weight: 600;
-  color: #334155;
-  background: #f1f5f9;
-  padding: 2px 6px;
+  padding: 2px 8px;
   border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.part-content {
-  padding: 12px;
+.block-name {
+  font-family: var(--llm-font-mono, monospace);
+  font-size: 1.4rem; /* Reference Size */
+  font-weight: 600;
+  color: var(--llm-badge-tool-use-text, #b45309);
+  background: var(--llm-badge-tool-use-bg, #fffbeb);
+  padding: 4px 10px;
+  border-radius: 4px;
+  flex-shrink: 0;
 }
 
-/* 通用组件样式 */
+/* 特殊处理 Response 的名字颜色，使其与 Tool Call 区分开 */
+.name-response {
+  color: #0891b2;
+  background: #cffafe;
+}
+
+/* Badge 颜色定义 - 优先使用 Reference 变量，Gemini 特有类型补全 */
+.badge-text {
+  background: var(--llm-badge-assistant-bg, #dbeafe);
+  color: var(--llm-badge-assistant-text, #1e40af);
+}
+
+.badge-tool-use {
+  background: var(--llm-badge-tool-bg, #e0e7ff);
+  color: var(--llm-badge-tool-text, #3730a3);
+}
+
+.badge-media {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.badge-file {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badge-response {
+  background: #cffafe;
+  color: #155e75;
+}
+
+.badge-code {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.badge-result {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.badge-unknown {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+/* Unknown 类型的左侧边框样式 (Reference 风格) */
+.type-unknown {
+  border-left: 3px solid #9ca3af;
+  padding-left: 8px;
+}
+
+/* 
+  内容区域样式适配 
+*/
+.block-content {
+  /* 与 header 保持一点距离，如果没有 header 背景色的话 */
+  padding-top: 4px;
+}
+
+/* 通用组件适配 */
 .meta-label {
   font-size: 0.8rem;
   color: #64748b;
   margin-bottom: 4px;
+  font-family: var(--llm-font-mono, monospace);
 }
 
 .file-info {
@@ -215,30 +269,30 @@ const prettyJson = (data: unknown) => JSON.stringify(data, null, 2);
   padding: 8px;
   background: #f8fafc;
   border-radius: 4px;
+  border: 1px solid #e2e8f0;
 }
 
 .file-uri {
-  font-family: monospace;
+  font-family: var(--llm-font-mono, monospace);
   font-size: 0.9rem;
   color: #334155;
 }
 
 .sub-header {
-  font-family: monospace;
+  font-family: var(--llm-font-mono, monospace);
   font-weight: 600;
   margin-bottom: 6px;
   font-size: 0.85rem;
   text-transform: uppercase;
 }
 
-.text-cyan { color: #0891b2; }
 .text-blue { color: #3b82f6; }
 
 .code-block {
   margin: 0;
   padding: 10px;
-  border-radius: 4px;
-  font-family: monospace;
+  border-radius: 6px; /* 更圆润一点，符合现代风格 */
+  font-family: var(--llm-font-mono, monospace);
   font-size: 0.85rem;
   white-space: pre-wrap;
   overflow-x: auto;
@@ -246,7 +300,12 @@ const prettyJson = (data: unknown) => JSON.stringify(data, null, 2);
 
 .bg-light { background: #f8fafc; border: 1px solid #e2e8f0; color: #334155; }
 .bg-dark  { background: #1e293b; color: #e2e8f0; }
-.bg-gray  { background: #f1f5f9; color: #475569; }
+
+.unknown-block {
+  background: #f9fafb;
+  border-radius: 6px;
+  padding: 12px;
+}
 
 .result-header { margin-bottom: 8px; }
 .outcome-badge {
