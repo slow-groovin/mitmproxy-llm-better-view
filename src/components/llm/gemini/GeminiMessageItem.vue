@@ -59,8 +59,6 @@ const getBadgeInfo = (part: Part): { type: 'text' | 'image' | 'tool' | 'thinking
   return { type: 'text', text: 'UNKNOWN' };
 };
 
-// 是否有多个parts
-const hasMultipleParts = computed(() => parts.value.length > 1);
 </script>
 
 <template>
@@ -78,74 +76,9 @@ const hasMultipleParts = computed(() => parts.value.length > 1);
         No parts in this message
       </div>
 
-      <!-- 单条内容：直接显示 -->
-      <template v-if="!hasMultipleParts">
-        <template v-for="(part, idx) in parts" :key="idx">
-          <!-- Text Part -->
-          <SmartViewer v-if="isTextPart(part)" :text="part.text" />
-
-          <!-- Inline Data Part (Image) -->
-          <ImageBlock
-            v-else-if="isInlineDataPart(part)"
-            :url="getInlineDataUrl(part)"
-          />
-
-          <!-- File Data Part -->
-          <div v-else-if="isFileDataPart(part)" class="file-part">
-            <div class="file-info">
-              <span class="file-icon">📎</span>
-              <span class="file-uri">{{ part.fileData.fileUri }}</span>
-              <span class="file-mime">({{ part.fileData.mimeType }})</span>
-            </div>
-          </div>
-
-          <!-- Function Call Part -->
-          <GeminiFunctionCall
-            v-else-if="isFunctionCallPart(part)"
-            :data="part.functionCall"
-          />
-
-          <!-- Function Response Part -->
-          <GeminiFunctionResponse
-            v-else-if="isFunctionResponsePart(part)"
-            :data="part.functionResponse"
-          />
-
-          <!-- Executable Code Part -->
-          <div v-else-if="isExecutableCodePart(part)" class="code-part">
-            <div class="code-header">
-              <span class="code-icon">💻</span>
-              <span class="code-lang">{{ part.executableCode.language }}</span>
-            </div>
-            <pre class="code-content">{{ part.executableCode.code }}</pre>
-          </div>
-
-          <!-- Code Execution Result Part -->
-          <div v-else-if="isCodeExecutionResultPart(part)" class="result-part">
-            <div class="result-header">
-              <span class="result-icon">📊</span>
-              <span
-                class="result-outcome"
-                :class="`outcome-${part.codeExecutionResult.outcome.toLowerCase()}`"
-              >
-                {{ part.codeExecutionResult.outcome }}
-              </span>
-            </div>
-            <pre class="result-output">{{ part.codeExecutionResult.output }}</pre>
-          </div>
-
-          <!-- Unknown Part -->
-          <div v-else class="part unknown-part">
-            <pre>{{ JSON.stringify(part, null, 2) }}</pre>
-          </div>
-        </template>
-      </template>
-
-      <!-- 多条内容：使用 SubMessageItem -->
-      <template v-else>
+      <!-- 统一使用 SubMessageItem 渲染所有 parts -->
+      <template v-for="(part, subIndex) in parts" :key="subIndex">
         <SubMessageItem
-          v-for="(part, subIndex) in parts"
-          :key="subIndex"
           :badge-type="getBadgeInfo(part).type"
           :badge-text="getBadgeInfo(part).text"
           :id="`${msgHashId}-part-${subIndex}`"

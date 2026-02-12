@@ -184,9 +184,10 @@ const hasContent = computed(() => contentBlocks.value.length > 0);
 
 /* Tool Result Header 样式 */
 .tool-id-ref {
+  color: var(--llm-text-primary);
   font-family: var(--llm-font-mono);
-  color: var(--llm-text-muted);
-  font-size: 0.9rem;
+  font-weight: 600;
+
 }
 
 .mini-image-placeholder {
