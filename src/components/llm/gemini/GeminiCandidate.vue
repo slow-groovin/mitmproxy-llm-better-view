@@ -46,7 +46,6 @@ const citationCount = computed(() => {
           {{ candidate.finishReason }}
         </span>
         <!-- Parts count moved to header -->
-        <span v-if="parts.length > 0" class="parts-count">{{ parts.length }} part(s)</span>
       </div>
       <div class="header-right">
         <span v-if="citationCount > 0" class="citation-count">{{ citationCount }} citation(s)</span>
@@ -149,26 +148,17 @@ const citationCount = computed(() => {
 .index {
   font-weight: 600;
   color: #374151;
-  font-size: 1rem;
+  font-size: 1.5rem;
 }
 
 .finish-reason {
   padding: 2px 8px;
   border-radius: 4px;
-  font-size: 0.8rem;
+  font-size: 1.5rem;
   font-weight: 500;
   text-transform: uppercase;
 }
 
-/* Parts count badge */
-.parts-count {
-  font-size: 0.8rem;
-  color: #64748b;
-  background: #e2e8f0;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-weight: 500;
-}
 
 .finish-stop {
   background: #dcfce7;
