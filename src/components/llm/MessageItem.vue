@@ -118,11 +118,12 @@ const toggleRawView = (e: MouseEvent) => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
+  /* min-width: 20px; */
+  /* height: 20px; */
+  padding: 0 3px;
   border: 1px solid var(--llm-border-color, #cbd5e1);
-  border-radius: 10px;
+  border-radius: 6px;
+  
   font-size: 1.1rem;
   font-weight: 500;
   color: var(--llm-text-muted, #94a3b8);
