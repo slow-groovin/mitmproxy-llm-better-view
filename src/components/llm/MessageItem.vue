@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, inject, Ref, watch } from 'vue';
 import { useSessionStorage } from '@vueuse/core';
 import { hashId } from '@/utils/id/hashId';
 import RoleBadge from './RoleBadge.vue';
@@ -21,12 +21,28 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 // 统一生成keyId
-const keyId = computed(() => 
+const keyId = computed(() =>
   props.id || hashId(props.dataAsText || `${props.index}-${props.role}`)
 );
 
 const isOpen = useSessionStorage(() => `${props.storagePrefix}-${keyId.value}-open`, true);
 const isRawView = useSessionStorage(() => `${props.storagePrefix}-${keyId.value}-raw`, false);
+
+// 注入全局折叠状态控制
+const globalCollapseState = inject<Ref<'expanded' | 'collapsed' | null>>('globalMessageCollapseState');
+
+// 监听全局折叠状态变化，同步更新本地状态
+watch(
+  () => globalCollapseState?.value,
+  (newState) => {
+    if (newState === 'expanded') {
+      isOpen.value = true;
+    } else if (newState === 'collapsed') {
+      isOpen.value = false;
+    }
+  },
+  { immediate: false }
+);
 
 const toggleRawView = (e: MouseEvent) => {
   e.stopPropagation();

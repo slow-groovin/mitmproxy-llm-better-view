@@ -16,8 +16,7 @@ interface Props {
 const props = defineProps<Props>();
 
 const storageKey = computed(() => {
-  const hash = hashId(JSON.stringify({ name: props.name, desc: props.description }));
-  return `tool-${props.standard}-${props.name}-${hash}-open`;
+  return `tool-${props.standard}-${props.name}-open`;
 });
 
 const isOpen = useStorage(storageKey.value, true);

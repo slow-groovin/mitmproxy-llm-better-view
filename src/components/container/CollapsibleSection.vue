@@ -1,27 +1,50 @@
 <script setup lang="ts">
 import { useStorage } from '@vueuse/core';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
 interface Props {
   title: string;
   defaultOpen?: boolean;
   count?: number | null;
   storageKey?: string;
+  /** 外部强制控制展开状态 */
+  forceOpen?: boolean | null;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   defaultOpen: false,
   count: null,
-  storageKey: undefined
+  storageKey: undefined,
+  forceOpen: null
 });
 
 const isOpen = props.storageKey
   ? useStorage(`llm-better-view-collapse-state-${props.storageKey}`, props.defaultOpen)
   : ref(props.defaultOpen);
 
+// 监听外部强制控制
+watch(() => props.forceOpen, (newVal) => {
+  if (newVal !== null && newVal !== undefined) {
+    isOpen.value = newVal;
+  }
+});
+
 const toggle = () => {
   isOpen.value = !isOpen.value;
 };
+
+// 暴露方法供父组件使用
+const ensureOpen = () => {
+  if (!isOpen.value) {
+    isOpen.value = true;
+  }
+};
+
+defineExpose({
+  isOpen,
+  toggle,
+  ensureOpen
+});
 </script>
 
 <template>
@@ -31,7 +54,13 @@ const toggle = () => {
         <span class="title">{{ title }}</span>
         <span v-if="count !== null" class="badge">{{ count }}</span>
       </div>
-      
+
+      <div style="flex-grow: 1;"/>
+      <!-- 右侧插槽，用于放置自定义按钮等 -->
+      <div class="header-right" @click.stop>
+        <slot name="header-right" />
+      </div>
+
       <svg 
         class="chevron-icon" 
         xmlns="http://www.w3.org/2000/svg" 
@@ -100,6 +129,13 @@ const toggle = () => {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 8px;
 }
 
 .title {
