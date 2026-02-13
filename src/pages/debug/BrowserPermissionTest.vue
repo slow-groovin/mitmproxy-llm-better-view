@@ -160,10 +160,10 @@ onMounted(() => {
 
 <template>
   <div class="browser-permission-test">
-    <h3>浏览器权限测试</h3>
+    <h3>Browser Permission Test</h3>
     
     <div class="section">
-      <h4>权限状态</h4>
+      <h4>Permission Status</h4>
       <div class="permission-list">
         <div v-for="perm in permissions" :key="perm.name" class="permission-item">
           <span class="perm-name">{{ perm.name }}</span>
@@ -174,14 +174,14 @@ onMounted(() => {
             @click="requestPermission(perm.name)"
             class="request-btn"
           >
-            请求权限
+            Request Permission
           </button>
         </div>
       </div>
     </div>
 
     <div class="section">
-      <h4>VueUse Storage 自动测试</h4>
+      <h4>VueUse Storage Auto Test</h4>
       <div class="storage-display">
         <div class="storage-item">
           <span class="label">useLocalStorage:</span>
@@ -197,14 +197,14 @@ onMounted(() => {
         </div>
       </div>
       <div class="button-group">
-        <button @click="testVueUseLocalStorage">测试 useLocalStorage</button>
-        <button @click="testVueUseSessionStorage">测试 useSessionStorage</button>
-        <button @click="testVueUseGenericStorage">测试 useStorage</button>
+        <button @click="testVueUseLocalStorage">Test useLocalStorage</button>
+        <button @click="testVueUseSessionStorage">Test useSessionStorage</button>
+        <button @click="testVueUseGenericStorage">Test useStorage</button>
       </div>
     </div>
 
     <div class="section">
-      <h4>原生 Storage 手动测试</h4>
+      <h4>Native Storage Manual Test</h4>
       <div class="input-group">
         <input v-model="testKey" placeholder="Storage key" class="input-field" />
         <input v-model="testInput" placeholder="Storage value" class="input-field" />
@@ -221,12 +221,12 @@ onMounted(() => {
         <button @click="testSessionStorageGet">Get</button>
         <button @click="testSessionStorageRemove">Remove</button>
         
-        <button @click="clearLogs" class="clear-btn">清空日志</button>
+         <button @click="clearLogs" class="clear-btn">Clear Logs</button>
       </div>
     </div>
 
     <div class="section">
-      <h4>操作日志</h4>
+      <h4>Action Logs</h4>
       <div class="log-list">
         <div v-for="(log, index) in storageLogs" :key="index" class="log-item">
           <span class="log-type">{{ log.type }}</span>
@@ -234,7 +234,7 @@ onMounted(() => {
           <span class="log-key">{{ log.key }}</span>
           <span class="log-value">{{ log.value }}</span>
         </div>
-        <div v-if="storageLogs.length === 0" class="empty-log">暂无日志</div>
+         <div v-if="storageLogs.length === 0" class="empty-log">No logs</div>
       </div>
     </div>
   </div>

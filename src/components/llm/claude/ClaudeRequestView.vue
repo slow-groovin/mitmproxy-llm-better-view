@@ -116,7 +116,7 @@ const hasSystemMessages = computed(() => {
       variant="default"
       :enable-bulk-actions="true"
     >
-      <div v-if="messages.length === 0" class="empty-state">暂无消息</div>
+      <div v-if="messages.length === 0" class="empty-state">No messages</div>
       <ClaudeMessageItem
         v-for="(message, index) in messages"
         :key="index"

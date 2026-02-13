@@ -82,7 +82,7 @@ function refreshData(standard: ApiStandard, datatype: DataType) {
           {{ activeStandard }} {{ activeDataType }}
         </div>
         <div class="success-msg">
-          {{ dataAsText ? '数据已加载' : '无数据' }}
+          {{ dataAsText ? 'Data Loaded' : 'No Data' }}
         </div>
       </div>
     </div>

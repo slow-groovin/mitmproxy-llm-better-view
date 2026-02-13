@@ -83,12 +83,12 @@ onUnmounted(() => {
 
 <template>
   <div class="url-listen-debug">
-    <h3>URL 监听调试</h3>
+    <h3>URL Listen Debug</h3>
 
     <!-- 基本信息 -->
     <div class="info-section">
       <div class="info-row">
-        <span class="label">完整 URL:</span>
+        <span class="label">Full URL:</span>
         <span class="value url-value">{{ currentUrl || 'N/A' }}</span>
       </div>
       <div class="info-row">
@@ -96,18 +96,18 @@ onUnmounted(() => {
         <span class="value">{{ currentHash || 'N/A' }}</span>
       </div>
       <div class="info-row">
-        <span class="label">更新次数:</span>
+        <span class="label">Update Count:</span>
         <span class="value">{{ updateCount }}</span>
       </div>
       <div class="info-row">
-        <span class="label">最后更新:</span>
+        <span class="label">Last Update:</span>
         <span class="value">{{ lastUpdateTime }}</span>
       </div>
     </div>
 
     <!-- URL 解析 -->
     <div v-if="urlParts" class="parsed-section">
-      <h4>URL 解析</h4>
+      <h4>URL Parse</h4>
       <div class="parsed-grid">
         <div class="parsed-item">
           <span class="parsed-label">Protocol</span>

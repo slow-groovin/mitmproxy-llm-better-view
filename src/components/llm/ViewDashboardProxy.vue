@@ -78,7 +78,7 @@ const transferResult = computed<TransferResult>(() => {
   } catch (err) {
     return {
       success: false,
-      error: err instanceof Error ? err.message : '数据转换失败',
+      error: err instanceof Error ? err.message : 'Data Conversion Failed',
       timestamp: Date.now()
     };
   }
@@ -97,7 +97,7 @@ const componentData = computed(() => {
 // 错误信息
 const errorMessage = computed(() => {
   if (hasComponentError.value) {
-    return `组件渲染错误: ${componentError.value?.message}`;
+    return `Component Render Error: ${componentError.value?.message}`;
   }
   return transferResult.value.error || null;
 });
@@ -122,22 +122,22 @@ const retry = () => {
     <!-- 组件错误 -->
     <div v-if="hasComponentError" class="error-state">
       <div class="error-icon">💥</div>
-      <div class="error-title">组件加载失败</div>
+      <div class="error-title">Component Load Failed</div>
       <div class="error-message">{{ componentError?.message }}</div>
-      <button @click="retry" class="retry-btn">重试</button>
+      <button @click="retry" class="retry-btn">Retry</button>
     </div>
 
     <!-- 数据错误 -->
     <div v-else-if="errorMessage" class="error-state">
       <div class="error-icon">⚠️</div>
-      <div class="error-title">数据解析失败</div>
+      <div class="error-title">Data Parse Failed</div>
       <div class="error-message">{{ errorMessage }}</div>
     </div>
 
     <!-- 空数据 -->
     <div v-else-if="!componentData" class="empty-state">
       <div class="empty-icon">📭</div>
-      <div class="empty-title">暂无数据</div>
+      <div class="empty-title">No Data</div>
     </div>
 
     <!-- 正常渲染 -->
@@ -145,7 +145,7 @@ const retry = () => {
       <!-- @vue-ignore -->
       <component :is="currentComponent" :data="componentData" :path="path" />
       <template #fallback>
-        <div class="loading-state">⏳ 加载中...</div>
+        <div class="loading-state">⏳ Loading...</div>
       </template>
     </Suspense>
   </div>

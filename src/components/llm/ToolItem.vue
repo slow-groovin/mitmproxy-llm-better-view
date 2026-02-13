@@ -136,13 +136,13 @@ const descPreview = computed(() => {
 
 .tool-name {
   font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
-  font-size: 1.4rem;
+  font-size: 1.6rem;
   font-weight: 600;
   padding: 4px 10px;
   border-radius: 4px;
   flex-shrink: 0;
-  background: #f3e8ff;
-  color: #7c3aed;
+  background: var(--llm-badge-tool-bg);
+  color: var(--llm-badge-tool-text);
 }
 
 .tool-desc-preview {

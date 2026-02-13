@@ -165,7 +165,7 @@ const formattedData = computed(() => {
       <!-- 结果状态区 -->
       <div v-if="result" class="result-box">
         <div class="status-badge" :class="{ success: result.success, error: !result.success }">
-          {{ result.success ? '成功' : '失败' }}
+          {{ result.success ? 'Success' : 'Failed' }}
         </div>
         <div v-if="hasError" class="error-msg">{{ result.error }}</div>
         <div v-else class="success-msg">
