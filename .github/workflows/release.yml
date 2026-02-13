@@ -50,3 +50,13 @@ jobs:
           asset_path: ./dist/mtimweb-llm-better-view.js
           asset_name: mtimweb-llm-better-view-${{ steps.get_tag.outputs.TAG_NAME }}.js
           asset_content_type: application/javascript
+
+      - name: Upload dist.js as release asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist.js
+          asset_name: dist-${{ steps.get_tag.outputs.TAG_NAME }}.js
+          asset_content_type: application/javascript
