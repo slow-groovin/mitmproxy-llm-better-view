@@ -6,7 +6,7 @@ import { CallAction, Flow } from '../types/flow';
 
 export type HookFunc = (type: 'request' | 'response', text: any, flow: Flow) => DocumentFragment | HTMLElement | null | void;
 
-const originalFetch = unsafeWindow.fetch;
+const originalFetch = (typeof unsafeWindow !== 'undefined' ? unsafeWindow : window).fetch;
 
 export function initRouteListener(hook: HookFunc) {
   listenUrlChange(async ({ uuid, action }) => {
