@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="src/assets/icon-raw.png" height="24" alt="icon" />
+  <img src="src/assets/icon.png" height="24" alt="icon" />
   <span style="vertical-align: middle; font-size: 24px;"> Mitmproxy LLM Better View</span>
 </div>
 
