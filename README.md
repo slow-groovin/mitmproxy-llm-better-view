@@ -1,7 +1,9 @@
 <div align="center">
-  <img src="src/assets/icon-raw.png.png" height="24" alt="icon" />
+  <img src="src/assets/icon-raw.png" height="24" alt="icon" />
   <span style="vertical-align: middle; font-size: 24px;"> Mitmproxy LLM Better View</span>
 </div>
+
+
 
 A Tampermonkey script for LLM API Request/Response Visualization in mitmweb.
 
@@ -17,6 +19,8 @@ A Tampermonkey script for LLM API Request/Response Visualization in mitmweb.
   *Screenshot3:*
   ![3](./docs/screenshot3.png)
 </details>
+
+<a href="docs/README_CN.md">简体中文README</a>
 
 ## Features
 
@@ -68,7 +72,7 @@ npm run dev
 
 ## Notes
 
-This feature is developed and tested based on the author's usage patterns. It may not cover all API usage scenarios. Please submit an ISSUE to add support for uncovered parameters/types.
+This is developed and tested based on the author's usage patterns. It may not cover all API usage scenarios. Please submit an ISSUE to add support for uncovered parameters/types.
 
 ## Future Plans
 

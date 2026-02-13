@@ -1,7 +1,7 @@
 # Mitmproxy LLM Better View
 
 <div align="center">
-  <imgser src="../src/assets/icon-raw.png.png" height="24" alt="icon" />
+  <imgser src="../src/assets/icon-raw.png" height="24" alt="icon" />
   <span style="vertical-align: middle; font-size: 24px;"> Mitmproxy LLM Better View</span>
 </div>
 
