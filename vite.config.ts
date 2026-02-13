@@ -22,7 +22,7 @@ export default defineConfig({
         },
         icon: 'https://s3.api2o.com/mitm-better-view.svg',
         description: {
-          '': 'Better view request body and response body of LLM API (openai completion) in mitmweb',
+          '': 'LLM(openai, gemini, claude) API Request/Response Visualization in mitmweb.',
           'zh-CN': '在 mitmweb 中查看大模型请求中的信息 '
         },
         homepage: 'https://github.com/slow-groovin/mitmproxy-llm-better-view',

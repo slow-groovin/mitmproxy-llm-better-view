@@ -1,7 +1,7 @@
 <!-- ClaudeRequestView.vue -->
 <script setup lang="ts">
 import BetterDetails from '@/components/container/BetterDetails.vue';
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import type { ClaudeRequest } from '../../../types/claude/claude-request';
 import CollapsibleSection from '../../container/CollapsibleSection.vue';
 import LabelValueRow from '../../content/LabelValueRow.vue';

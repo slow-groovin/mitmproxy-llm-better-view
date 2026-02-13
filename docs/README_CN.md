@@ -1,45 +1,81 @@
-# 在 mitmproxy 中更好的查看 LLM API（如 OpenAI Completion）的请求和响应
+# Mitmproxy LLM Better View
 
-![对比图](./compare-1.png)
-![](https://raw.githubusercontent.com/slow-groovin/mitmproxy-llm-better-view/refs/heads/main/docs/mitm-better-view.webp)
+<div align="center">
+  <imgser src="../src/assets/icon-raw.png.png" height="24" alt="icon" />
+  <span style="vertical-align: middle; font-size: 24px;"> Mitmproxy LLM Better View</span>
+</div>
 
-[English README](../README.md)
+一个用于在 mitmweb 中可视化大模型 API 请求/响应的 Tampermonkey 脚本。
 
-## 快速开始
-本项目提供了两种工具：
-1. mitmproxy addon 脚本，可在 mitmproxy 运行时通过参数添加
-2. （仅支持 mitmweb）Tampermonkey 脚本
+<details>
+  <summary>查看截图</summary>
+  
+  *截图1:*
+  ![1](./screenshot1.png)
+  *截图2:*
+  ![2](./screenshot2.png)
+  *截图3:*
+  ![3](./screenshot3.png)
+</details>
 
-### 方式1：mitmproxy addon 脚本
+## 功能特性
+
+- **请求/响应可视化**: 格式化显示消息、工具和元数据
+- **多平台支持**: OpenAI Chat Completion、Claude 和 Gemini
+- **SSE 支持**: 处理流式响应
+- **可折叠区域**: 折叠/展开消息和工具调用
+
+## 安装
+
+> 如果你没有在 8081 或 9090 端口上运行 mitmweb，那么你**必须**修改 Tampermonkey 脚本的匹配 URL 为你使用的地址。
+
+### 从 GreasyFork 安装（推荐）
+
+直接从以下地址安装：https://greasyfork.org/scripts/540917-mitmproxy-llm-better-view
+
+### 手动安装
+
+从发布页面下载，然后手动安装
+
+### 手动构建
 
 ```bash
+# 克隆仓库
 git clone https://github.com/slow-groovin/mitmproxy-llm-better-view.git
+cd mitmproxy-llm-better-view
+
+# 安装依赖
+npm install
+
+# 构建脚本
+npm run build
+
+# 输出文件将在 dist/mitmproxy-llm-better-view.user.js
 ```
 
-在 `~/.mitmproxy/config.yaml` 中添加持久化配置：
+## 使用方法
 
-```yaml
-# ... 你的其他配置
-scripts:
-  - <目录路径>\addon\openai_req.py
-  - <目录路径>\addon\openai_res.py
-  - <目录路径>\addon\openai_res_sse.py
+1. 安装 Tampermonkey 脚本
+2. 在浏览器中打开 mitmweb
+3. 点击任意 LLM API 请求/响应以查看增强视图
+
+## 开发
+
+```bash
+# 启动开发服务器（支持热重载）
+npm run dev
 ```
 
-> 你也可以在启动时通过 `-s` 参数指定脚本：
-> `mitmweb -s .\openai_req.py -s .\openai_res.py -s .\openai_res_sse.py`
+## 说明
 
-### 方式2：Tampermonkey 脚本
+本功能依靠作者使用方式进行测试开发, 无法覆盖到所有API使用场景, 欢迎提ISSUE增加对未覆盖的参数/类型的支持
 
-直接安装:
+## 未来计划
 
-https://greasyfork.org/scripts/540917-mitmproxy-llm-better-view
+1. ollama api
+2. openai response api
 
-## 工作原理
-### 方式1：mitmproxy addon 脚本
+## 相关项目
 
-本工具利用 mitmproxy 的 [contentviews](https://docs.mitmproxy.org/stable/addons/contentviews/) ，将 openai api 的请求体和响应内容转换为 Markdown 格式进行展示。
-
-### 方式2：Tampermonkey 脚本
-
-通过 JS 在页面内获取数据并渲染为静态 HTML，然后通过 iframe 嵌入页面显示。
+- [mitmproxy](https://mitmproxy.org/) - 一个交互式的支持 TLS 拦截的 HTTP 代理
+- [Tampermonkey](https://www.tampermonkey.net/) - 世界上最流行的用户脚本管理器

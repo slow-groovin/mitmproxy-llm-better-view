@@ -7,7 +7,6 @@ import type {
   OpenaiChatMessage,
   MessageContent,
   AssistantMessage,
-  ToolMessage,
   TextContentItem,
   ImageContentItem,
 } from '@/types/openai/chat-request';
@@ -69,18 +68,10 @@ const toolRequests = computed(() => {
   return (props.message as AssistantMessage).tool_calls || [];
 });
 
-// 工具调用响应 (来自tool)
-const toolResponse = computed(() => {
-  if (props.message.role !== 'tool') return null;
-  const msg = props.message as ToolMessage;
-  return { id: msg.tool_call_id, name: msg.name };
-});
+
 
 const hasContent = computed(() => contentItems.value.length > 0);
 
-function scrollTo(selector: string) {
-  document.querySelector(selector)?.scrollIntoView({ behavior: 'smooth' });
-}
 </script>
 
 <template>

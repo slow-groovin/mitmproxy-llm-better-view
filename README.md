@@ -1,45 +1,81 @@
-# Better view request body and response body of LLM API (openai completion) in mitmproxy
+<div align="center">
+  <img src="src/assets/icon-raw.png.png" height="24" alt="icon" />
+  <span style="vertical-align: middle; font-size: 24px;"> Mitmproxy LLM Better View</span>
+</div>
 
-![compare](./docs/compare-1.png)
-![](https://raw.githubusercontent.com/slow-groovin/mitmproxy-llm-better-view/refs/heads/main/docs/mitm-better-view.webp)
+A Tampermonkey script for LLM API Request/Response Visualization in mitmweb.
 
-[中文文档](./docs/README_CN.md)
+*Screenshot1:*
+![1](./docs/screenshot1.png)
 
-## Quick Start
-This project provides two tools (**The two are conflicting**):
-1. mitmproxy addon scripts, which can be added when executing mitmproxy/mitmweb
-2. (mitmweb only) Tampermonkey script
+<details>
+  <summary>More Screenshots</summary>
+  
 
-### Method 1: mitmproxy addon scripts
+  *Screenshot2:*
+  ![2](./docs/screenshot2.png)
+  *Screenshot3:*
+  ![3](./docs/screenshot3.png)
+</details>
+
+## Features
+
+- **Request/Response Visualization**: Formatted display of messages, tools, and metadata
+- **Multi-Platform Support**: OpenAI Chat Completion, Claude, and Gemini
+- **SSE Support**: Handles streaming responses
+- **Collapsible Sections**: Fold/unfold messages and tool calls
+
+## Installation
+> If you’re not running mitmweb on ports 8081 or 9090, then you **must** change the Tampermonkey script’s matching URL to the address you’re using.
+
+
+### From GreasyFork (Recommended)
+
+Install directly from: https://greasyfork.org/scripts/540917-mitmproxy-llm-better-view
+
+
+### Manual Install 
+Download from release, and install mannually
+
+### Manual Build
 
 ```bash
+# Clone the repository
 git clone https://github.com/slow-groovin/mitmproxy-llm-better-view.git
+cd mitmproxy-llm-better-view
+
+# Install dependencies
+npm install
+
+# Build the script
+npm run build
+
+# The output will be in dist/mitmproxy-llm-better-view.user.js
 ```
 
-Add persistent configuration in `~/.mitmproxy/config.yaml`:
+## Usage
 
-```yaml
-# ... your other configs
-scripts:
-  - <dir path>\addon\openai_req.py
-  - <dir path>\addon\openai_res.py
-  - <dir path>\addon\openai_res_sse.py
+1. Install the Tampermonkey script
+2. Open mitmweb in your browser
+3. Click on any LLM API request/response to see the enhanced view
+
+## Development
+
+```bash
+# Start development server with hot reload
+npm run dev
 ```
 
-> You can also specify the scripts at launch using the `-s` parameter:
-> `mitmweb -s .\openai_req.py -s .\openai_res.py -s .\openai_res_sse.py`
+## Notes
 
-### Method 2: Tampermonkey script
+This feature is developed and tested based on the author's usage patterns. It may not cover all API usage scenarios. Please submit an ISSUE to add support for uncovered parameters/types.
 
-visit and install:
+## Future Plans
 
-https://greasyfork.org/scripts/540917-mitmproxy-llm-better-view
+- Ollama API
+- OpenAI Response API
 
-## How It Works
-### Method 1: mitmproxy addon scripts
+## Related Projects
 
-This uses mitmproxy's [contentviews](https://docs.mitmproxy.org/stable/addons/contentviews/) to convert the request body and response content of OpenAI API into Markdown format for better viewing.
-
-### Method 2: Tampermonkey script
-
-Uses JS to fetch data on the page, render it as static HTML, and embed it into the page via an iframe.
+- [mitmproxy](https://mitmproxy.org/) - An interactive TLS-capable intercepting HTTP proxy
+- [Tampermonkey](https://www.tampermonkey.net/) - The world's most popular userscript manager
