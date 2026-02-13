@@ -123,9 +123,14 @@ const systemInstructionText = computed(() => {
 
     <!-- Tools Section -->
     <!-- Gemini 的 tools 是 [{ functionDeclarations: [...] }] 结构, 和 Claude 不同 -->
-    <CollapsibleSection v-if="tools.length > 0" title="Tools"
-      :count="tools.reduce((acc, t) => acc + (t.functionDeclarations?.length || 0), 0)" storage-key="gemini-tools"
-      variant="tools">
+    <CollapsibleSection
+      v-if="tools.length > 0"
+      title="Tools"
+      :count="tools.reduce((acc, t) => acc + (t.functionDeclarations?.length || 0), 0)"
+      storage-key="gemini-tools"
+      variant="tools"
+      enable-bulk-actions
+    >
       <template v-for="(tool, toolIdx) in tools" :key="toolIdx">
         <ToolItem
           v-for="(func, funcIdx) in tool.functionDeclarations"

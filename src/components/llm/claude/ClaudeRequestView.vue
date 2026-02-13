@@ -125,12 +125,13 @@ const hasSystemMessages = computed(() => {
       />
     </CollapsibleSection>
 
-    <CollapsibleSection 
-      v-if="tools.length > 0" 
-      title="Tools" 
-      :count="tools.length" 
+    <CollapsibleSection
+      v-if="tools.length > 0"
+      title="Tools"
+      :count="tools.length"
       storage-key="claude-tools"
       variant="tools"
+      enable-bulk-actions
     >
       <ToolItem
         v-for="(tool, index) in tools"

@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, inject, ref, Ref, watch } from 'vue';
 import { useStorage } from '@vueuse/core';
-import { hashId } from '@/utils/id/hashId';
 import SmartViewer from '@/components/content/SmartViewer.vue';
 import ToolParameters from './ToolParameters.vue';
 
@@ -24,6 +23,22 @@ const toggle = () => { isOpen.value = !isOpen.value; };
 
 const showRaw = ref(false);
 const toggleRaw = () => { showRaw.value = !showRaw.value; };
+
+// 监听 CollapsibleSection 提供的批量折叠状态
+const bulkCollapseState = inject<Ref<'collapsed' | 'expanded' | null>>('bulkCollapseState');
+
+// 监听批量折叠状态变化，同步更新本地状态
+watch(
+  () => bulkCollapseState?.value,
+  (newState) => {
+    if (newState === 'expanded') {
+      isOpen.value = true;
+    } else if (newState === 'collapsed') {
+      isOpen.value = false;
+    }
+  },
+  { immediate: false }
+);
 
 const toggleIcon = computed(() => isOpen.value ? '▼' : '▶');
 const descPreview = computed(() => {

@@ -1,0 +1,85 @@
+import { toast } from "vue-sonner";
+import { logger } from "./lib/logtape";
+import { initPageInjector } from "./lib/page-injector";
+import { HookFunc, initRouteListener } from "./lib/pipeline";
+import { isOpenAIReq, isOpenAIRes, isSSE, isAnthropicReq, isAnthropicRes, isGeminiReq, isGeminiRes } from "./llm/judge";
+import { ApiStandard, DataType } from "./types/flow";
+import { useCurrentFlowStore } from "./store/llm";
+import Dashboard from './pages/Dashboard.vue';
+
+
+
+export function useEntry() {
+  const { setLLMData } = useCurrentFlowStore();
+
+  // Hook function for processing LLM requests/responses
+  const handleLLMData: HookFunc = (type, flowData, flow) => {
+    logger.debug`Detected request/response ${{ type, flowData, flow }}`;
+    try {
+      let standard: ApiStandard | null = null;
+      let dataType: DataType | null = null;
+      const dataAsText = flowData.text
+      // Parse the response data
+      // const data = parseResponseData(dataAsText);
+      // logger.debug`dataTExt: ${dataAsText}`
+      // Detect platform and view type
+      if (isOpenAIReq(type, dataAsText, flow)) {
+        standard = 'openai';
+        dataType = 'request';
+      } else if (isOpenAIRes(type, dataAsText, flow)) {
+        standard = 'openai';
+        if (isSSE(flow)) {
+          dataType = 'sse';
+        } else {
+          dataType = 'response';
+        }
+      } else if (isAnthropicReq(type, dataAsText, flow)) {
+        standard = 'claude';
+        dataType = 'request';
+        toast('Claude Request detected');
+      } else if (isAnthropicRes(type, dataAsText, flow)) {
+        standard = 'claude';
+        if (isSSE(flow)) {
+          dataType = 'sse';
+        } else {
+          dataType = 'response';
+        }
+      } else if (isGeminiReq(type, dataAsText, flow)) {
+        standard = 'gemini';
+        dataType = 'request';
+      } else if (isGeminiRes(type, dataAsText, flow)) {
+        standard = 'gemini';
+        if (isSSE(flow)) {
+          dataType = 'sse';
+        } else {
+          dataType = 'response';
+        }
+      }
+
+      if (standard && dataAsText && dataType) {
+        setLLMData(standard, dataType, dataAsText, flow);
+
+        logger.info`Dashboard data updated  ${{ standard: standard, view: dataType }}`;
+
+        initPageInjector({
+          component: Dashboard,
+        });
+      } else {
+        logger.warn('Unknown type or no data', { type, hasData: !!dataAsText });
+      }
+    } catch (error) {
+      logger.error(error as Error);
+      toast('Error processing request');
+    }
+
+    // Return null to not modify the original response
+    return null;
+  };
+
+  // Initialize route listener
+  return {
+    init: () => initRouteListener(handleLLMData)
+  }
+
+
+}

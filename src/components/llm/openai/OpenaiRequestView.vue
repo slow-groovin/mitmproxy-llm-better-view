@@ -81,7 +81,14 @@ const stopValue = computed(() => {
         :message="message" />
     </CollapsibleSection>
 
-    <CollapsibleSection v-if="tools.length > 0" title="Tools" storage-key="tools" :count="tools.length" variant="tools">
+    <CollapsibleSection
+      v-if="tools.length > 0"
+      title="Tools"
+      storage-key="tools"
+      :count="tools.length"
+      variant="tools"
+      enable-bulk-actions
+    >
       <ToolItem v-for="(tool, index) in tools" :key="index" :name="tool.function.name"
         :description="tool.function.description" :params="tool.function.parameters" :index="index" standard="openai" />
     </CollapsibleSection>
