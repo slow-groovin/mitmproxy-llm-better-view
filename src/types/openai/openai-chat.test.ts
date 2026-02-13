@@ -152,7 +152,7 @@ const openAiChatRequest: OpenaiChatRequest =
               "type": "number"
             },
             "workdir": {
-              "description": "The working directory to run the command in. Defaults to /home/user13500/code/repo/mitmproxy-llm-better-view. Use this instead of 'cd' commands.",
+              "description": "The working directory to run the command in. Defaults to /home/user12345/code/repo/mitmproxy-llm-better-view. Use this instead of 'cd' commands.",
               "type": "string"
             },
             "description": {
