@@ -28,12 +28,12 @@ const keyId = computed(() =>
 const isOpen = useSessionStorage(() => `${props.storagePrefix}-${keyId.value}-open`, true);
 const isRawView = useSessionStorage(() => `${props.storagePrefix}-${keyId.value}-raw`, false);
 
-// 注入全局折叠状态控制
-const globalCollapseState = inject<Ref<'expanded' | 'collapsed' | null>>('globalMessageCollapseState');
+// 监听 CollapsibleSection 提供的批量折叠状态
+const bulkCollapseState = inject<Ref<'collapsed' | 'expanded' | null>>('bulkCollapseState');
 
-// 监听全局折叠状态变化，同步更新本地状态
+// 监听批量折叠状态变化，同步更新本地状态
 watch(
-  () => globalCollapseState?.value,
+  () => bulkCollapseState?.value,
   (newState) => {
     if (newState === 'expanded') {
       isOpen.value = true;

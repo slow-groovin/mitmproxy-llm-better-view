@@ -1,7 +1,7 @@
 <!-- ClaudeRequestView.vue -->
 <script setup lang="ts">
 import BetterDetails from '@/components/container/BetterDetails.vue';
-import { computed, provide, ref } from 'vue';
+import { computed, ref } from 'vue';
 import type { ClaudeRequest } from '../../../types/claude/claude-request';
 import CollapsibleSection from '../../container/CollapsibleSection.vue';
 import LabelValueRow from '../../content/LabelValueRow.vue';
@@ -11,25 +11,14 @@ import ClaudeMessageItem from './ClaudeMessageItem.vue';
 import ClaudeSystemMessage from './ClaudeSystemMessage.vue';
 import ClaudeIcon from '@/assets/claude.svg';
 
-const globalMessageCollapseState = ref<'expanded' | 'collapsed' | null>(null);
-provide('globalMessageCollapseState', globalMessageCollapseState);
-
-const messagesSectionRef = ref<{ isOpen: boolean; toggle: () => void; ensureOpen: () => void } | null>(null);
-
-const handleCollapseAll = () => {
-  globalMessageCollapseState.value = 'collapsed';
-};
-
-const handleExpandAll = () => {
-  messagesSectionRef.value?.ensureOpen();
-  globalMessageCollapseState.value = 'expanded';
-};
-
 interface Props {
   data: ClaudeRequest;
 }
 
 const props = defineProps<Props>();
+
+// 移除旧的 provide/inject 方式，改用 CollapsibleSection 内置的 bulkCollapseState
+// 子组件通过 inject('bulkCollapseState') 监听批量操作状态
 
 const messages = computed(() => props.data.messages || []);
 const tools = computed(() => props.data.tools || []);
@@ -120,34 +109,19 @@ const hasSystemMessages = computed(() => {
     </CollapsibleSection>
 
     <CollapsibleSection
-      ref="messagesSectionRef"
       title="Messages"
       :count="messages.length"
       :default-open="true"
       storage-key="claude-messages"
       variant="default"
+      :enable-bulk-actions="true"
     >
-      <template #header-right>
-        <button class="icon-btn" title="折叠全部" @click.stop="handleCollapseAll">
-          <!-- 双箭头向上 = 全部折叠 -->
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M17 11l-5-5-5 5M17 18l-5-5-5 5"/>
-          </svg>
-        </button>
-        <button class="icon-btn" title="展开全部" @click.stop="handleExpandAll">
-          <!-- 双箭头向下 = 全部展开 -->
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M7 13l5 5 5-5M7 6l5 5 5-5"/>
-          </svg>
-        </button>
-      </template>
-      
       <div v-if="messages.length === 0" class="empty-state">暂无消息</div>
-      <ClaudeMessageItem 
-        v-for="(message, index) in messages" 
-        :key="index" 
-        :message="message" 
-        :index="index + 1" 
+      <ClaudeMessageItem
+        v-for="(message, index) in messages"
+        :key="index"
+        :message="message"
+        :index="index + 1"
       />
     </CollapsibleSection>
 
@@ -222,31 +196,6 @@ const hasSystemMessages = computed(() => {
 
 .divider {
   color: #d1d5db;
-}
-
-.icon-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  border: 1px solid var(--llm-border-color, #cbd5e1);
-  border-radius: var(--llm-radius-sm, 4px);
-  background: #fff;
-  color: var(--llm-text-secondary, #64748b);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.icon-btn:hover {
-  border-color: var(--llm-border-dark, #94a3b8);
-  background: var(--llm-bg-hover, #f1f5f9);
-  color: var(--llm-text-primary, #475569);
-}
-
-.icon-btn:active {
-  transform: scale(0.95);
 }
 
 .empty-state {

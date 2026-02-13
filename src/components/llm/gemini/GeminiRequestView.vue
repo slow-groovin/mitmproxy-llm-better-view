@@ -114,7 +114,7 @@ const systemInstructionText = computed(() => {
 
     <!-- Contents Section -->
     <CollapsibleSection title="Contents" :count="contents.length" :default-open="true" storage-key="gemini-contents"
-      variant="default">
+      variant="default" enable-bulk-actions>
       <div v-if="contents.length === 0" class="empty-state">
         No contents
       </div>

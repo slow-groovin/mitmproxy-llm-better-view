@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useStorage } from '@vueuse/core';
-import { ref, watch } from 'vue';
+import { ref, watch, provide, readonly } from 'vue';
+import CollapseAllIcon from '@/assets/collapse-all.svg';
+import ExpandAllIcon from '@/assets/expand-all.svg';
 
 interface Props {
   title: string;
@@ -9,18 +11,27 @@ interface Props {
   storageKey?: string;
   /** 外部强制控制展开状态 */
   forceOpen?: boolean | null;
+  /** 是否启用批量折叠/展开功能，默认 false */
+  enableBulkActions?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   defaultOpen: false,
   count: null,
   storageKey: undefined,
-  forceOpen: null
+  forceOpen: null,
+  enableBulkActions: false
 });
 
 const isOpen = props.storageKey
   ? useStorage(`llm-better-view-collapse-state-${props.storageKey}`, props.defaultOpen)
   : ref(props.defaultOpen);
+
+// 批量操作状态：null = 无操作，'collapsed' = 全部折叠，'expanded' = 全部展开
+const bulkCollapseState = ref<'collapsed' | 'expanded' | null>(null);
+
+// 向子组件提供只读的批量操作状态
+provide('bulkCollapseState', readonly(bulkCollapseState));
 
 // 监听外部强制控制
 watch(() => props.forceOpen, (newVal) => {
@@ -40,6 +51,21 @@ const ensureOpen = () => {
   }
 };
 
+// 批量折叠全部
+const handleCollapseAll = () => {
+  bulkCollapseState.value = 'collapsed';
+  // 重置状态，允许再次触发相同操作
+  setTimeout(() => { bulkCollapseState.value = null; }, 50);
+};
+
+// 批量展开全部
+const handleExpandAll = () => {
+  ensureOpen();
+  bulkCollapseState.value = 'expanded';
+  // 重置状态，允许再次触发相同操作
+  setTimeout(() => { bulkCollapseState.value = null; }, 50);
+};
+
 defineExpose({
   isOpen,
   toggle,
@@ -56,6 +82,16 @@ defineExpose({
       </div>
 
       <div style="flex-grow: 1;"/>
+      <!-- 批量操作按钮，可配置启用 -->
+      <div v-if="enableBulkActions" class="header-actions" @click.stop>
+        <button class="action-btn" title="Collapse All" @click.stop="handleCollapseAll">
+          <img :src="CollapseAllIcon" class="action-icon" alt="" />
+        </button>
+        <button class="action-btn" title="Expand All" @click.stop="handleExpandAll">
+          <img :src="ExpandAllIcon" class="action-icon" alt="" />
+        </button>
+      </div>
+
       <!-- 右侧插槽，用于放置自定义按钮等 -->
       <div class="header-right" @click.stop>
         <slot name="header-right" />
@@ -155,17 +191,18 @@ defineExpose({
   padding: 4px 8px;
   border-radius: 6px;
 }
-
 .chevron-icon {
   color: #64748b;
+  /* 1. 添加默认旋转 -90度，使箭头指向右侧 ( > ) */
+  transform: rotate(-90deg); 
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s;
 }
 
 .collapse-card.is-open .chevron-icon {
-  transform: rotate(180deg);
+  /* 2. 展开时恢复 0度，显示 SVG 原本的向下形状 ( v ) */
+  transform: rotate(0deg);
   color: #475569;
 }
-
 .card-content-wrapper {
   display: grid;
   grid-template-rows: 0fr;
@@ -183,5 +220,49 @@ defineExpose({
 
 .content-padding {
   padding: 2px;
+}
+
+/* 批量操作按钮样式 */
+.header-actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.card-header:hover .header-actions {
+  opacity: 1;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: var(--llm-radius-sm, 4px);
+  background: transparent;
+  color: var(--llm-text-secondary, #64748b);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+  background: var(--llm-bg-hover, #f1f5f9);
+}
+
+.action-btn:hover .action-icon {
+  filter: brightness(0.7);
+}
+
+.action-btn:active {
+  transform: scale(0.95);
+}
+
+.action-icon {
+  width: 16px;
+  height: 16px;
 }
 </style>

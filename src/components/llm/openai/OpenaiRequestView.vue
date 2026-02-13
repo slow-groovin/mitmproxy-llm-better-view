@@ -73,7 +73,7 @@ const stopValue = computed(() => {
     </CollapsibleSection>
 
     <CollapsibleSection title="Messages" :count="messages.length" :default-open="true" storage-key="messages"
-      variant="default">
+      enable-bulk-actions variant="default">
       <div v-if="messages.length === 0" class="empty-state">
         No messages
       </div>
@@ -82,15 +82,8 @@ const stopValue = computed(() => {
     </CollapsibleSection>
 
     <CollapsibleSection v-if="tools.length > 0" title="Tools" storage-key="tools" :count="tools.length" variant="tools">
-      <ToolItem
-        v-for="(tool, index) in tools"
-        :key="index"
-        :name="tool.function.name"
-        :description="tool.function.description"
-        :params="tool.function.parameters"
-        :index="index"
-        standard="openai"
-      />
+      <ToolItem v-for="(tool, index) in tools" :key="index" :name="tool.function.name"
+        :description="tool.function.description" :params="tool.function.parameters" :index="index" standard="openai" />
     </CollapsibleSection>
 
     <BetterDetails title="Full Request">
