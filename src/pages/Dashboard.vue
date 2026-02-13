@@ -2,7 +2,7 @@
 import ViewDashboardProxy from '@/components/llm/ViewDashboardProxy.vue';
 import { useCurrentFlowStore } from '@/store/llm';
 import { computed } from 'vue';
-
+import icon from '@/assets/icon.png'
 const { standard, dataType, dataAsText, flow } = useCurrentFlowStore()
 
 // 根据 API 标准获取对应的主题颜色
@@ -29,10 +29,12 @@ const subjectColor = computed(() => {
   >
     <summary class="summary">
       <span class="arrow">▸</span>
-      <div style="width: 40%;"></div>
+      <div style="flex:1"></div>
       <div class="title">
+        <img :src="icon"  height="24px"/>
         <span style="width: 4px; height: 4px; display: inline-block;"></span>
         <span class="text">LLM Better View</span>
+
       </div>
       <div style="flex:1"></div>
       <a href="https://github.com/mitmproxy/mitmproxy" target="_blank" rel="noopener noreferrer" class="github-link"
@@ -108,6 +110,7 @@ const subjectColor = computed(() => {
   display: flex;
   align-items: center;
   font-size: 1.25rem;
+  white-space: nowrap;
   font-weight: 600;
   color: #1e293b;
 }

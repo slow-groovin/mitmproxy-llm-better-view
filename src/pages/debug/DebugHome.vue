@@ -34,7 +34,6 @@ const tabs = shallowRef<TabItem[]>([
   { name: 'Transfer', component: TransferDebug as Component },
   { name: 'Render', component: RenderDebug as Component },
 
-
   ]);
 </script>
 

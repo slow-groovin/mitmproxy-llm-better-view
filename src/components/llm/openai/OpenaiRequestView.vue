@@ -9,6 +9,7 @@ import BetterDetails from '@/components/container/BetterDetails.vue';
 import SmartViewer from '../../content/SmartViewer.vue';
 import OpenaiIcon from '@/assets/openai.svg';
 
+
 interface Props {
   data: OpenaiChatRequest;
 }
@@ -17,6 +18,7 @@ const props = defineProps<Props>();
 
 const messages = computed(() => props.data.messages || []);
 const tools = computed(() => props.data.tools || []);
+
 
 const toolChoice = computed(() => {
   const tc = props.data.tool_choice;
