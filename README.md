@@ -1,8 +1,7 @@
 <div align="center">
-  <img src="src/assets/icon.png" height="24" alt="icon" />
-  <span style="vertical-align: middle; font-size: 24px;"> Mitmproxy LLM Better View</span>
+<img src="src/assets/icon.png" height="48" alt="icon" />
+<h1>Mitmproxy LLM Better View</h1>
 </div>
-
 
 
 A Tampermonkey script for LLM API Request/Response Visualization in mitmweb.
