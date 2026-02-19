@@ -48,12 +48,22 @@ const contentBlocks = computed<ExtendedBlock[]>(() => {
   return [];
 });
 
+const messageCount = computed(() => {
+  const content = props.message.content;
+  if (typeof content === 'string') {
+    return 1; // 字符串内容返回 1
+  } else if (Array.isArray(content)) {
+    return content.length; // 数组内容返回数组长度
+  }
+  return 0; // 空内容返回 0
+});
+
 const hasContent = computed(() => contentBlocks.value.length > 0);
 </script>
 
 <template>
   <MessageItem 
-    :count="message.content.length" 
+    :count="messageCount" 
     :data-as-text="JSON.stringify(message, null, 2)" 
     :index="String(index)"
     :role="message.role" 
