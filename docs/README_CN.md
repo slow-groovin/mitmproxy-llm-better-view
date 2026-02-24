@@ -143,19 +143,15 @@ model_provider = "your-provider"
 
 ---
 
-#### 如果你使用官方 ChatGPT 计划
+#### 如果你使用官方 ChatGPT 订阅
 
-这会更复杂一些。
 
-由于 Codex 是用 Rust 构建的，你不能使用：
-
-```bash
-export NODE_TLS_REJECT_UNAUTHORIZED=0
+```sh
+export OPENAI_BASE_URL="https://api.openai.com/v1"
+codex
 ```
 
-来绕过证书验证。
-
-你可能需要在系统信任存储中安装并信任 mitmproxy CA 证书。
+ref: https://developers.openai.com/codex/config-advanced/
 
 </details>
 
