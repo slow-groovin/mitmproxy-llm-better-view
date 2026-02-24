@@ -1,10 +1,12 @@
 <div align="center">
-<img src="src/assets/icon.png" height="48" alt="icon" />
+<img src="src/assets/icon.png" height="20" alt="icon" />
 <h1>Mitmproxy LLM Better View</h1>
 </div>
 
 
-A Tampermonkey script for LLM API Request/Response Visualization in mitmweb.
+<a href="docs/README_CN.md">简体中文README</a>
+
+**A Tampermonkey script for LLM API Request/Response Visualization in mitmweb.**
 
 *Screenshot1:*
 ![1](./docs/screenshot1.png)
@@ -19,7 +21,41 @@ A Tampermonkey script for LLM API Request/Response Visualization in mitmweb.
   ![3](./docs/screenshot3.png)
 </details>
 
-<a href="docs/README_CN.md">简体中文README</a>
+
+## Usage
+### Step 1. Install Mitmproxy
+
+
+### Step 2. Make the application's http request go through mitmproxy's reverse proxy.
+
+
+<details>
+<summary>claude code</summary>
+TODO
+</details>
+
+### Step 3. Install the Tampermonkey script
+
+#### From GreasyFork (Recommended)
+
+Install directly from: https://greasyfork.org/scripts/540917-mitmproxy-llm-better-view
+
+
+#### Manual Install 
+Download from release, and install mannually
+> If you’re not running mitmweb on ports 8081 or 9090, then you **must** change the Tampermonkey script’s matching URL to the address you’re using.
+
+1. Install the Tampermonkey script
+2. Open mitmweb in your browser
+### Step 4. Click on any LLM API request/response to see the enhanced view
+
+
+
+
+
+
+
+
 
 ## Features
 
@@ -28,57 +64,27 @@ A Tampermonkey script for LLM API Request/Response Visualization in mitmweb.
 - **SSE Support**: Handles streaming responses
 - **Collapsible Sections**: Fold/unfold messages and tool calls
 
-## Installation
-> If you’re not running mitmweb on ports 8081 or 9090, then you **must** change the Tampermonkey script’s matching URL to the address you’re using.
 
+## Support
+- openai
+  - /chat/completion api
+- gemini
+  - /v1beta api
+- claude
+  - api
 
-### From GreasyFork (Recommended)
-
-Install directly from: https://greasyfork.org/scripts/540917-mitmproxy-llm-better-view
-
-
-### Manual Install 
-Download from release, and install mannually
-
-### Manual Build
-
-```bash
-# Clone the repository
-git clone https://github.com/slow-groovin/mitmproxy-llm-better-view.git
-cd mitmproxy-llm-better-view
-
-# Install dependencies
-npm install
-
-# Build the script
-npm run build
-
-# The output will be in dist/mitmproxy-llm-better-view.user.js
-```
-
-## Usage
-
-1. Install the Tampermonkey script
-2. Open mitmweb in your browser
-3. Click on any LLM API request/response to see the enhanced view
-
-## Development
-
-```bash
-# Start development server with hot reload
-npm run dev
-```
+### Future Plans
+- Ollama API
+- OpenAI Response API
 
 ## Notes
 
 This is developed and tested based on the author's usage patterns. It may not cover all API usage scenarios. Please submit an ISSUE to add support for uncovered parameters/types.
 
-## Future Plans
 
-- Ollama API
-- OpenAI Response API
 
 ## Related Projects
 
 - [mitmproxy](https://mitmproxy.org/) - An interactive TLS-capable intercepting HTTP proxy
 - [Tampermonkey](https://www.tampermonkey.net/) - The world's most popular userscript manager
+
