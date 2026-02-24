@@ -11,13 +11,12 @@
 <a href="docs/README_CN.md">简体中文README</a>
 
 
-*Screenshot1:*
-![1](./docs/screenshot1.png)
 
 <details>
-  <summary>More Screenshots</summary>
+  <summary>Screenshots</summary>
   
-
+  *Screenshot1:*
+  ![1](./docs/screenshot1.png)
   *Screenshot2:*
   ![2](./docs/screenshot2.png)
   *Screenshot3:*
@@ -29,17 +28,22 @@
 ### Step 1. Install Mitmproxy
 
 
-### Step 2. Config: application's http request  ----->  mitmproxy's reverse proxy  -----> target
+### Step 2. Config: application's http request  ----->  mitmproxy -----> target
 > mitmweb is the web GUI of mitmproxy
 
-**Firstly, config a reverse proxy in mitmweb**
 
 
 <details>
 <summary>opencode/cline/cherrystudio/vercel ai sdk/others</summary>
 It's easy.
 There is a config like `baseURL` or something like it.
-Just replace it to your mitmproxy's reverse proxy endpoint
+
+**Firstly, config a reverse proxy in mitmweb**
+![mitmweb-reverse-proxy](./docs/mitmweb-reverse-proxy.png)
+
+**Then replace the endpoint to your mitmproxy's reverse proxy endpoint**
+
+⬇️Take opencode as example(~/.config/opencode.jsonc):
 
 ```json
 {
@@ -50,41 +54,75 @@ Just replace it to your mitmproxy's reverse proxy endpoint
   },
 }
 ```
+
 > Notice the reverse proxy endpoint's schema is **http** 
 
 </details>
 
 
 <details>
-<summary>claude code</summary>
+<summary>claude code/ gemini-cli (Nodejs CLI)</summary>
 If you use third-party api, it's like opencode
 
+
+**Firstly, config a reverse proxy in mitmweb**
+![mitmweb-reverse-proxy](./docs/mitmweb-reverse-proxy.png)
+
+**Then replace the endpoint to your mitmproxy's reverse proxy endpoint**
+
+⬇️Take claude code as example:
 ```sh
+# ~/.bashrc or ~/.zshrc
 #export ANTHROPIC_BASE_URL="https://your-origin-api-endpoint.com/api/coding"
 export ANTHROPIC_BASE_URL="http://localhost:9091/api/coding"
 ```
 
-If you use claude plan, because claude code is built on nodejs, you can config **Explicit HTTP(S) Proxy (With Upstream Proxy)** in mitmweb and try this:
+If you use claude plan, though claude code is built on nodejs, you can config **Explicit HTTP(S) Proxy** in mitmweb:
+
+![mitmweb-forward-proxy](./docs/mitmweb-forward-proxy.png)
+
+and set env for 
+
 ```sh
-export NODE_TLS_REJECT_UNAUTHORIZED=0
-export HTTPS_PROXY=http://127.0.0.1:8080
+export NODE_TLS_REJECT_UNAUTHORIZED=0  #allow insecure cert
+export HTTPS_PROXY=http://127.0.0.1:8080 #proxy endpoint
 ```
-HTTPS_PROXY endpoint is **NOT** the reverse proxy configed before, but a new config
-
-TODO: img hhere
 </details>
 
 
 <details>
-<summary>codex code</summary>
-TODO
+<summary>codex (Rust CLI)</summary>
+
+If you use third-party api, it's like opencode
+
+
+**Firstly, config a reverse proxy in mitmweb**
+![mitmweb-reverse-proxy](./docs/mitmweb-reverse-proxy.png)
+
+**Then replace the endpoint to your mitmproxy's reverse proxy endpoint**
+
+```toml
+# ~/.codex/config.toml
+[model_providers.your-provider]  
+name = "your-provider"  
+#base_url = "https://your-provider-endpoint/api/v1"  
+base_url = "http://localhost:9091/api/v1"  
+env_key = "ARK_API_KEY"
+wire_api = "chat" 
+requires_openai_auth = false
+ 
+ 
+[profiles.your-provider-profile]
+model = "<Model_Name>"
+model_provider = "your-provider"
+```
+
+
+If you use official chatgpt plan, it's a big trouble, because codex is built on rust, you cannot use env var like `export NODE_TLS_REJECT_UNAUTHORIZED=0` to skip insecure cert. You may try to trust local trust cert to skip. 
 </details>
 
 
-<details>
-<summary>gemini cli</summary>
-TODO
-</details>
+
 
 ### Step 3. Install the Tampermonkey script
 
@@ -99,9 +137,10 @@ Download from release, and install mannually
 
 1. Install the Tampermonkey script
 2. Open mitmweb in your browser
-### Step 4. Click on any LLM API request/response to see the enhanced view
-
-
+  
+### Step 4. Use and view
+Your mitmproxy should capture the request, and click it, you will see the panel in the right
+![view](./docs/view.png)
 
 
 
@@ -123,11 +162,12 @@ Download from release, and install mannually
 - gemini
   - /v1beta api
 - claude
-  - api
+  - /v1/messages api
 
-### Future Plans
+### TODO
 - Ollama API
 - OpenAI Response API
+
 
 ## Notes
 
