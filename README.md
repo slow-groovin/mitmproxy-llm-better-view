@@ -23,128 +23,178 @@
   ![3](./docs/screenshot3.png)
 </details>
 
-
 ## Usage
-### Step 1. Install Mitmproxy
 
+### Step 1. Install mitmproxy
 
-### Step 2. Config: application's http request  ----->  mitmproxy -----> target
-> mitmweb is the web GUI of mitmproxy
+Make sure you have mitmproxy installed.
 
+> mitmweb is the web-based GUI of mitmproxy.
 
+---
+
+### Step 2. Configure the Traffic Flow
+
+Set up your request flow like this:
+
+```
+Your Application  →  mitmproxy  →  Target API
+```
+
+---
 
 <details>
-<summary>opencode/cline/cherrystudio/vercel ai sdk/others</summary>
-It's easy.
-There is a config like `baseURL` or something like it.
+<summary>opencode / cline / cherrystudio / vercel ai sdk / others</summary>
 
-**Firstly, config a reverse proxy in mitmweb**
+Most tools provide a configuration option such as `baseURL` (or a similar field).
+
+#### 1️⃣ Configure a Reverse Proxy in mitmweb
+
+Set up a reverse proxy in mitmweb:
+
 ![mitmweb-reverse-proxy](./docs/mitmweb-reverse-proxy.png)
 
-**Then replace the endpoint to your mitmproxy's reverse proxy endpoint**
+#### 2️⃣ Replace the API Endpoint
 
-⬇️Take opencode as example(~/.config/opencode.jsonc):
+Update your application's endpoint to point to your mitmproxy reverse proxy address.
+
+⬇️ Take opencode as an example (`~/.config/opencode.jsonc`):
 
 ```json
 {
   "npm": "@ai-sdk/openai-compatible",
   "options": {
     // "baseURL": "https://api.openai.com/v1/",
-    "basURL": "http://localhost:9091/v1/",
-  },
+    "baseURL": "http://localhost:9091/v1/"
+  }
 }
 ```
 
-> Notice the reverse proxy endpoint's schema is **http** 
+> ⚠️ Note: The reverse proxy endpoint uses **http**, not https.
 
 </details>
 
+---
 
 <details>
-<summary>claude code/ gemini-cli (Nodejs CLI)</summary>
-If you use third-party api, it's like opencode
+<summary>claude code / gemini-cli (Node.js CLI)</summary>
 
+If you are using a third-party API, the setup is the same as above.
 
-**Firstly, config a reverse proxy in mitmweb**
+#### 1️⃣ Configure a Reverse Proxy in mitmweb
+
 ![mitmweb-reverse-proxy](./docs/mitmweb-reverse-proxy.png)
 
-**Then replace the endpoint to your mitmproxy's reverse proxy endpoint**
+#### 2️⃣ Replace the Endpoint
 
-⬇️Take claude code as example:
-```sh
+⬇️ Take Claude Code as an example:
+
+```bash
 # ~/.bashrc or ~/.zshrc
-#export ANTHROPIC_BASE_URL="https://your-origin-api-endpoint.com/api/coding"
+
+# export ANTHROPIC_BASE_URL="https://your-original-api-endpoint.com/api/coding"
 export ANTHROPIC_BASE_URL="http://localhost:9091/api/coding"
 ```
 
-If you use claude plan, though claude code is built on nodejs, you can config **Explicit HTTP(S) Proxy** in mitmweb:
+---
+
+### If You Are Using an Official Claude Plan
+
+Although Claude Code is built on Node.js, you can configure an **explicit HTTP(S) proxy** in mitmweb instead:
 
 ![mitmweb-forward-proxy](./docs/mitmweb-forward-proxy.png)
 
-and set env for 
+Then set the following environment variables:
 
-```sh
-export NODE_TLS_REJECT_UNAUTHORIZED=0  #allow insecure cert
-export HTTPS_PROXY=http://127.0.0.1:8080 #proxy endpoint
+```bash
+export NODE_TLS_REJECT_UNAUTHORIZED=0   # Allow insecure certificates
+export HTTPS_PROXY=http://127.0.0.1:8080
 ```
+
 </details>
 
+---
 
 <details>
 <summary>codex (Rust CLI)</summary>
 
-If you use third-party api, it's like opencode
+If you are using a third-party API, the setup is similar to the previous examples.
 
+#### 1️⃣ Configure a Reverse Proxy in mitmweb
 
-**Firstly, config a reverse proxy in mitmweb**
 ![mitmweb-reverse-proxy](./docs/mitmweb-reverse-proxy.png)
 
-**Then replace the endpoint to your mitmproxy's reverse proxy endpoint**
+#### 2️⃣ Replace the Base URL
 
 ```toml
 # ~/.codex/config.toml
-[model_providers.your-provider]  
-name = "your-provider"  
-#base_url = "https://your-provider-endpoint/api/v1"  
-base_url = "http://localhost:9091/api/v1"  
+
+[model_providers.your-provider]
+name = "your-provider"
+# base_url = "https://your-provider-endpoint/api/v1"
+base_url = "http://localhost:9091/api/v1"
 env_key = "ARK_API_KEY"
-wire_api = "chat" 
+wire_api = "chat"
 requires_openai_auth = false
- 
- 
+
 [profiles.your-provider-profile]
 model = "<Model_Name>"
 model_provider = "your-provider"
 ```
 
+---
 
-If you use official chatgpt plan, it's a big trouble, because codex is built on rust, you cannot use env var like `export NODE_TLS_REJECT_UNAUTHORIZED=0` to skip insecure cert. You may try to trust local trust cert to skip. 
+#### If You Are Using an Official ChatGPT Plan
+
+This is more complicated.
+
+Since Codex is built in Rust, you cannot use:
+
+```bash
+export NODE_TLS_REJECT_UNAUTHORIZED=0
+```
+
+to bypass certificate validation.
+
+You may need to install and trust the mitmproxy CA certificate in your system trust store.
+
 </details>
 
+---
 
+### Step 3. Install the Tampermonkey Script
 
+If your mitmweb is **not** running on `localhost:8081` or `localhost:9091`, you must manually add a matching rule in the Tampermonkey script, for example:
 
-### Step 3. Install the Tampermonkey script
+```js
+// @match  http://127.0.0.1:8081/*
+```
 
 #### From GreasyFork (Recommended)
 
-Install directly from: https://greasyfork.org/scripts/540917-mitmproxy-llm-better-view
+Install directly from:  
+https://greasyfork.org/scripts/540917-mitmproxy-llm-better-view
 
+#### Manual Installation
 
-#### Manual Install 
-Download from release, and install mannually
-> If you’re not running mitmweb on ports 8081 or 9090, then you **must** change the Tampermonkey script’s matching URL to the address you’re using.
+Download from the release page and install it manually.
 
-1. Install the Tampermonkey script
-2. Open mitmweb in your browser
-  
-### Step 4. Use and view
-Your mitmproxy should capture the request, and click it, you will see the panel in the right
+> If mitmweb is not running on ports `8081` or `9090`, you **must** update the matching URL inside the Tampermonkey script.
+
+1. Install the Tampermonkey script  
+2. Open mitmweb in your browser  
+
+---
+
+### Step 4. Use and View
+
+Once everything is configured:
+
+1. mitmproxy should capture the requests.
+2. Click any captured request.
+3. You will see the enhanced panel on the right side.
+
 ![view](./docs/view.png)
-
-
-
-
 
 
 
