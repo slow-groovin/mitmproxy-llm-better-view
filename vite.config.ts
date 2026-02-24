@@ -18,21 +18,22 @@ export default defineConfig({
       userscript: {
         name: {
           '': 'mitmproxy-llm-better-view',
-          'zh-CN': 'mitmproxy 大模型请求内容预览'
+          'zh-CN': 'mitmweb中 可视化大模型(openai, gemini, claude)请求/响应内容'
         },
-        icon: 'https://s3.api2o.com/mitm-better-view.svg',
+        icon: 'https://s3.api2o.com/mitm-better-view.png',
         description: {
           '': 'LLM(openai, gemini, claude) API Request/Response Visualization in mitmweb.',
-          'zh-CN': '在 mitmweb 中查看大模型请求中的信息 '
+          'zh-CN': 'mitmweb中 可视化大模型(openai, gemini, claude)请求/响应内容 '
         },
         homepage: 'https://github.com/slow-groovin/mitmproxy-llm-better-view',
-        updateURL: 'https://raw.githubusercontent.com/slow-groovin/mitmproxy-llm-better-view/refs/heads/main/tampermonkey-script/dist/mtimweb-llm-better-view.js',
-        downloadURL: 'https://raw.githubusercontent.com/slow-groovin/mitmproxy-llm-better-view/refs/heads/main/tampermonkey-script/dist/mtimweb-llm-better-view.js',
+        updateURL: 'https://github.com/slow-groovin/mitmproxy-llm-better-view/releases/latest/download/dist-latest.js',
+        downloadURL: 'https://github.com/slow-groovin/mitmproxy-llm-better-view/releases/latest/download/dist-latest.js',
         namespace: 'npm/vite-plugin-monkey',
         match: [
           'http://localhost:8081/*',
           'http://127.0.0.1:8081/*',
-          'http://127.0.0.1:9090/*'
+          'http://127.0.0.1:9090/*',
+          'http://127.0.0.1:8888/or_add_match_pattern_for_your_specific_mitmweb_endpoint/*'
         ],
       },
       build: {
