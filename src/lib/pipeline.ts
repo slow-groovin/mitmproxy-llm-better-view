@@ -9,7 +9,8 @@ export type HookFunc = (type: 'request' | 'response', text: any, flow: Flow) => 
 const originalFetch = (typeof unsafeWindow !== 'undefined' ? unsafeWindow : window).fetch;
 
 export function initRouteListener(hook: HookFunc) {
-  listenUrlChange(async ({ uuid, action }) => {
+  // 处理单个 flow action 的逻辑
+  const handleFlowAction = async ({ uuid, action }: CallAction) => {
     const flow = await getFlow(uuid);
     if (!flow) {
       return;
@@ -18,7 +19,16 @@ export function initRouteListener(hook: HookFunc) {
     const dataUrl = `http://${window.location.host}/flows/${uuid}/${action}/content/Auto.json`;
     const data = await getFlowData(dataUrl);
     hook(action, data, flow);
-  });
+  };
+
+  // 初始化时检查当前 URL
+  const currentFlow = extractFlowInfo(location.href);
+  if (currentFlow) {
+    handleFlowAction(currentFlow);
+  }
+
+  // 监听 URL 变化
+  listenUrlChange(handleFlowAction);
 }
 
 function extractFlowInfo(url: string): CallAction | null {
