@@ -15,13 +15,17 @@
 <details>
   <summary>Screenshots</summary>
   
-  *Screenshot1:*
+  *1:*
   ![1](./docs/screenshot1.png)
-  *Screenshot2:*
+  *2:*
   ![2](./docs/screenshot2.png)
-  *Screenshot3:*
+  *3:*
   ![3](./docs/screenshot3.png)
 </details>
+
+## Why Do You Need This?
+
+When using AI applications like `Claude Code` or `OpenCode`, if you can see what context these tools aggregate and input to the LLM, and what the LLM outputs in return, you will better understand how these tools work. You will also gain a clearer idea of what to provide to the LLM to get the results you want.
 
 ## Usage
 
@@ -229,4 +233,5 @@ This is developed and tested based on the author's usage patterns. It may not co
 
 - [mitmproxy](https://mitmproxy.org/) - An interactive TLS-capable intercepting HTTP proxy
 - [Tampermonkey](https://www.tampermonkey.net/) - The world's most popular userscript manager
+- If you do not want to install the tampermonkey script, you can also use this to visualize req/res online: [ai-api-visualizer](https://github.com/slow-groovin/ai-api-visualizer)
 
