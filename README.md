@@ -4,9 +4,12 @@
 </div>
 
 
-<a href="docs/README_CN.md">简体中文README</a>
+
 
 **A Tampermonkey script for LLM API Request/Response Visualization in mitmweb.**
+
+<a href="docs/README_CN.md">简体中文README</a>
+
 
 *Screenshot1:*
 ![1](./docs/screenshot1.png)
@@ -26,11 +29,60 @@
 ### Step 1. Install Mitmproxy
 
 
-### Step 2. Make the application's http request go through mitmproxy's reverse proxy.
+### Step 2. Config: application's http request  ----->  mitmproxy's reverse proxy  -----> target
+> mitmweb is the web GUI of mitmproxy
+
+**Firstly, config a reverse proxy in mitmweb**
+
+
+<details>
+<summary>opencode/cline/cherrystudio/vercel ai sdk/others</summary>
+It's easy.
+There is a config like `baseURL` or something like it.
+Just replace it to your mitmproxy's reverse proxy endpoint
+
+```json
+{
+  "npm": "@ai-sdk/openai-compatible",
+  "options": {
+    // "baseURL": "https://api.openai.com/v1/",
+    "basURL": "http://localhost:9091/v1/",
+  },
+}
+```
+> Notice the reverse proxy endpoint's schema is **http** 
+
+</details>
 
 
 <details>
 <summary>claude code</summary>
+If you use third-party api, it's like opencode
+
+```sh
+#export ANTHROPIC_BASE_URL="https://your-origin-api-endpoint.com/api/coding"
+export ANTHROPIC_BASE_URL="http://localhost:9091/api/coding"
+```
+
+If you use claude plan, because claude code is built on nodejs, you can config **Explicit HTTP(S) Proxy (With Upstream Proxy)** in mitmweb and try this:
+```sh
+export NODE_TLS_REJECT_UNAUTHORIZED=0
+export HTTPS_PROXY=http://127.0.0.1:8080
+```
+HTTPS_PROXY endpoint is **NOT** the reverse proxy configed before, but a new config
+
+TODO: img hhere
+</details>
+
+
+<details>
+<summary>codex code</summary>
+TODO
+</details>
+
+
+<details>
+<summary>gemini cli</summary>
 TODO
 </details>
 
