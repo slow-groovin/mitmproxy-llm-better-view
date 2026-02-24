@@ -18,7 +18,7 @@ export default defineConfig({
       userscript: {
         name: {
           '': 'mitmproxy-llm-better-view',
-          'zh-CN': 'mitmweb中 可视化大模型(openai, gemini, claude)请求/响应内容'
+          'zh-CN': 'mitmproxy-llm-better-view'
         },
         icon: 'https://s3.api2o.com/mitm-better-view.png',
         description: {
