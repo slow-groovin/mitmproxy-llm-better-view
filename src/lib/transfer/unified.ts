@@ -3,6 +3,9 @@ import { TransferResult } from "./types";
 import { openaiTransferService } from "./openai-transfer-service";
 import { claudeTransferService } from "./claude-transfer-service";
 import { geminiTransferService } from "./gemini-transfer-service";
+import { adaptGeminiRequestBody, adaptGeminiResponseBody } from "./gemini-request-adapter";
+import { toast } from "vue-sonner";
+import { logger } from "../logtape";
 
 /**
  * 统一的 transfer 数据转换函数
@@ -28,9 +31,29 @@ export function unifiedTransferData(
   // 对于 request 和 response，数据应该是 JSON 格式，直接解析返回
   try {
     const parsedData = JSON.parse(dataAsText);
+    let normalizedData = parsedData;
+
+    // Gemini request 支持 /v1internal 的 request 包装体适配。
+    if (standard === "gemini" && dataType === "request") {
+      const { adaptedBody, adapted } = adaptGeminiRequestBody(parsedData);
+      normalizedData = adaptedBody;
+      if (adapted) {
+        logger.info("Detected Gemini /v1internal wrapper. Request body adapted.");
+      }
+    }
+
+    // Gemini response 支持内部 response 包装体适配。
+    if (standard === "gemini" && dataType === "response") {
+      const { adaptedBody, adapted } = adaptGeminiResponseBody(parsedData);
+      normalizedData = adaptedBody;
+      if (adapted) {
+        logger.info("Detected Gemini internal wrapper. Response body adapted.");
+      }
+    }
+
     return {
       success: true,
-      data: parsedData,
+      data: normalizedData,
       timestamp: Date.now(),
     };
   } catch (error) {

@@ -111,7 +111,16 @@ export function isGeminiReq(action: 'request' | 'response', data: string, flow: 
   const hasGeminiStructure = Array.isArray(body.contents) &&
     (body.contents.length === 0 || body.contents.some((c: any) => c && (c.parts || c.role)))
 
-  return isGeminiPath(flow) || hasGeminiStructure
+  // 兼容 /v1internal 等包装格式：{ request: { contents: [...] } }。
+  const wrappedRequest = body?.request
+  const hasWrappedGeminiStructure =
+    wrappedRequest &&
+    typeof wrappedRequest === 'object' &&
+    !Array.isArray(wrappedRequest) &&
+    !('content' in body) &&
+    Array.isArray((wrappedRequest as any).contents)
+
+  return isGeminiPath(flow) || hasGeminiStructure || hasWrappedGeminiStructure
 }
 
 /**
@@ -121,8 +130,7 @@ export function isGeminiReq(action: 'request' | 'response', data: string, flow: 
  */
 export function isGeminiRes(action: 'request' | 'response', data: string, flow: Flow): boolean {
   if (action !== 'response') return false
-  if (!isGeminiPath(flow)) return false;
-  if (isSSE(flow)) return true;
+  if (isSSE(flow) && isGeminiPath(flow)) return true;
   const body = parseDataText(data)
 
   if (!body) return false
@@ -133,5 +141,13 @@ export function isGeminiRes(action: 'request' | 'response', data: string, flow: 
     return b && b.candidates
   }
 
-  return isGeminiPath(flow) || hasCandidates(body)
+  // 兼容内部包装格式：{ response: { candidates: [...] } }。
+  const wrappedResponse = body?.response
+  const hasWrappedCandidates =
+    wrappedResponse &&
+    typeof wrappedResponse === 'object' &&
+    !Array.isArray(wrappedResponse) &&
+    hasCandidates(wrappedResponse)
+
+  return isGeminiPath(flow) || hasCandidates(body) || hasWrappedCandidates
 }

@@ -1,0 +1,110 @@
+{
+  "model": "gemini-3-flash-preview",
+  "project": "qualified-canto-rf16k",
+  "user_prompt_id": "02c11fb0-7c17-4549-9818-1a3490d174bb########0",
+  "request": {
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "This is the I will provide my first command in the next turn."
+          }
+        ]
+      },
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "hello gemini"
+          }
+        ]
+      }
+    ],
+    "systemInstruction": {
+      "role": "user",
+      "parts": [
+        {
+          "text": "You are an interactive CLI agent specializing resolved."
+        }
+      ]
+    },
+    "tools": [
+      {
+        "functionDeclarations": [
+          {
+            "name": "list_directory",
+            "description": "Lists the names of files and subdirectories directly within a specified directory path. Can optionally ignore entries matching provided glob patterns.",
+            "parametersJsonSchema": {
+              "properties": {
+                "dir_path": {
+                  "description": "The path to the directory to list",
+                  "type": "string"
+                },
+                "ignore": {
+                  "description": "List of glob patterns to ignore",
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "file_filtering_options": {
+                  "description": "Optional: Whether to respect ignore patterns from .gitignore or .geminiignore",
+                  "type": "object",
+                  "properties": {
+                    "respect_git_ignore": {
+                      "description": "Optional: Whether to respect .gitignore patterns when listing files. Only available in git repositories. Defaults to true.",
+                      "type": "boolean"
+                    },
+                    "respect_gemini_ignore": {
+                      "description": "Optional: Whether to respect .geminiignore patterns when listing files. Defaults to true.",
+                      "type": "boolean"
+                    }
+                  }
+                }
+              },
+              "required": [
+                "dir_path"
+              ],
+              "type": "object"
+            }
+          },
+          {
+            "name": "read_file",
+            "description": "Reads and returns the content of a specified file. If the file is large, the content will be truncated. The tool's response will clearly indicate if truncation has occurred and will provide details on how to read more of the file using the 'offset' and 'limit' parameters. Handles text, images (PNG, JPG, GIF, WEBP, SVG, BMP), audio files (MP3, WAV, AIFF, AAC, OGG, FLAC), and PDF files. For text files, it can read specific line ranges.",
+            "parametersJsonSchema": {
+              "properties": {
+                "file_path": {
+                  "description": "The path to the file to read.",
+                  "type": "string"
+                },
+                "offset": {
+                  "description": "Optional: For text files, the 0-based line number to start reading from. Requires 'limit' to be set. Use for paginating through large files.",
+                  "type": "number"
+                },
+                "limit": {
+                  "description": "Optional: For text files, maximum number of lines to read. Use with 'offset' to paginate through large files. If omitted, reads the entire file (if feasible, up to a default limit).",
+                  "type": "number"
+                }
+              },
+              "required": [
+                "file_path"
+              ],
+              "type": "object"
+            }
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "temperature": 1,
+      "topP": 0.95,
+      "topK": 64,
+      "thinkingConfig": {
+        "includeThoughts": true,
+        "thinkingLevel": "HIGH"
+      }
+    },
+    "session_id": "02c11fb0-7c17-4549-9818-1a3490d174bb"
+  }
+}

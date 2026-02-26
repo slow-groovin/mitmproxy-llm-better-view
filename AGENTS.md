@@ -5,22 +5,10 @@ vite-plugin-monkey@7.x + vue3 (making 外挂式辅助页面 for mitmweb(react sp
 2. 响应包括普通/SSE
 
 # TASK
-## task 1 (Failed)
-实现一个Debug页面for在列表中注入标记
-这个功能比较艰难, 因为列表元素中并没有包含id信息, 需要通过信息对比进行注入
-
-当触发handleLLMData时, 可以获取当前选中的flow信息, 列表中的选中元素通过 `.selected.has-request.has-response`获取
-
-元素内容如下:
-```
-<tr class="selected has-request has-response"><td class="col-tls col-tls-http"></td><td class="col-icon"><div class="resource-icon resource-icon-plain"></div></td><td class="col-path"><span class="marker pull-right"></span>https://xxxxxx</td><td class="col-method">POST</td><td class="col-status" style="color: darkgreen;">200</td><td class="col-size">154.8kb</td><td class="col-time">9s</td><td class="col-quickactions"><div><a href="#" class="quickaction"><i class="fa fa-fw fa-repeat text-primary"></i></a></div></td></tr>
-```
-
-里面包含了: 地址, method, status, 大小, 时间,
-
-此时需要通过flow信息比对一下, 确认匹配无误进入下一步, 否则结束 (在用户连点时会出现,不匹配的情况)
-
-现在实现这个页面, 在确认无误后, 在对应的 .col-path下添加(作为第一个子元素)一个 "✅"
+## current tsk
+发现有一种 /v1internal 的特殊 gemini api, 示例request如 ./samples/gemini-internal/request.jsonc
+为了渲染这种, 需要进行 request body adapt, 而不是新建一套types和组件, 因为它和 默认的gemini api非常相似, 只是使用了`"request":` wrapper
+在合适的位置, 添加这个adapt函数, 不用声明新的类型,  如果检测到有"request" key,且没有 "content" key时, 尝试执行, 并toast通知提示
 
 
 
