@@ -1,0 +1,127 @@
+{
+    "model": "gpt-5.3-codex",
+    "instructions": "You are xxx",
+    "input": [
+        {
+            "type": "message",
+            "role": "developer",
+            "content": [
+                {
+                    "type": "input_text",
+                    "text": "<permissions instructions>\nFilesystem sandboxing "
+                }
+            ]
+        },
+        {
+            "type": "message",
+            "role": "user",
+            "content": [
+                {
+                    "type": "input_text",
+                    "text": "# AGENTS.md instructions for "
+                }
+            ]
+        },
+        {
+            "type": "message",
+            "role": "user",
+            "content": [
+                {
+                    "type": "input_text",
+                    "text": "<enviro..."
+                }
+            ]
+        },
+        {
+            "type": "message",
+            "role": "developer",
+            "content": [
+                {
+                    "type": "input_text",
+                    "text": "xxx"
+                }
+            ]
+        },
+        {
+            "type": "message",
+            "role": "user",
+            "content": [
+                {
+                    "type": "input_text",
+                    "text": ""
+                }
+            ]
+        }
+    ],
+    "tools": [
+        {
+            "type": "function",
+            "name": "exec_command",
+            "description": "Runs a command in a PTY, returning output or a session ID for ongoing interaction.",
+            "strict": false,
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "cmd": {
+                        "type": "string",
+                        "description": "Shell command to execute."
+                    },
+                    "yield_time_ms": {
+                        "type": "number",
+                        "description": "How long to wait (in milliseconds) for output before yielding."
+                    }
+                },
+                "required": [
+                    "cmd"
+                ],
+                "additionalProperties": false
+            }
+        },
+        {
+            "type": "function",
+            "name": "write_stdin",
+            "description": "Writes characters to an existing unified exec session and returns recent output.",
+            "strict": false,
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "chars": {
+                        "type": "string",
+                        "description": "Bytes to write to stdin (may be empty to poll)."
+                    },
+                    "max_output_tokens": {
+                        "type": "number",
+                        "description": "Maximum number of tokens to return. Excess output will be truncated."
+                    },
+                    "session_id": {
+                        "type": "number",
+                        "description": "Identifier of the running unified exec session."
+                    },
+                    "yield_time_ms": {
+                        "type": "number",
+                        "description": "How long to wait (in milliseconds) for output before yielding."
+                    }
+                },
+                "required": [
+                    "session_id"
+                ],
+                "additionalProperties": false
+            }
+        }
+    ],
+    "tool_choice": "auto",
+    "parallel_tool_calls": true,
+    "reasoning": {
+        "effort": "high", //reasoning.effort=
+        "summary": "auto" //reasoning.summary=
+    },
+    "store": false,
+    "stream": true,
+    "include": [
+        "reasoning.encrypted_content"
+    ],
+    "prompt_cache_key": "019c9a4e-a21e-70b1-95bc-85c7236560d9", //这个也是关键信息
+    "text": {
+        "verbosity": "low"
+    }
+}
