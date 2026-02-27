@@ -220,9 +220,8 @@ const rawJson = computed(() => {
         <LabelValueRow label="Previous Response ID" :value="response.previous_response_id" />
         <LabelValueRow label="Prompt Cache Key" :value="response.prompt_cache_key" />
         <LabelValueRow label="Safety Identifier" :value="response.safety_identifier" />
-      </CollapsibleSection>
-
-      <CollapsibleSection title="Parameters" :default-open="true" storage-key="openai-responses-response-parameters">
+        <!-- Parameters are grouped here to reduce section count -->
+        <div class="info-group-title">Parameters</div>
         <LabelValueRow label="Tool Choice" :value="toolChoiceDisplay" />
         <LabelValueRow label="Reasoning" :value="reasoningDisplay" />
         <LabelValueRow label="Text" :value="textDisplay" />
@@ -239,6 +238,35 @@ const rawJson = computed(() => {
         <LabelValueRow label="Store" :value="response.store !== undefined ? String(response.store) : null" />
         <LabelValueRow label="Truncation" :value="response.truncation" />
         <LabelValueRow label="Include" :value="includeDisplay" />
+
+        <!-- SSE meta is placed here to avoid extra panels -->
+        <div v-if="sseMeta" class="info-group-title">SSE Meta</div>
+        <LabelValueRow v-if="sseMeta" label="Event Count" :value="sseMeta.event_count" />
+        <LabelValueRow v-if="sseMeta" label="Parse Errors" :value="sseMeta.parse_error_count" />
+        <LabelValueRow
+          v-if="sseMeta?.unknown_event_types?.length"
+          label="Unknown Event Types"
+          :value="sseMeta.unknown_event_types.join(', ')"
+        />
+
+        <!-- Other fields are kept inside Basic Info for compactness -->
+        <div v-if="otherFieldRows.length > 0" class="info-group-title">Other Fields</div>
+        <table v-if="otherFieldRows.length > 0" class="other-fields-table">
+          <thead>
+            <tr>
+              <th>field</th>
+              <th>value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="row in otherFieldRows" :key="row.key">
+              <th>{{ row.key }}</th>
+              <td>
+                <SmartViewer :text="row.value" />
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </CollapsibleSection>
 
       <CollapsibleSection
@@ -304,45 +332,6 @@ const rawJson = computed(() => {
           :id="getToolId(tool, index)"
           :tool="tool"
           :index="index"
-        />
-      </CollapsibleSection>
-
-      <CollapsibleSection
-        v-if="otherFieldRows.length > 0"
-        title="Other Fields"
-        :default-open="false"
-        storage-key="openai-responses-response-other-fields"
-      >
-        <table class="other-fields-table">
-          <thead>
-            <tr>
-              <th>field</th>
-              <th>value</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="row in otherFieldRows" :key="row.key">
-              <th>{{ row.key }}</th>
-              <td>
-                <SmartViewer :text="row.value" />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </CollapsibleSection>
-
-      <CollapsibleSection
-        v-if="sseMeta"
-        title="SSE Meta"
-        :default-open="false"
-        storage-key="openai-responses-response-meta"
-      >
-        <LabelValueRow label="Event Count" :value="sseMeta.event_count" />
-        <LabelValueRow label="Parse Errors" :value="sseMeta.parse_error_count" />
-        <LabelValueRow
-          v-if="sseMeta.unknown_event_types?.length"
-          label="Unknown Event Types"
-          :value="sseMeta.unknown_event_types.join(', ')"
         />
       </CollapsibleSection>
 
@@ -419,9 +408,19 @@ const rawJson = computed(() => {
   padding: 40px 20px;
 }
 
+.info-group-title {
+  margin: 14px 0 6px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
 .other-fields-table {
   width: 100%;
   border-collapse: collapse;
+  margin-top: 6px;
 }
 
 .other-fields-table th,
