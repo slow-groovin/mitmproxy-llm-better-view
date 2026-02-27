@@ -81,9 +81,8 @@ Generic example:
 <details>
 <summary>2) Forward Proxy</summary>
 
-For `gemini-cli`, `codex`, or `claude code` under official subscription plans, the upstream endpoint is often fixed; in that case, use **Forward Proxy** below instead of Reverse Proxy.
+For `gemini-cli`, `codex`, or `claude code` under official subscription plans, the API baseURL endpoint is often fixed; in that case, use **Forward Proxy**.
 
-Use this mode when you cannot easily replace the API base URL, but can configure system/app proxy variables.
 
 #### 1️⃣ Follow mitmproxy certificate setup guide
 

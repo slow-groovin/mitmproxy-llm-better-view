@@ -43,9 +43,11 @@
 ---
 
 <details>
-<summary>opencode / cline / cherrystudio / vercel ai sdk / 其他</summary>
+<summary>1) 反向代理（opencode / cline / claude code / codex / cherrystudio / vercel ai sdk / 其他）</summary>
 
-大多数工具都提供如 `baseURL`（或类似字段）的配置选项。
+当你的客户端支持替换 API endpoint/base URL（例如 `baseURL`、`endpoint`、`api_base`）时，使用这种方式。
+
+
 
 #### 1️⃣ 在 mitmweb 中配置反向代理
 
@@ -53,105 +55,49 @@
 
 ![mitmweb-reverse-proxy](./mitmweb-reverse-proxy.png)
 
-#### 2️⃣ 替换 API 端点
+#### 2️⃣ 替换你的客户端端点
 
-更新应用的端点以指向你的 mitmproxy 反向代理地址。
+将客户端端点改为 mitmproxy 的反向代理地址。
 
-⬇️ 以 opencode 为例（`~/.config/opencode.jsonc`）：
+通用示例：
 
 ```json
 {
-  "npm": "@ai-sdk/openai-compatible",
-  "options": {
-    // "baseURL": "https://api.openai.com/v1/",
-    "baseURL": "http://localhost:9091/v1/"
-  }
+  "baseURL": "http://localhost:9091/v1/"
 }
 ```
 
-> ⚠️ 注意：反向代理端点使用 **http**，不是 https。
+> ⚠️ 注意：本地场景下反向代理端点通常是 **http**。
 
 </details>
 
 ---
 
 <details>
-<summary>claude code / gemini-cli (Node.js CLI)</summary>
+<summary>2) 正向代理</summary>
 
-如果你使用第三方 API，设置与上面相同。
+对于 `gemini-cli`、`codex`、`claude code` 使用官方会员订阅套餐的场景，API baseURL 端点通常不可改，这种情况下使用**正向代理**方案。
 
-#### 1️⃣ 在 mitmweb 中配置反向代理
 
-![mitmweb-reverse-proxy](./mitmweb-reverse-proxy.png)
+#### 1️⃣ 按 mitmproxy 文档完成证书配置
 
-#### 2️⃣ 替换端点
+按 mitmproxy 文档生成/安装证书：  
+https://docs.mitmproxy.org/stable/concepts-certificates/
 
-⬇️ 以 Claude Code 为例：
+#### 2️⃣ 将 mitmproxy CA 证书加入主机信任
 
-```bash
-# ~/.bashrc 或 ~/.zshrc
+在你的操作系统（必要时包括运行时环境）中信任 mitmproxy CA，否则 HTTPS 请求可能因 TLS 校验失败。
 
-# export ANTHROPIC_BASE_URL="https://your-original-api-endpoint.com/api/coding"
-export ANTHROPIC_BASE_URL="http://localhost:9091/api/coding"
-```
-
----
-
-### 如果你使用官方 Claude 计划
-
-虽然 Claude Code 是基于 Node.js 构建的，但你可以在 mitmweb 中配置**显式 HTTP(S) 代理**：
-
-![mitmweb-forward-proxy](./mitmweb-forward-proxy.png)
-
-然后设置以下环境变量：
+#### 3️⃣ 导出代理环境变量并启动客户端
 
 ```bash
-export NODE_TLS_REJECT_UNAUTHORIZED=0   # 允许不安全证书
+export HTTP_PROXY=http://127.0.0.1:8080
 export HTTPS_PROXY=http://127.0.0.1:8080
+# 可选：本地回环地址不走代理
+export NO_PROXY=localhost,127.0.0.1
 ```
 
-</details>
-
----
-
-<details>
-<summary>codex (Rust CLI)</summary>
-
-如果你使用第三方 API，设置与前面的示例类似。
-
-#### 1️⃣ 在 mitmweb 中配置反向代理
-
-![mitmweb-reverse-proxy](./mitmweb-reverse-proxy.png)
-
-#### 2️⃣ 替换基础 URL
-
-```toml
-# ~/.codex/config.toml
-
-[model_providers.your-provider]
-name = "your-provider"
-# base_url = "https://your-provider-endpoint/api/v1"
-base_url = "http://localhost:9091/api/v1"
-env_key = "ARK_API_KEY"
-wire_api = "chat"
-requires_openai_auth = false
-
-[profiles.your-provider-profile]
-model = "<Model_Name>"
-model_provider = "your-provider"
-```
-
----
-
-#### 如果你使用官方 ChatGPT 订阅
-
-
-```sh
-export OPENAI_BASE_URL="https://api.openai.com/v1"
-codex
-```
-
-ref: https://developers.openai.com/codex/config-advanced/
+然后在同一个 shell 会话里启动你的客户端。
 
 </details>
 
