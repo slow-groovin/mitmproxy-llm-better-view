@@ -52,6 +52,12 @@ const displayRole = computed(() => {
   color: var(--llm-badge-system-text);
 }
 
+/* Responses API 常见 developer 角色，单独给出可读性更高的视觉区分。 */
+.role-developer {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
 .role-tool {
   background: var(--llm-badge-tool-bg);
   color: var(--llm-badge-tool-text);

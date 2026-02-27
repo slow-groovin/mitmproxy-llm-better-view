@@ -5,6 +5,7 @@ import SmartViewer from '@/components/content/SmartViewer.vue';
 import ToolParameters from './ToolParameters.vue';
 
 interface Props {
+  id?: string;
   name: string;
   description?: string;
   params?: unknown;
@@ -15,7 +16,8 @@ interface Props {
 const props = defineProps<Props>();
 
 const storageKey = computed(() => {
-  return `tool-${props.standard}-${props.name}-open`;
+  // 优先使用外部传入的稳定 id，避免同名工具共享折叠状态。
+  return `tool-${props.standard}-${props.id || props.name}-open`;
 });
 
 const isOpen = useStorage(storageKey.value, true);
@@ -47,10 +49,14 @@ const descPreview = computed(() => {
     ? props.description.slice(0, 160) + '...'
     : props.description;
 });
+
+const domId = computed(() => {
+  return props.id || `${props.standard}-tool-${props.name}`;
+});
 </script>
 
 <template>
-  <div :id="`${standard}-tool-${name}`" class="tool-item">
+  <div :id="domId" class="tool-item">
     <div class="tool-header" @click="toggle">
       <div class="header-left">
         <span class="toggle-icon">{{ toggleIcon }}</span>

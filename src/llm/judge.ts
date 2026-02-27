@@ -29,9 +29,20 @@ function parseDataText(text: string): any | null {
 
 // --- OpenAI Detection ---
 
-function isOpenAIPath(flow: Flow): boolean {
+function isOpenAIRequestPath(flow: Flow): boolean {
   const path = flow.request.path
-  return (path.endsWith('/completions') || path.includes('/chat/completions')) 
+  return (
+    path.endsWith('/completions') ||
+    path.includes('/chat/completions') ||
+    // 兼容 OpenAI Responses API: /response 
+    path.toLowerCase().includes('/response')
+  )
+}
+
+function isOpenAIResponsePath(flow: Flow): boolean {
+  const path = flow.request.path
+  // 当前 response/sse 渲染仍是 chat-completions 结构，避免误判到 responses。
+  return path.endsWith('/completions') || path.includes('/chat/completions')
 }
 
 function isOpenAIBody(parsedObj: any): boolean {
@@ -40,14 +51,16 @@ function isOpenAIBody(parsedObj: any): boolean {
 }
 
 export function isOpenAIReq(action: 'request' | 'response', data: string, flow: Flow): boolean {
-  if (action !== 'request' || !isOpenAIPath(flow)) return false
+  if (action !== 'request' || !isOpenAIRequestPath(flow)) return false
   const body = parseDataText(data)
   // OpenAI 请求体通常包含 messages (Chat) 或 prompt (Legacy)
-  return isOpenAIBody(body) && (Array.isArray(body.messages) || typeof body.prompt !== 'undefined')
+  const isChatLikeRequest = Array.isArray(body?.messages) || typeof body?.prompt !== 'undefined'
+  const isResponsesLikeRequest = body && (typeof body.input !== 'undefined' || typeof body.instructions !== 'undefined')
+  return isOpenAIBody(body) && (isChatLikeRequest || isResponsesLikeRequest)
 }
 
 export function isOpenAIRes(action: 'request' | 'response', data: string, flow: Flow): boolean {
-  if (action !== 'response' || !isOpenAIPath(flow)) return false
+  if (action !== 'response' || !isOpenAIResponsePath(flow)) return false
   if (isSSE(flow)) return true // OpenAI SSE
 
   if (isJson(flow)) {

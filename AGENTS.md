@@ -5,10 +5,12 @@ vite-plugin-monkey@7.x + vue3 (making 外挂式辅助页面 for mitmweb(react sp
 2. 响应包括普通/SSE
 
 # TASK
-## current tsk
-发现有一种 /v1internal 的特殊 gemini api, 示例request如 ./samples/gemini-internal/request.jsonc
-为了渲染这种, 需要进行 request body adapt, 而不是新建一套types和组件, 因为它和 默认的gemini api非常相似, 只是使用了`"request":` wrapper
-在合适的位置, 添加这个adapt函数, 不用声明新的类型,  如果检测到有"request" key,且没有 "content" key时, 尝试执行, 并toast通知提示
+## current task
+openai新出了 新型API:  /v1/response  api
+> 背景知识, /api/v1/chat/completions 是第一代API(现有的src/components/llm/openai/*  就是它的渲染), /api/v1/response 是第二代API, 被称为Response API
+
+已经添加实例 ./sample/openai-response
+现在为request生成新的: types和RequestView渲染(页面和组件)
 
 
 
@@ -84,3 +86,68 @@ OpenaiRequestView.vue以及 OpenaiResponseView.vue 以及子组件, Claude相关
 
 # samples
 `./samples/`下存放各种请求/响应的实例
+
+# files-functional-introduction-tree
+```text
+.
+├── AGENTS.md (协作约束、任务背景、开发注意事项)
+├── README.md (项目说明与基础使用)
+├── docs/
+│   ├── README_CN.md (中文文档与说明)
+│   └── *.png (功能截图与流程示意图)
+├── samples/ (用于调试与回归的输入输出样本)
+│   ├── openai/ (OpenAI request/response/sse 示例)
+│   ├── gemini/ (Gemini request/response/sse 示例)
+│   ├── gemini-internal/request.jsonc (Gemini /v1internal wrapper 请求示例)
+│   └── claude/ (Claude request/response/sse 示例)
+├── src/
+│   ├── main.ts (Vue 应用启动入口)
+│   ├── entry.ts (外挂注入入口，连接 mitmweb 页面与渲染流水线)
+│   ├── App.vue (应用根组件)
+│   ├── style.css (全局基础样式)
+│   ├── old/ (历史实现，仅参考，禁止继续修改)
+│   ├── lib/
+│   │   ├── pipeline.ts (核心流程: 路由监听 -> 拉取 flow -> hook 渲染 -> 注入节点)
+│   │   ├── page-injector.ts (页面 DOM 挂载/替换逻辑)
+│   │   ├── constant.ts (流程与渲染相关常量定义)
+│   │   ├── judge.ts (LLM 厂商/类型识别与分流判断)
+│   │   ├── logtape.ts (调试日志收集与输出封装)
+│   │   └── transfer/
+│   │       ├── types.ts (统一转换层类型定义)
+│   │       ├── unified.ts (统一转换入口与调度)
+│   │       ├── openai-transfer-service.ts (OpenAI 数据转换实现)
+│   │       ├── gemini-transfer-service.ts (Gemini 数据转换实现)
+│   │       ├── claude-transfer-service.ts (Claude 数据转换实现)
+│   │       └── gemini-request-adapter.ts (Gemini request 结构适配, 含 internal wrapper 处理点)
+│   ├── types/ (协议级类型定义与测试)
+│   │   ├── flow.ts (mitm flow 结构类型)
+│   │   ├── openai/ (chat request/response/sse/common 类型与测试)
+│   │   ├── gemini/ (request/response/sse/common 类型与测试)
+│   │   └── claude/ (request/response/sse 类型与测试)
+│   ├── components/
+│   │   ├── llm/
+│   │   │   ├── ViewDashboardProxy.vue (总览视图代理与入口容器)
+│   │   │   ├── openai/ (OpenAI 请求/响应及子项展示组件)
+│   │   │   ├── gemini/ (Gemini 请求/响应及子项展示组件)
+│   │   │   ├── claude/ (Claude 请求/响应及子项展示组件)
+│   │   │   ├── MessageItem.vue / SubMessageItem.vue (通用消息块展示)
+│   │   │   ├── ToolItem.vue / ToolArgs.vue / ToolParameters.vue (工具调用展示)
+│   │   │   └── RoleBadge.vue (角色标识 UI)
+│   │   ├── container/ (可折叠区块、tabs 等容器组件)
+│   │   ├── content/ (JSON/XML/Raw/Prose/图片等内容渲染组件)
+│   │   ├── common/ (复制、展开、格式切换等通用按钮组件)
+│   │   └── debug/ (调试页面辅助组件)
+│   ├── pages/
+│   │   ├── Dashboard.vue (主面板页面)
+│   │   └── debug/ (调试路由页面集合)
+│   ├── store/
+│   │   ├── llm.ts (LLM 展示状态存储)
+│   │   └── debug.ts (调试状态存储)
+│   ├── utils/
+│   │   ├── format/ (时间、JSON、内容格式化工具)
+│   │   ├── id/hashId.ts (稳定 hash id 生成工具)
+│   │   └── scroll.ts (滚动与定位辅助)
+│   ├── styles/llm-common.css (LLM 视图共用样式)
+│   └── assets/ (图标与静态资源)
+└── sample-vue-init-repo/ (初始化模板仓库副本，仅作参考)
+```

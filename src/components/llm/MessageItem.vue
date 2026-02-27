@@ -90,6 +90,8 @@ const toggleRawView = (e: MouseEvent) => {
 
 /* 角色边框 */
 .role-system { border-left: 3px solid var(--llm-border-system, #8b5cf6); }
+/* developer 在 Responses API 中语义接近 system，这里给独立边线便于区分。 */
+.role-developer { border-left: 3px solid #6366f1; }
 .role-user { border-left: 3px solid var(--llm-border-user, #3b82f6); }
 .role-assistant { border-left: 3px solid var(--llm-border-assistant, #10b981); }
 .role-tool { border-left: 3px solid var(--llm-border-tool, #f59e0b); }

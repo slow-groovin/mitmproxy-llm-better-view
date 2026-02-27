@@ -4,7 +4,6 @@ import { openaiTransferService } from "./openai-transfer-service";
 import { claudeTransferService } from "./claude-transfer-service";
 import { geminiTransferService } from "./gemini-transfer-service";
 import { adaptGeminiRequestBody, adaptGeminiResponseBody } from "./gemini-request-adapter";
-import { toast } from "vue-sonner";
 import { logger } from "../logtape";
 
 /**
