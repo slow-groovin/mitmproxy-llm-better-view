@@ -1,6 +1,7 @@
 import { ApiStandard, DataType } from "@/types/flow";
 import { TransferResult } from "./types";
 import { openaiTransferService } from "./openai-transfer-service";
+import { openaiResponsesTransferService } from "./openai-responses-transfer-service";
 import { claudeTransferService } from "./claude-transfer-service";
 import { geminiTransferService } from "./gemini-transfer-service";
 import { adaptGeminiRequestBody, adaptGeminiResponseBody } from "./gemini-request-adapter";
@@ -74,8 +75,8 @@ function getTransferService(standard: ApiStandard) {
     case "openai":
       return openaiTransferService;
     case "openai-response":
-      // Responses API 的 SSE 聚合尚未实现，先给出明确错误避免隐式错用。
-      throw new Error("Unsupported SSE transfer standard: openai-response");
+      // Responses API SSE 采用专用聚合逻辑。
+      return openaiResponsesTransferService;
     case "claude":
       return claudeTransferService;
     case "gemini":

@@ -2,7 +2,7 @@ import { toast } from "vue-sonner";
 import { logger } from "./lib/logtape";
 import { initPageInjector } from "./lib/page-injector";
 import { HookFunc, initRouteListener } from "./lib/pipeline";
-import { isAnthropicReq, isAnthropicRes, isGeminiReq, isGeminiRes, isOpenAIReq, isOpenAIRes, isOpenAIResponsesReq, isSSE } from "./llm/judge";
+import { isAnthropicReq, isAnthropicRes, isGeminiReq, isGeminiRes, isOpenAIReq, isOpenAIRes, isOpenAIResponsesReq, isOpenAIResponsesRes, isSSE } from "./llm/judge";
 import { useCurrentFlowStore } from "./store/llm";
 import type { ApiStandard, DataType } from "./types/flow";
 
@@ -27,6 +27,10 @@ export function useEntry() {
       if (isOpenAIResponsesReq(type, dataAsText, flow)) {
         standard = 'openai-response';
         dataType = 'request';
+      } else if (isOpenAIResponsesRes(type, dataAsText, flow)) {
+        standard = 'openai-response';
+        // Responses API 支持 SSE 与 JSON 两种响应形式。
+        dataType = isSSE(flow) ? 'sse' : 'response';
       } else if (isOpenAIReq(type, dataAsText, flow)) {
         standard = 'openai';
         dataType = 'request';

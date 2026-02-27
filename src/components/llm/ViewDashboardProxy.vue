@@ -52,7 +52,7 @@ const componentMap = {
   'openai-response': {
     // Responses API request 使用独立目录下的专用视图。
     request: defineAsyncComponent(() => import('./openai-response/OpenaiResponsesRequestView.vue')),
-    // response/sse 暂无完整实现，先展示原始数据避免误渲染为 chat-completions。
+    // response/sse 使用 Responses API 专用渲染组件。
     response: defineAsyncComponent(() => import('./openai-response/OpenaiResponsesResponseView.vue')),
     sse: defineAsyncComponent(() => import('./openai-response/OpenaiResponsesResponseView.vue')),
   },

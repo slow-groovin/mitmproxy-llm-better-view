@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { OpenaiTokenUsage } from '@/types/openai/common';
+import type { OpenaiTokenUsage, CompletionTokensDetails } from '@/types/openai/common';
 
 interface Props {
   usage: OpenaiTokenUsage;
@@ -17,7 +17,11 @@ const stats = computed(() => {
   
   // 2. Normalize Output (Completion)
   const completionTotal = u.completion_tokens || u.output_tokens || 0;
-  const completionDetails = u.completion_tokens_details || {};
+  // Responses API uses output_tokens_details; fall back to it when present.
+  const completionDetails =
+    u.completion_tokens_details ||
+    (u as OpenaiTokenUsage & { output_tokens_details?: CompletionTokensDetails }).output_tokens_details ||
+    {};
 
   // 3. Normalize Total
   const total = u.total_tokens || (promptTotal + completionTotal);

@@ -4,6 +4,7 @@
 
 import { Flow } from "../types/flow"
 import { isOpenaiResponseRequest, isOpenaiResponsesPath } from "../types/openai-response/response-request"
+import { isOpenaiResponse } from "../types/openai-response/response-response"
 
 export function isJson(flow: Flow): boolean {
   return flow.response.headers.some(h => {
@@ -64,6 +65,23 @@ export function isOpenAIResponsesReq(action: 'request' | 'response', data: strin
   if (action !== 'request' || !isOpenaiResponsesPath(flow.request.path)) return false
   const body = parseDataText(data)
   return isOpenaiResponseRequest(body)
+}
+
+/**
+ * OpenAI Responses API response 独立识别，支持 JSON 与 SSE。
+ */
+export function isOpenAIResponsesRes(action: 'request' | 'response', data: string, flow: Flow): boolean {
+  if (action !== 'response' || !isOpenaiResponsesPath(flow.request.path)) return false
+  if (isSSE(flow)) return true
+
+  if (isJson(flow)) {
+    const body = parseDataText(data)
+    if (!body) return false
+    // 兼容可能的包装体：{ response: {...} }
+    if (isOpenaiResponse(body)) return true
+    if (body?.response && isOpenaiResponse(body.response)) return true
+  }
+  return false
 }
 
 export function isOpenAIRes(action: 'request' | 'response', data: string, flow: Flow): boolean {

@@ -21,9 +21,15 @@ interface Props {
   id: string;
   item: OpenaiResponseInputItem;
   index: number;
+  // Allow caller to scope collapse state between input/output lists.
+  storagePrefix?: string;
+  storageSubPrefix?: string;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  storagePrefix: 'openai-response-input',
+  storageSubPrefix: 'openai-response-input-sub',
+});
 
 type BadgeType = 'text' | 'image' | 'tool' | 'thinking' | 'system';
 type DisplayContentItem = {
@@ -219,7 +225,7 @@ const scrollToId = (targetId: string | null) => {
       :role="itemRole"
       :count="itemCount"
       :data-as-text="itemRawText"
-      storage-prefix="openai-response-input"
+      :storage-prefix="storagePrefix"
     >
       <div class="input-item-body">
         <template v-if="isMessageItem(item)">
@@ -233,7 +239,7 @@ const scrollToId = (targetId: string | null) => {
             :index="`${index}-${contentIndex + 1}`"
             :badge-type="contentItem.badgeType"
             :badge-text="contentItem.badgeText"
-            storage-prefix="openai-response-input-sub"
+            :storage-prefix="storageSubPrefix"
           >
             <ImageBlock
               v-if="contentItem.badgeType === 'image' && contentItem.imageUrl"
@@ -257,7 +263,7 @@ const scrollToId = (targetId: string | null) => {
             :index="`${index}-${summaryIndex + 1}`"
             badge-type="thinking"
             badge-text="SUMMARY"
-            storage-prefix="openai-response-input-sub"
+            :storage-prefix="storageSubPrefix"
           >
             <SmartViewer :text="summaryItem.text" />
           </SubMessageItem>
@@ -267,7 +273,7 @@ const scrollToId = (targetId: string | null) => {
             :index="`${index}-${reasoningSummaries.length + 1}`"
             badge-type="thinking"
             badge-text="CONTENT"
-            storage-prefix="openai-response-input-sub"
+            :storage-prefix="storageSubPrefix"
           >
             <SmartViewer :text="stringifyUnknown(item.content)" />
           </SubMessageItem>

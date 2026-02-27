@@ -1,17 +1,18 @@
 <script setup lang="ts">
-import { onMounted, ref, shallowRef, type Component } from 'vue';
+import { computed, onMounted, ref, shallowRef, type Component } from 'vue';
 import { Toaster } from 'vue-sonner';
 import 'vue-sonner/style.css';
 import { useEntry } from './entry';
 
 const showDebug = ref(false);
-const isDev = import.meta.env.DEV
+const isDev = computed(()=> import.meta.env.DEV && showDebug.value);
+
 const DebugHome = shallowRef<Component>();
 const {init}=useEntry();
 // 动态导入debug页面 - 生产构建时此代码不会执行, 因为isDev为false
 // 使用动态import确保debug页面代码被正确分割
 async function toggleDebug() {
-  if (!DebugHome.value) {
+  if (!DebugHome.value && false) {
     // 开发环境: 动态导入实际组件
     // 生产环境: 此分支不会被执行 (isDev为false)
     const module = await import('./pages/debug/DebugHome.vue');
