@@ -147,16 +147,34 @@ function refreshData(standard: ApiStandard, datatype: DataType) {
           </button>
         </div>
       </div>
+
+      <!-- OpenAI Responses -->
+      <div class="button-group">
+        <div class="group-label">OpenAI Response</div>
+        <div class="group-buttons">
+          <button class="render-btn openai" :class="{ disabled: loading }" :disabled="loading"
+            @click="refreshData('openai-response', 'request')">
+            Request
+          </button>
+          <!-- response/sse 渲染未完整实现，先禁用按钮避免误导。 -->
+          <button class="render-btn openai disabled" disabled>
+            Response
+          </button>
+          <button class="render-btn openai disabled" disabled>
+            SSE
+          </button>
+        </div>
+      </div>
     </div>
 
     <view-dashboard-proxy v-if="activeDataType && activeStandard && dataAsText" :data-type="activeDataType"
       :standard="activeStandard" :data="dataAsText" />
 
-    <!-- 空状态 -->
-    <div v-else class="empty-state">
-      <p>点击上方按钮加载数据</p>
-      <p class="hint">支持 OpenAI / Claude / Gemini 的 Request / Response / SSE 渲染</p>
-    </div>
+      <!-- 空状态 -->
+      <div v-else class="empty-state">
+        <p>点击上方按钮加载数据</p>
+        <p class="hint">支持 OpenAI / OpenAI Response / Claude / Gemini 的 Request / Response / SSE 渲染</p>
+      </div>
   </div>
 </template>
 

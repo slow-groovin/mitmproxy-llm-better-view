@@ -19,11 +19,10 @@ export function unifiedTransferData(
   dataType: DataType,
   dataAsText: string
 ): TransferResult {
-  // 根据 standard 选择对应的 service
-  const service = getTransferService(standard);
-
   // 如果是 sse 类型，使用 transfer 方法处理
   if (dataType === "sse") {
+    // 仅 SSE 需要 transfer service，request/response 直接按 JSON 解析。
+    const service = getTransferService(standard);
     return service.transfer(dataAsText);
   }
 
@@ -74,6 +73,9 @@ function getTransferService(standard: ApiStandard) {
   switch (standard) {
     case "openai":
       return openaiTransferService;
+    case "openai-response":
+      // Responses API 的 SSE 聚合尚未实现，先给出明确错误避免隐式错用。
+      throw new Error("Unsupported SSE transfer standard: openai-response");
     case "claude":
       return claudeTransferService;
     case "gemini":

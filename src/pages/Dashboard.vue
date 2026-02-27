@@ -10,6 +10,8 @@ const subjectColor = computed(() => {
   switch (standard) {
     case 'openai':
       return '#08080866'; // OpenAI 绿色
+    case 'openai-response':
+      return '#21212166';
     case 'claude':
       return '#d97757'; // Claude 红色
     case 'gemini':

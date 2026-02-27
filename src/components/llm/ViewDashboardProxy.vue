@@ -21,6 +21,7 @@ const emit = defineEmits<{
 // 可用的标准选项
 const standardOptions: { value: ApiStandard; label: string }[] = [
   { value: 'openai', label: 'OpenAI' },
+  { value: 'openai-response', label: 'OpenAI Response' },
   { value: 'claude', label: 'Claude' },
   { value: 'gemini', label: 'Gemini' },
 ];
@@ -47,6 +48,13 @@ const componentMap = {
     request: defineAsyncComponent(() => import('./openai/OpenaiRequestView.vue')),
     response: defineAsyncComponent(() => import('./openai/OpenaiResponseView.vue')),
     sse: defineAsyncComponent(() => import('./openai/OpenaiResponseView.vue')),
+  },
+  'openai-response': {
+    // Responses API request 使用独立目录下的专用视图。
+    request: defineAsyncComponent(() => import('./openai-response/OpenaiResponsesRequestView.vue')),
+    // response/sse 暂无完整实现，先展示原始数据避免误渲染为 chat-completions。
+    response: defineAsyncComponent(() => import('./openai-response/OpenaiResponsesResponseView.vue')),
+    sse: defineAsyncComponent(() => import('./openai-response/OpenaiResponsesResponseView.vue')),
   },
   claude: {
     request: defineAsyncComponent(() => import('./claude/ClaudeRequestView.vue')),

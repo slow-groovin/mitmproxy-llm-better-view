@@ -80,8 +80,6 @@ const includeDisplay = computed(() => {
   return props.data.include.join(', ');
 });
 
-const normalizedPath = computed(() => props.path || 'unknown');
-
 const getInputItemId = (item: OpenaiResponseInputItem, index: number): string => {
   const idCandidate = (item as Record<string, unknown>).id;
   if (typeof idCandidate === 'string' && idCandidate.length > 0) return idCandidate;

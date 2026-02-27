@@ -176,12 +176,12 @@ export function isOpenaiResponseRequest(data: unknown): data is OpenaiResponseRe
 }
 
 /**
- * 路径判断兼容 `/v1/response` 和 `/v1/responses`。
+ * 路径判断兼容 `/v1/response`
  */
 export function isOpenaiResponsesPath(path?: string): boolean {
   if (!path) {
     return false;
   }
   const normalizedPath = path.toLowerCase();
-  return normalizedPath.includes('/v1/response');
+  return normalizedPath.includes('/response');
 }

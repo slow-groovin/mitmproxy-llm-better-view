@@ -2,7 +2,7 @@ import { toast } from "vue-sonner";
 import { logger } from "./lib/logtape";
 import { initPageInjector } from "./lib/page-injector";
 import { HookFunc, initRouteListener } from "./lib/pipeline";
-import { isAnthropicReq, isAnthropicRes, isGeminiReq, isGeminiRes, isOpenAIReq, isOpenAIRes, isSSE } from "./llm/judge";
+import { isAnthropicReq, isAnthropicRes, isGeminiReq, isGeminiRes, isOpenAIReq, isOpenAIRes, isOpenAIResponsesReq, isSSE } from "./llm/judge";
 import { useCurrentFlowStore } from "./store/llm";
 import type { ApiStandard, DataType } from "./types/flow";
 
@@ -23,7 +23,11 @@ export function useEntry() {
       // const data = parseResponseData(dataAsText);
       // logger.debug`dataTExt: ${dataAsText}`
       // Detect platform and view type
-      if (isOpenAIReq(type, dataAsText, flow)) {
+      // Responses API 优先识别，避免被 chat/completions 逻辑吞掉。
+      if (isOpenAIResponsesReq(type, dataAsText, flow)) {
+        standard = 'openai-response';
+        dataType = 'request';
+      } else if (isOpenAIReq(type, dataAsText, flow)) {
         standard = 'openai';
         dataType = 'request';
       } else if (isOpenAIRes(type, dataAsText, flow)) {

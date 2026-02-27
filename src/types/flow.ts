@@ -1,4 +1,5 @@
-export type ApiStandard = 'openai' | 'claude' | 'gemini';
+// API 标准标识：openai-response 与 openai-chat 独立分流，避免混用。
+export type ApiStandard = 'openai' | 'openai-response' | 'claude' | 'gemini';
 export type DataType = 'request' | 'response' | 'sse';
 
 export type CallAction = { uuid: string, action: 'request' | 'response' }

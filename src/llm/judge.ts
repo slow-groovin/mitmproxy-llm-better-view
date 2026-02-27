@@ -3,6 +3,7 @@
 // --- 辅助函数 ---
 
 import { Flow } from "../types/flow"
+import { isOpenaiResponseRequest, isOpenaiResponsesPath } from "../types/openai-response/response-request"
 
 export function isJson(flow: Flow): boolean {
   return flow.response.headers.some(h => {
@@ -29,13 +30,11 @@ function parseDataText(text: string): any | null {
 
 // --- OpenAI Detection ---
 
-function isOpenAIRequestPath(flow: Flow): boolean {
+function isOpenAIChatRequestPath(flow: Flow): boolean {
   const path = flow.request.path
   return (
     path.endsWith('/completions') ||
-    path.includes('/chat/completions') ||
-    // 兼容 OpenAI Responses API: /response 
-    path.toLowerCase().includes('/response')
+    path.includes('/chat/completions')
   )
 }
 
@@ -51,12 +50,20 @@ function isOpenAIBody(parsedObj: any): boolean {
 }
 
 export function isOpenAIReq(action: 'request' | 'response', data: string, flow: Flow): boolean {
-  if (action !== 'request' || !isOpenAIRequestPath(flow)) return false
+  if (action !== 'request' || !isOpenAIChatRequestPath(flow)) return false
   const body = parseDataText(data)
   // OpenAI 请求体通常包含 messages (Chat) 或 prompt (Legacy)
   const isChatLikeRequest = Array.isArray(body?.messages) || typeof body?.prompt !== 'undefined'
-  const isResponsesLikeRequest = body && (typeof body.input !== 'undefined' || typeof body.instructions !== 'undefined')
-  return isOpenAIBody(body) && (isChatLikeRequest || isResponsesLikeRequest)
+  return isOpenAIBody(body) && isChatLikeRequest
+}
+
+/**
+ * OpenAI Responses API request 独立识别，不与 chat/completions 混用。
+ */
+export function isOpenAIResponsesReq(action: 'request' | 'response', data: string, flow: Flow): boolean {
+  if (action !== 'request' || !isOpenaiResponsesPath(flow.request.path)) return false
+  const body = parseDataText(data)
+  return isOpenaiResponseRequest(body)
 }
 
 export function isOpenAIRes(action: 'request' | 'response', data: string, flow: Flow): boolean {
