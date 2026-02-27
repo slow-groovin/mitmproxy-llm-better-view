@@ -6,11 +6,11 @@ import { isAnthropicReq, isAnthropicRes, isGeminiReq, isGeminiRes, isOpenAIReq, 
 import { useCurrentFlowStore } from "./store/llm";
 import type { ApiStandard, DataType } from "./types/flow";
 
-import Dashboard from './pages/Dashboard.vue';
+import DashboardGate from './pages/DashboardGate.vue';
 
 
 export function useEntry() {
-  const { setLLMData } = useCurrentFlowStore();
+  const { setLLMData, setUnknownLLMData } = useCurrentFlowStore();
 
   // Hook function for processing LLM requests/responses
   const handleLLMData: HookFunc = (type, flowData, flow) => {
@@ -70,9 +70,21 @@ export function useEntry() {
         logger.info`Dashboard data updated  ${{ standard: standard, view: dataType }}`;
 
         initPageInjector({
-          component: Dashboard,
+          component: DashboardGate,
         });
       } else {
+        // 未识别场景也挂载 dashboard，允许用户手动选择标准后强制渲染。
+        const fallbackDataType: DataType = type === 'request'
+          ? 'request'
+          : (isSSE(flow) ? 'sse' : 'response');
+        setUnknownLLMData(
+          fallbackDataType,
+          flow,
+          typeof dataAsText === 'string' ? dataAsText : undefined
+        );
+        initPageInjector({
+          component: DashboardGate,
+        });
         logger.warn('Unknown type or no data', { type, hasData: !!dataAsText });
       }
     } catch (error) {

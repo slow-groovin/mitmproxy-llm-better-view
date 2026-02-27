@@ -3,6 +3,7 @@ import { computed, ref, onErrorCaptured, defineAsyncComponent } from 'vue';
 import type { ApiStandard, DataType } from '@/types/flow';
 import type { TransferResult } from '@/lib/transfer/types';
 import { unifiedTransferData } from '@/lib/transfer/unified';
+import ApiStandardSelect from './ApiStandardSelect.vue';
 
 interface Props {
   standard: ApiStandard;
@@ -18,14 +19,6 @@ const emit = defineEmits<{
   'update:standard': [standard: ApiStandard];
 }>();
 
-// 可用的标准选项
-const standardOptions: { value: ApiStandard; label: string }[] = [
-  { value: 'openai', label: 'OpenAI' },
-  { value: 'openai-response', label: 'OpenAI Response' },
-  { value: 'claude', label: 'Claude' },
-  { value: 'gemini', label: 'Gemini' },
-];
-
 // 用户手动选择的标准（null 表示未手动选择，使用 props.standard）
 const manualStandard = ref<ApiStandard | null>(null);
 
@@ -35,9 +28,8 @@ const effectiveStandard = computed<ApiStandard>(() => {
 });
 
 // 处理标准切换
-const handleStandardChange = (event: Event) => {
-  const target = event.target as HTMLSelectElement;
-  const newStandard = target.value as ApiStandard;
+const handleStandardChange = (newStandard: ApiStandard | '') => {
+  if (!newStandard) return;
   manualStandard.value = newStandard;
   emit('update:standard', newStandard);
 };
@@ -120,11 +112,7 @@ const retry = () => {
   <div class="view-dashboard-proxy">
     <!-- 低调的下拉切换框：用于手动切换API标准 -->
     <div class="standard-selector">
-      <select :value="effectiveStandard" @change="handleStandardChange" class="standard-select">
-        <option v-for="opt in standardOptions" :key="opt.value" :value="opt.value">
-          {{ opt.label }}
-        </option>
-      </select>
+      <ApiStandardSelect :model-value="effectiveStandard" @update:model-value="handleStandardChange" />
     </div>
 
     <!-- 组件错误 -->
@@ -170,29 +158,5 @@ const retry = () => {
   top: 4px;
   right: 4px;
   z-index: 10;
-}
-
-.standard-select {
-  /* 极其低调的样式 */
-  font-size: 11px;
-  padding: 2px 6px;
-  border: 1px solid #e0e0e0;
-  border-radius: 3px;
-  background-color: rgba(255, 255, 255, 0.8);
-  color: #666;
-  cursor: pointer;
-  outline: none;
-  opacity: 0.6;
-  transition: opacity 0.2s, border-color 0.2s;
-}
-
-.standard-select:hover {
-  opacity: 1;
-  border-color: #ccc;
-}
-
-.standard-select:focus {
-  opacity: 1;
-  border-color: #999;
 }
 </style>

@@ -14,7 +14,8 @@ export const useCurrentFlowStore = defineStore('current-store', () => {
   const flowId=computed(()=>flow.value?.id);
 
   const hasValidData = computed(() => {
-    return standard.value !== null && dataAsText.value !== null;
+    // 使用 undefined 判断，避免 setup-store 初始值被误判为有效数据。
+    return standard.value !== undefined && dataAsText.value !== undefined;
   });
 
   const currentTypeInfo = computed(() => {
@@ -32,6 +33,18 @@ export const useCurrentFlowStore = defineStore('current-store', () => {
     newFlow: Flow
   ) {
     standard.value = newStandard;
+    dataType.value = newDataType;
+    dataAsText.value = newDataAsText;
+    flow.value = newFlow;
+  }
+
+  function setUnknownLLMData(
+    newDataType: DataType,
+    newFlow: Flow,
+    newDataAsText?: string
+  ) {
+    // 未识别到标准时仅保存原始上下文，供手动切换标准后强制渲染。
+    standard.value = undefined;
     dataType.value = newDataType;
     dataAsText.value = newDataAsText;
     flow.value = newFlow;
@@ -64,6 +77,7 @@ export const useCurrentFlowStore = defineStore('current-store', () => {
     currentTypeInfo,
     // Actions
     setLLMData,
+    setUnknownLLMData,
     reset,
     updateDataType,
     updateStandard

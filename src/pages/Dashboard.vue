@@ -2,12 +2,15 @@
 import ViewDashboardProxy from '@/components/llm/ViewDashboardProxy.vue';
 import { useCurrentFlowStore } from '@/store/llm';
 import { computed } from 'vue';
+import { storeToRefs } from 'pinia';
 import icon from '@/assets/icon.png'
-const { standard, dataType, dataAsText, flow } = useCurrentFlowStore()
+const currentFlowStore = useCurrentFlowStore();
+// 使用 storeToRefs 保持解构后的响应式，保证手动切换能立即触发渲染。
+const { standard, dataType, dataAsText, flow } = storeToRefs(currentFlowStore);
 
 // 根据 API 标准获取对应的主题颜色
 const subjectColor = computed(() => {
-  switch (standard) {
+  switch (standard.value) {
     case 'openai':
       return '#08080866'; // OpenAI 绿色
     case 'openai-response':
@@ -20,6 +23,10 @@ const subjectColor = computed(() => {
       return '#e2e8f0'; // 默认灰色
   }
 })
+
+// 只要标准与数据类型存在，就允许渲染（data 可为空字符串）。
+const canRenderDashboard = computed(() => Boolean(standard.value && dataType.value));
+const dashboardData = computed(() => dataAsText.value ?? '');
 </script>
 
 <template>
@@ -49,8 +56,13 @@ const subjectColor = computed(() => {
       </a>
     </summary>
     <div class="content">
-      <view-dashboard-proxy v-if="standard && dataType && dataAsText" :standard="standard" :data-type="dataType"
-        :data="dataAsText" :path="flow?.request.path" />
+      <view-dashboard-proxy
+        v-if="canRenderDashboard"
+        :standard="standard!"
+        :data-type="dataType!"
+        :data="dashboardData"
+        :path="flow?.request.path"
+      />
     </div>
   </details>
 </template>
