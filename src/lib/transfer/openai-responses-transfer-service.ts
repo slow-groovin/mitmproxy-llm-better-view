@@ -5,7 +5,6 @@ import type {
   OpenaiResponseSSEWrapper,
   OpenaiResponseSSEMeta,
 } from '@/types/openai-response/response-response';
-import { isOpenaiResponsesPath } from '@/types/openai-response/response-request';
 
 type MutableItem = Record<string, unknown> & {
   id?: string;
@@ -36,8 +35,7 @@ export class OpenaiResponsesTransferService implements ITransferService {
   canHandle(flow: Flow): boolean {
     return (
       flow.response.status_code === 200 &&
-      flow.response.contentLength > 0 &&
-      isOpenaiResponsesPath(flow.request.path)
+      flow.response.contentLength > 0 
     );
   }
 
