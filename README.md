@@ -48,9 +48,11 @@ Your Application  →  mitmproxy  →  Target API
 ---
 
 <details>
-<summary>opencode / cline / cherrystudio / vercel ai sdk / others</summary>
+<summary>1) Reverse Proxy (opencode / cline / claude code / codex / cherrystudio / vercel ai sdk / others)</summary>
 
-Most tools provide a configuration option such as `baseURL` (or a similar field).
+Use this mode when your client supports replacing API endpoint/base URL (for example: `baseURL`, `endpoint`, `api_base`).
+
+
 
 #### 1️⃣ Configure a Reverse Proxy in mitmweb
 
@@ -58,104 +60,50 @@ Set up a reverse proxy in mitmweb:
 
 ![mitmweb-reverse-proxy](./docs/mitmweb-reverse-proxy.png)
 
-#### 2️⃣ Replace the API Endpoint
+#### 2️⃣ Replace Your Client Endpoint
 
-Update your application's endpoint to point to your mitmproxy reverse proxy address.
+Point your client endpoint to your mitmproxy reverse proxy address.
 
-⬇️ Take opencode as an example (`~/.config/opencode.jsonc`):
+Generic example:
 
 ```json
 {
-  "npm": "@ai-sdk/openai-compatible",
-  "options": {
-    // "baseURL": "https://api.openai.com/v1/",
-    "baseURL": "http://localhost:9091/v1/"
-  }
+  "baseURL": "http://localhost:9091/v1/"
 }
 ```
 
-> ⚠️ Note: The reverse proxy endpoint uses **http**, not https.
+> ⚠️ Note: Reverse proxy endpoint is usually **http** in local setup.
 
 </details>
 
 ---
 
 <details>
-<summary>claude code / gemini-cli (Node.js CLI)</summary>
+<summary>2) Forward Proxy</summary>
 
-If you are using a third-party API, the setup is the same as above.
+For `gemini-cli`, `codex`, or `claude code` under official subscription plans, the upstream endpoint is often fixed; in that case, use **Forward Proxy** below instead of Reverse Proxy.
 
-#### 1️⃣ Configure a Reverse Proxy in mitmweb
+Use this mode when you cannot easily replace the API base URL, but can configure system/app proxy variables.
 
-![mitmweb-reverse-proxy](./docs/mitmweb-reverse-proxy.png)
+#### 1️⃣ Follow mitmproxy certificate setup guide
 
-#### 2️⃣ Replace the Endpoint
+Generate/install certificates by following mitmproxy docs:  
+https://docs.mitmproxy.org/stable/concepts-certificates/
 
-⬇️ Take Claude Code as an example:
+#### 2️⃣ Add the mitmproxy CA certificate to host trust store
 
-```bash
-# ~/.bashrc or ~/.zshrc
+Trust the mitmproxy CA on your OS (and runtime if needed), otherwise HTTPS requests may fail TLS verification.
 
-# export ANTHROPIC_BASE_URL="https://your-original-api-endpoint.com/api/coding"
-export ANTHROPIC_BASE_URL="http://localhost:9091/api/coding"
-```
-
----
-
-### If You Are Using an Official Claude Plan
-
-Although Claude Code is built on Node.js, you can configure an **explicit HTTP(S) proxy** in mitmweb instead:
-
-![mitmweb-forward-proxy](./docs/mitmweb-forward-proxy.png)
-
-Then set the following environment variables:
+#### 3️⃣ Export proxy env vars and run your client
 
 ```bash
-export NODE_TLS_REJECT_UNAUTHORIZED=0   # Allow insecure certificates
+export HTTP_PROXY=http://127.0.0.1:8080
 export HTTPS_PROXY=http://127.0.0.1:8080
+# optional for local loopback/no-proxy targets
+export NO_PROXY=localhost,127.0.0.1
 ```
 
-</details>
-
----
-
-<details>
-<summary>codex (Rust CLI)</summary>
-
-If you are using a third-party API, the setup is similar to the previous examples.
-
-#### 1️⃣ Configure a Reverse Proxy in mitmweb
-
-![mitmweb-reverse-proxy](./docs/mitmweb-reverse-proxy.png)
-
-#### 2️⃣ Replace the Base URL
-
-```toml
-# ~/.codex/config.toml
-
-[model_providers.your-provider]
-name = "your-provider"
-# base_url = "https://your-provider-endpoint/api/v1"
-base_url = "http://localhost:9091/api/v1"
-env_key = "ARK_API_KEY"
-wire_api = "chat"
-requires_openai_auth = false
-
-[profiles.your-provider-profile]
-model = "<Model_Name>"
-model_provider = "your-provider"
-```
-
----
-
-#### If You Are Using an Official ChatGPT Plan
-
-```sh
-export OPENAI_BASE_URL="https://api.openai.com/v1"
-codex
-```
-
-ref: https://developers.openai.com/codex/config-advanced/
+Then start your client in the same shell session.
 
 </details>
 
@@ -229,4 +177,3 @@ This is developed and tested based on the author's usage patterns. It may not co
 - [mitmproxy](https://mitmproxy.org/) - An interactive TLS-capable intercepting HTTP proxy
 - [Tampermonkey](https://www.tampermonkey.net/) - The world's most popular userscript manager
 - If you do not want to install the tampermonkey script, you can also use this to visualize req/res online: [ai-api-visualizer](https://github.com/slow-groovin/ai-api-visualizer)
-
