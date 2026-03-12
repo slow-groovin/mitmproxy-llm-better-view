@@ -47,7 +47,8 @@ function extractFlowId(url: string): string | null {
 }
 
 async function getFlow(uuid: string): Promise<Flow | null> {
-  const response = await fetch(`http://${window.location.host}/flows`);
+  // 使用 `window.location.origin`，避免把 schema 写死为 `http://`（实际可能是 https）。
+  const response = await fetch(`${window.location.origin}/flows`);
   if (!response.ok) {
     throw new Error(`Failed to fetch flows: ${response.statusText}`);
   }

@@ -44,7 +44,8 @@ export class OpenaiResponsesTransferService implements ITransferService {
    */
   async getSSEContent(flow: Flow): Promise<string> {
     const { id } = flow;
-    const dataUrl = `http://${window.location.host}/flows/${id}/response/content/raw.json`;
+    // 使用 `window.location.origin`，避免把 schema 写死为 `http://`（实际可能是 https）。
+    const dataUrl = `${window.location.origin}/flows/${id}/response/content/raw.json`;
 
     const response = await fetch(dataUrl);
     if (!response.ok) {

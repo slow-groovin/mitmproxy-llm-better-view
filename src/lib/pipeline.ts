@@ -7,6 +7,8 @@ import { CallAction, Flow } from '../types/flow';
 export type HookFunc = (type: 'request' | 'response', text: any, flow: Flow) => DocumentFragment | HTMLElement | null | void;
 
 const originalFetch = (typeof unsafeWindow !== 'undefined' ? unsafeWindow : window).fetch;
+// 统一使用 `location.origin`，避免把 schema 写死为 `http://`（mitmweb 也可能是 https）。
+const flowApiBaseUrl = location.origin;
 
 export function initRouteListener(hook: HookFunc) {
   // 处理单个 flow action 的逻辑
@@ -16,7 +18,7 @@ export function initRouteListener(hook: HookFunc) {
       return;
     }
 
-    const dataUrl = `http://${window.location.host}/flows/${uuid}/${action}/content/Auto.json`;
+    const dataUrl = `${flowApiBaseUrl}/flows/${uuid}/${action}/content/Auto.json`;
     const data = await getFlowData(dataUrl);
     hook(action, data, flow);
   };
@@ -71,7 +73,7 @@ function listenUrlChange(hook?: (flow: CallAction) => void) {
 }
 
 function getFlow(uuid: string): Promise<Flow | null> {
-  return originalFetch(`http://${location.host}/flows`)
+  return originalFetch(`${flowApiBaseUrl}/flows`)
     .then(res => {
       if (!res.ok) {
         throw new Error(`Failed to fetch flow with uuid ${uuid}`);
@@ -87,4 +89,3 @@ function getFlowData(dataUrl: string): Promise<any> {
   return originalFetch(new Request(dataUrl))
     .then(resp => resp.json());
 }
-
