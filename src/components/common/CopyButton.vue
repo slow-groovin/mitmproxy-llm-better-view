@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useClipboard } from '@vueuse/core';
 import { toast } from 'vue-sonner';
 
 interface Props {
@@ -11,18 +10,55 @@ const props = withDefaults(defineProps<Props>(), {
   successMessage: 'Copied'
 });
 
-const { copy, isSupported } = useClipboard();
+// 优先走原生 Clipboard API，失败时再降级到旧版复制方案。
+const canUseClipboardApi = () => typeof navigator !== 'undefined' && typeof navigator.clipboard?.writeText === 'function';
+
+// 兼容 mitmweb 注入场景：某些上下文里 Clipboard API 不可用，但 `execCommand('copy')` 仍可工作。
+const copyWithExecCommand = (content: string) => {
+  if (typeof document === 'undefined') return false;
+
+  const textarea = document.createElement('textarea');
+  textarea.value = content;
+  textarea.setAttribute('readonly', 'true');
+  textarea.style.position = 'fixed';
+  textarea.style.opacity = '0';
+  textarea.style.pointerEvents = 'none';
+
+  document.body.appendChild(textarea);
+  textarea.focus();
+  textarea.select();
+
+  try {
+    return document.execCommand('copy');
+  } finally {
+    document.body.removeChild(textarea);
+  }
+};
 
 const handleCopy = async () => {
   if (!props.content) return;
-  await copy(props.content);
-  toast.success(props.successMessage);
+
+  try {
+    if (canUseClipboardApi()) {
+      await navigator.clipboard.writeText(props.content);
+      toast.success(props.successMessage);
+      return;
+    }
+  } catch {
+    // 这里继续走兼容复制，不额外中断交互。
+  }
+
+  if (copyWithExecCommand(props.content)) {
+    toast.success(props.successMessage);
+    return;
+  }
+
+  toast.error('Copy failed');
 };
 </script>
 
 <template>
   <button
-    v-if="isSupported"
     class="copy-btn"
     type="button"
     title="Copy"
