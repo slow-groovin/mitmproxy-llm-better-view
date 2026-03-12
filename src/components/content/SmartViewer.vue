@@ -188,7 +188,8 @@ const handleFormatChange = (format: ContentFormat) => {
 */
 .scroll-content {
   position: relative;
-  min-height: 32px;
+  /* 给悬浮按钮预留最小高度，避免短文本块 hover 时按钮下沿溢出。 */
+  min-height: 40px;
   height: auto;
   overflow: visible; /* 默认显示全部 */
   transition: box-shadow 0.2s;

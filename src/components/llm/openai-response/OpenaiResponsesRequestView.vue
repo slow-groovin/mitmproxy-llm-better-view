@@ -85,7 +85,11 @@ const getInputItemId = (item: OpenaiResponseInputItem, index: number): string =>
   if (typeof idCandidate === 'string' && idCandidate.length > 0) return idCandidate;
 
   const callIdCandidate = (item as Record<string, unknown>).call_id;
-  if (typeof callIdCandidate === 'string' && callIdCandidate.length > 0) return callIdCandidate;
+  if (typeof callIdCandidate === 'string' && callIdCandidate.length > 0) {
+    // `call_id` is shared between the assistant tool-call item and its tool output item.
+    // If we use `call_id` directly, their collapse state keys collide and they toggle together.
+    return `${callIdCandidate}-${item.type}`;
+  }
 
   return `openai-response-input-${index}-${hashId(JSON.stringify(item))}`;
 };

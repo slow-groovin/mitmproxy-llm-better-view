@@ -158,7 +158,11 @@ const getOutputItemId = (item: OpenaiResponseOutputItem, index: number): string 
   if (typeof idCandidate === 'string' && idCandidate.length > 0) return idCandidate;
 
   const callIdCandidate = (item as Record<string, unknown>).call_id;
-  if (typeof callIdCandidate === 'string' && callIdCandidate.length > 0) return callIdCandidate;
+  if (typeof callIdCandidate === 'string' && callIdCandidate.length > 0) {
+    // `call_id` is not unique across output items (tool-call vs tool-output share it).
+    // Add `item.type` to keep per-item collapse state isolated.
+    return `${callIdCandidate}-${item.type}`;
+  }
 
   return `openai-response-output-${index}-${hashId(JSON.stringify(item))}`;
 };
