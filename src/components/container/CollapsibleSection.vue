@@ -26,6 +26,8 @@ const props = withDefaults(defineProps<Props>(), {
 const isOpen = props.storageKey
   ? useStorage(`llm-better-view-collapse-state-${props.storageKey}`, props.defaultOpen)
   : ref(props.defaultOpen);
+// 默认折叠时不挂载内部内容，减少首屏开销。
+const hasRendered = ref(Boolean(isOpen.value));
 
 // 批量操作状态：null = 无操作，'collapsed' = 全部折叠，'expanded' = 全部展开
 const bulkCollapseState = ref<'collapsed' | 'expanded' | null>(null);
@@ -39,6 +41,15 @@ watch(() => props.forceOpen, (newVal) => {
     isOpen.value = newVal;
   }
 });
+
+watch(
+  () => isOpen.value,
+  (open) => {
+    if (open) {
+      hasRendered.value = true;
+    }
+  }
+);
 
 const toggle = () => {
   isOpen.value = !isOpen.value;
@@ -116,7 +127,7 @@ defineExpose({
     <div class="card-content-wrapper">
       <div class="card-content-inner">
         <div class="content-padding">
-          <slot />
+          <slot v-if="hasRendered" />
         </div>
       </div>
     </div>

@@ -1,21 +1,30 @@
 <script setup lang="ts">
-import { useSlots } from 'vue';
+import { ref, useSlots } from 'vue';
 
 interface Props {
   title?: string;
   defaultOpen?: boolean;
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   title: 'Details',
   defaultOpen: false
 });
 
 const slots = useSlots();
+// 默认折叠时不挂载重内容，首次展开后再渲染。
+const hasRendered = ref(props.defaultOpen);
+
+const onToggle = (event: Event) => {
+  const details = event.target as HTMLDetailsElement;
+  if (details.open) {
+    hasRendered.value = true;
+  }
+};
 </script>
 
 <template>
-  <details class="native-details" :open="defaultOpen">
+  <details class="native-details" :open="defaultOpen" @toggle="onToggle">
     <summary class="native-summary">
       <span class="summary-content">
         <slot v-if="slots.summary" name="summary" />
@@ -23,7 +32,7 @@ const slots = useSlots();
       </span>
     </summary>
     
-    <div class="details-content">
+    <div v-if="hasRendered" class="details-content">
       <slot />
     </div>
   </details>

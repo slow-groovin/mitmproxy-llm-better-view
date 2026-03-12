@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, Ref, watch } from 'vue';
+import { computed, inject, ref, Ref, watch } from 'vue';
 import { useSessionStorage } from '@vueuse/core';
 import { hashId } from '@/utils/id/hashId';
 import RoleBadge from './RoleBadge.vue';
@@ -11,22 +11,24 @@ interface Props {
   role: string;
   count?: number;
   dataAsText?: string;
+  dataForRaw?: unknown;
   storagePrefix?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   count: 0,
-  dataAsText: '',
   storagePrefix: 'msg',
 });
 
 // 统一生成keyId
 const keyId = computed(() =>
-  props.id || hashId(props.dataAsText || `${props.index}-${props.role}`)
+  props.id || hashId(`${props.index}-${props.role}`)
 );
 
 const isOpen = useSessionStorage(() => `${props.storagePrefix}-${keyId.value}-open`, true);
 const isRawView = useSessionStorage(() => `${props.storagePrefix}-${keyId.value}-raw`, false);
+// 未展开前不挂载内容，展开后保持挂载状态。
+const hasOpened = ref(Boolean(isOpen.value));
 
 // 监听 CollapsibleSection 提供的批量折叠状态
 const bulkCollapseState = inject<Ref<'collapsed' | 'expanded' | null>>('bulkCollapseState');
@@ -43,6 +45,33 @@ watch(
   },
   { immediate: false }
 );
+
+watch(
+  () => isOpen.value,
+  (open) => {
+    if (open) {
+      hasOpened.value = true;
+    }
+  }
+);
+
+const hasRawData = computed(() => {
+  return typeof props.dataAsText === 'string' ? props.dataAsText.length > 0 : props.dataForRaw !== undefined;
+});
+
+const safeStringify = (value: unknown): string => {
+  try {
+    return JSON.stringify(value, null, 2);
+  } catch {
+    return String(value ?? '');
+  }
+};
+
+const rawText = computed(() => {
+  if (!isRawView.value) return '';
+  if (typeof props.dataAsText === 'string' && props.dataAsText.length > 0) return props.dataAsText;
+  return safeStringify(props.dataForRaw);
+});
 
 const toggleRawView = (e: MouseEvent) => {
   e.stopPropagation();
@@ -61,7 +90,7 @@ const toggleRawView = (e: MouseEvent) => {
       </div>
 
       <button
-        v-if="dataAsText && isOpen"
+        v-if="hasRawData && isOpen"
         class="raw-btn"
         :class="{ active: isRawView }"
         @click="toggleRawView"
@@ -70,8 +99,8 @@ const toggleRawView = (e: MouseEvent) => {
       </button>
     </div>
 
-    <div v-show="isOpen" class="content">
-      <SmartViewer v-if="isRawView" :text="dataAsText"></SmartViewer>
+    <div v-if="hasOpened" v-show="isOpen" class="content">
+      <SmartViewer v-if="isRawView" :text="rawText"></SmartViewer>
       <slot v-else />
     </div>
   </div>

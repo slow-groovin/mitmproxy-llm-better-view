@@ -209,8 +209,6 @@ const customToolCallOutputText = computed(() => {
   return stringifyUnknown(props.item.output);
 });
 
-const itemRawText = computed(() => JSON.stringify(props.item, null, 2));
-
 const scrollToId = (targetId: string | null) => {
   if (!targetId) return;
   document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -224,7 +222,7 @@ const scrollToId = (targetId: string | null) => {
       :index="String(index)"
       :role="itemRole"
       :count="itemCount"
-      :data-as-text="itemRawText"
+      :data-for-raw="item"
       :storage-prefix="storagePrefix"
     >
       <div class="input-item-body">
@@ -342,7 +340,7 @@ const scrollToId = (targetId: string | null) => {
         </template>
 
         <template v-else>
-          <SmartViewer :text="itemRawText" />
+          <SmartViewer :text="stringifyUnknown(item)" />
         </template>
       </div>
     </MessageItem>

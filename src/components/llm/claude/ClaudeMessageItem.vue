@@ -14,8 +14,17 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-// 生成消息唯一的 Hash ID
-const msgHashId = hashId(JSON.stringify(props.message));
+// 使用轻量指纹生成稳定 ID，避免对整条消息做全量 stringify。
+const msgHashId = computed(() => {
+  const content = props.message.content;
+  if (typeof content === 'string') {
+    return hashId(`${props.index}-${props.message.role}-${content.length}`);
+  }
+  if (Array.isArray(content)) {
+    return hashId(`${props.index}-${props.message.role}-blocks-${content.length}`);
+  }
+  return hashId(`${props.index}-${props.message.role}-empty`);
+});
 
 // 定义带 ID 的 Block 类型
 type ExtendedBlock = Exclude<ContentBlock, string> & { id: string };
@@ -64,7 +73,7 @@ const hasContent = computed(() => contentBlocks.value.length > 0);
 <template>
   <MessageItem 
     :count="messageCount" 
-    :data-as-text="JSON.stringify(message, null, 2)" 
+    :data-for-raw="message"
     :index="String(index)"
     :role="message.role" 
     storage-prefix="claude-msg"
