@@ -39,37 +39,42 @@
 
       <!-- B. 内容滚动区域 -->
       <!-- 负责 max-height 和 overflow -->
-      <div 
+      <div
         ref="scrollContainerRef"
-        class="scroll-content" 
+        class="scroll-content"
         :class="{ 'scroll-mode': !isExpanded && needsExpansion }"
       >
-        <RawViewer 
-          v-if="showRaw" 
-          :content="text" 
-          :wrap-lines="wrapLines" 
-        />
-        <ProseContent 
-          v-else-if="displayFormat === 'markdown'" 
-          v-model:content="textModel" 
-          :wrap-lines="wrapLines" 
-        />
-        <XMLViewer 
-          v-else-if="displayFormat === 'xml'" 
-          v-model:content="textModel" 
-          :wrap-lines="wrapLines" 
-        />
-        <JsonViewer 
-          v-else-if="displayFormat === 'json'" 
-          v-model:content="textModel" 
-          :wrap-lines="wrapLines" 
-        />
-        <div 
-          v-else 
-          class="text-content" 
-          :style="{ whiteSpace: wrapLines ? 'pre-wrap' : 'pre' }"
-        >
-          {{ text }}
+        <template v-if="visible">
+          <RawViewer
+            v-if="showRaw"
+            :content="text"
+            :wrap-lines="wrapLines"
+          />
+          <ProseContent
+            v-else-if="displayFormat === 'markdown'"
+            v-model:content="textModel"
+            :wrap-lines="wrapLines"
+          />
+          <XMLViewer
+            v-else-if="displayFormat === 'xml'"
+            v-model:content="textModel"
+            :wrap-lines="wrapLines"
+          />
+          <JsonViewer
+            v-else-if="displayFormat === 'json'"
+            v-model:content="textModel"
+            :wrap-lines="wrapLines"
+          />
+          <div
+            v-else
+            class="text-content"
+            :style="{ whiteSpace: wrapLines ? 'pre-wrap' : 'pre' }"
+          >
+            {{ text }}
+          </div>
+        </template>
+        <div v-else class="deferred-placeholder">
+          Rendering content...
         </div>
       </div>
     </div>
@@ -77,7 +82,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch, nextTick } from 'vue';
+import { computed, ref, watch, nextTick, onMounted, onBeforeUnmount } from 'vue';
 import { useResizeObserver } from '@vueuse/core';
 // 组件引入保持不变...
 import ProseContent from '@/components/content/ProseContent.vue';
@@ -98,10 +103,50 @@ interface Props {
 const props = defineProps<Props>();
 
 // ========== 状态管理 ==========
+// 延迟挂载重内容，降低首屏同步渲染压力。
+const visible = ref(false);
 const showRaw = ref(false);
 const wrapLines = ref(true);
 const manualFormat = ref<ContentFormat | null>(null);
 const showButtons = ref(false);
+
+type IdleWindow = Window & {
+  requestIdleCallback?: (cb: () => void, options?: { timeout: number }) => number;
+  cancelIdleCallback?: (handle: number) => void;
+};
+
+let cancelDeferredMount: (() => void) | null = null;
+
+const scheduleDeferredMount = () => {
+  cancelDeferredMount?.();
+
+  const idleWindow = window as IdleWindow;
+  if (typeof idleWindow.requestIdleCallback === 'function' && typeof idleWindow.cancelIdleCallback === 'function') {
+    const handle = idleWindow.requestIdleCallback(
+      () => {
+        visible.value = true;
+        cancelDeferredMount = null;
+      },
+      { timeout: 300 }
+    );
+
+    cancelDeferredMount = () => {
+      idleWindow.cancelIdleCallback?.(handle);
+      cancelDeferredMount = null;
+    };
+    return;
+  }
+
+  const timeoutHandle = window.setTimeout(() => {
+    visible.value = true;
+    cancelDeferredMount = null;
+  }, 16);
+
+  cancelDeferredMount = () => {
+    window.clearTimeout(timeoutHandle);
+    cancelDeferredMount = null;
+  };
+};
 
 // ========== 高度检测逻辑 ==========
 // 注意：Ref 现在绑定的是内部滚动容器
@@ -136,22 +181,42 @@ useResizeObserver(scrollContainerRef, () => {
   checkHeight();
 });
 
-watch([() => props.text, wrapLines, showRaw, () => manualFormat.value], async () => {
+watch([() => props.text, wrapLines, showRaw, () => manualFormat.value, visible], async () => {
   await nextTick();
   checkHeight();
 });
 
 // ========== 其他逻辑保持不变 ==========
-const detectedFormat = computed(() => detectContentFormat(props.text));
+const detectedFormat = computed(() => {
+  if (!visible.value) return 'text';
+  return detectContentFormat(props.text);
+});
 const displayFormat = computed(() => manualFormat.value ?? detectedFormat.value);
-const canToggle = computed(() => true);
+const canToggle = computed(() => visible.value);
 const showWrapLineBtn = computed(() => displayFormat.value !== 'markdown');
 const showViewRawBtn = computed(() => !['json', 'text'].includes(displayFormat.value));
-const showFloatingButtons = computed(() => !showRaw.value);
+const showFloatingButtons = computed(() => visible.value && !showRaw.value);
 const textModel = computed({ get: () => props.text, set: () => { } });
 const handleFormatChange = (format: ContentFormat) => {
   manualFormat.value = format === detectedFormat.value ? null : format;
 };
+
+watch(
+  () => props.text,
+  () => {
+    visible.value = false;
+    showRaw.value = false;
+    scheduleDeferredMount();
+  }
+);
+
+onMounted(() => {
+  scheduleDeferredMount();
+});
+
+onBeforeUnmount(() => {
+  cancelDeferredMount?.();
+});
 </script>
 
 <style scoped>
@@ -284,5 +349,12 @@ const handleFormatChange = (format: ContentFormat) => {
   word-wrap: break-word;
   margin: 0;
   padding: 0;
+}
+
+.deferred-placeholder {
+  padding: 10px 0;
+  font-size: 1.2rem;
+  color: #64748b;
+  font-style: italic;
 }
 </style>
